@@ -1,11 +1,12 @@
-import React from 'react';
-import LoginPage from './pages/login.js'; // Your login component
+import React from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import Login from "./pages/login"; // adjust path if different
 
 function App() {
   return (
-    <div className="App">
-      <LoginPage />
-    </div>
+    <GoogleOAuthProvider clientId="838743403493-o2t5ivtistueoga8oi8i5t6brn070ipi.apps.googleusercontent.com">
+      <Login />
+    </GoogleOAuthProvider>
   );
 }
 
