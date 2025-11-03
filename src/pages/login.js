@@ -1,74 +1,78 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 
-// **IMPORTANT**: Replace with your actual backend URL/port (e.g., 5000)
-const API_URL = 'http://localhost:5000/api/users/login'; 
-
-function LoginPage() {
-  // 1. State for form inputs
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
 
-  // 2. Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default browser form submission
-
-    try {
-      // 3. Make a POST request to the backend login route
-      const response = await axios.post(API_URL, { email, password });
-
-      // 4. Handle success (e.g., save the user token and redirect)
-      const token = response.data.token;
-      
-      // Save token (e.g., in localStorage) for future requests
-      localStorage.setItem('authToken', token); 
-      
-      setMessage('Login Successful! Redirecting...');
-      
-      // *** In a real app, you would use React Router to navigate here ***
-      // Example: history.push('/dashboard'); 
-
-    } catch (error) {
-      // 5. Handle errors (e.g., 401 Unauthorized, Network error)
-      const errorMsg = error.response 
-        ? error.response.data.message // Message from the Express backend
-        : 'Network error or server is down.';
-        
-      setMessage(`Login Failed: ${errorMsg}`);
-      console.error('Login Error:', error);
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Email: ${email}\nPassword: ${password}`);
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Log In</button>
+    <div style={styles.container}>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <h2 style={styles.title}>Login</h2>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={styles.input}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={styles.input}
+          required
+        />
+        <button type="submit" style={styles.button}>Login</button>
       </form>
-      {message && <p className="message">{message}</p>}
     </div>
   );
-}
+};
 
-export default LoginPage;
+// CSS in JS
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    background: '#f5f5f5',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '30px',
+    borderRadius: '8px',
+    background: '#fff',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  },
+  title: {
+    marginBottom: '20px',
+    textAlign: 'center',
+    color: '#333',
+  },
+  input: {
+    marginBottom: '15px',
+    padding: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    fontSize: '16px',
+  },
+  button: {
+    padding: '10px',
+    borderRadius: '4px',
+    border: 'none',
+    background: '#007BFF',
+    color: '#fff',
+    fontSize: '16px',
+    cursor: 'pointer',
+  },
+};
+
+export default Login;
