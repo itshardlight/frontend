@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom'; // 👈 Import Routes, Route, and Link
-import LoginPage from './pages/LoginPage'; // 👈 Your new component
+import LoginPage from './pages/login.js'; // 👈 Your new component
 // import HomePage from './pages/HomePage'; // (You will add this later)
 
 function App() {
