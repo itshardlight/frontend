@@ -5,11 +5,11 @@ import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleLogin = async (credentialResponse) => {
-    if (!credentialResponse || !credentialResponse.credential) {
-      alert("No credential returned from Google");
-      return;
-    }
+  // const handleGoogleLogin = async (credentialResponse) => {
+  //   if (!credentialResponse || !credentialResponse.credential) {
+  //     alert("No credential returned from Google");
+  //     return;
+  //   }
 
     setLoading(true);
     try {
