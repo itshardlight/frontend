@@ -46,7 +46,7 @@ const Login = () => {
           --bg: #f4f7fb;
           --card: #ffffff;
           --muted: #6b7280;
-          --accent: #2563eb;
+          --accent: #b0eb25ff;
           --shadow: rgba(16, 24, 40, 0.06);
         }
 
