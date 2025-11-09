@@ -166,15 +166,7 @@ const Login = () => {
 
           <h2 className="login-title">Sign in to Shikshyasetu</h2>
 
-          <form className="login-form" onSubmit={handleFakeSubmit}>
-            <input className="login-input" type="email" placeholder="Email" />
-            <input className="login-input" type="password" placeholder="Password" />
-            <button className="login-button" type="submit">
-              Sign in
-            </button>
-          </form>
-
-          <div className="divider">Or</div>
+      
 
           <div className="google-wrapper">
             {loading ? (
