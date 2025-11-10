@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logOut } from "../firebase/authService";
+import { logOut, updateUserProfile } from "../firebase/authService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { 
   FaUserGraduate, 
@@ -17,6 +17,9 @@ import {
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,6 +39,36 @@ const Dashboard = () => {
     } else {
       alert("Logout failed. Please try again.");
     }
+  };
+
+  const handleOpenProfileModal = () => {
+    setNewName(user.user?.name || "");
+    setShowProfileModal(true);
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    if (!newName.trim()) {
+      alert("Name cannot be empty");
+      return;
+    }
+
+    setIsUpdating(true);
+    const result = await updateUserProfile(newName.trim());
+    
+    if (result.success) {
+      const updatedUser = {
+        ...user,
+        user: result.user
+      };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setShowProfileModal(false);
+      alert("Profile updated successfully!");
+    } else {
+      alert(`Failed to update profile: ${result.error}`);
+    }
+    setIsUpdating(false);
   };
 
   if (!user) return null;
@@ -130,7 +163,11 @@ const Dashboard = () => {
                 {user.user?.name}
               </button>
               <ul className="dropdown-menu dropdown-menu-end">
-                <li><a className="dropdown-item" href="#">Profile Settings</a></li>
+                <li>
+                  <button className="dropdown-item" onClick={handleOpenProfileModal}>
+                    Profile Settings
+                  </button>
+                </li>
                 <li><a className="dropdown-item" href="#">System Settings</a></li>
                 <li><hr className="dropdown-divider" /></li>
                 <li>
@@ -299,6 +336,68 @@ const Dashboard = () => {
           </p>
         </div>
       </footer>
+
+      {/* Profile Settings Modal */}
+      {showProfileModal && (
+        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Profile Settings</h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setShowProfileModal(false)}
+                  disabled={isUpdating}
+                ></button>
+              </div>
+              <form onSubmit={handleUpdateProfile}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      value={user.user?.email || ""} 
+                      disabled 
+                    />
+                    <small className="text-muted">Email cannot be changed</small>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Display Name</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      placeholder="Enter your name"
+                      disabled={isUpdating}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => setShowProfileModal(false)}
+                    disabled={isUpdating}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? "Updating..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

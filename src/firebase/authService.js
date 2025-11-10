@@ -95,6 +95,38 @@ export const resetPassword = async (email) => {
   }
 };
 
+// Update user profile
+export const updateUserProfile = async (displayName) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      return {
+        success: false,
+        error: "No user is currently signed in"
+      };
+    }
+
+    await updateProfile(user, {
+      displayName: displayName
+    });
+
+    return {
+      success: true,
+      user: {
+        uid: user.uid,
+        email: user.email,
+        name: displayName,
+        photoURL: user.photoURL
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
 // Sign out
 export const logOut = async () => {
   try {
