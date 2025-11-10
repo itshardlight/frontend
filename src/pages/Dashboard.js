@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { logOut } from "../firebase/authService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { 
   FaUserGraduate, 
@@ -27,9 +28,14 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
+  const handleLogout = async () => {
+    const result = await logOut();
+    if (result.success) {
+      localStorage.removeItem("user");
+      navigate("/login");
+    } else {
+      alert("Logout failed. Please try again.");
+    }
   };
 
   if (!user) return null;
