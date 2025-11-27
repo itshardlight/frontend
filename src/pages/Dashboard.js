@@ -1,25 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logOut, updateUserProfile } from "../firebase/authService";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { 
-  FaUserGraduate, 
-  FaChalkboardTeacher, 
-  FaCalendarCheck, 
-  FaMoneyCheckAlt, 
-  FaChartLine, 
-  FaBook,
-  FaClipboardList,
-  FaBell,
-  FaCog,
-  FaSignOutAlt
-} from "react-icons/fa";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,373 +15,351 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  const handleLogout = async () => {
-    const result = await logOut();
-    if (result.success) {
-      localStorage.removeItem("user");
-      navigate("/login");
-    } else {
-      alert("Logout failed. Please try again.");
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  const getRoleBadgeClass = (role) => {
+    switch (role) {
+      case "admin": return "bg-danger";
+      case "teacher": return "bg-primary";
+      case "student": return "bg-success";
+      case "parent": return "bg-info";
+      case "fee_department": return "bg-warning";
+      default: return "bg-secondary";
     }
   };
 
-  const handleOpenProfileModal = () => {
-    setNewName(user.user?.name || "");
-    setShowProfileModal(true);
-  };
+  // Student Dashboard Content
+  const StudentDashboard = () => (
+    <div className="row g-4">
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-book" style={{ fontSize: "3rem", color: "#0d6efd" }}></i>
+            </div>
+            <h5>My Courses</h5>
+            <p className="text-muted">View enrolled courses</p>
+            <button className="btn btn-primary btn-sm">View Courses</button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-calendar-check" style={{ fontSize: "3rem", color: "#198754" }}></i>
+            </div>
+            <h5>Attendance</h5>
+            <p className="text-muted">Check attendance record</p>
+            <button className="btn btn-success btn-sm">View Attendance</button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-file-earmark-text" style={{ fontSize: "3rem", color: "#ffc107" }}></i>
+            </div>
+            <h5>Assignments</h5>
+            <p className="text-muted">View pending assignments</p>
+            <button className="btn btn-warning btn-sm">View Assignments</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    if (!newName.trim()) {
-      alert("Name cannot be empty");
-      return;
-    }
+  // Teacher/Admin Dashboard Content
+  const TeacherDashboard = () => (
+    <div className="row g-4">
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-people" style={{ fontSize: "3rem", color: "#0d6efd" }}></i>
+            </div>
+            <h5>My Students</h5>
+            <p className="text-muted">Manage student records</p>
+            <button className="btn btn-primary btn-sm">View Students</button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-clipboard-check" style={{ fontSize: "3rem", color: "#198754" }}></i>
+            </div>
+            <h5>Attendance</h5>
+            <p className="text-muted">Mark student attendance</p>
+            <button className="btn btn-success btn-sm">Take Attendance</button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-journal-text" style={{ fontSize: "3rem", color: "#6f42c1" }}></i>
+            </div>
+            <h5>Assignments</h5>
+            <p className="text-muted">Create and grade assignments</p>
+            <button className="btn btn-purple btn-sm" style={{ backgroundColor: "#6f42c1", color: "white" }}>Manage Assignments</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
-    setIsUpdating(true);
-    const result = await updateUserProfile(newName.trim());
-    
-    if (result.success) {
-      const updatedUser = {
-        ...user,
-        user: result.user
-      };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setShowProfileModal(false);
-      alert("Profile updated successfully!");
-    } else {
-      alert(`Failed to update profile: ${result.error}`);
-    }
-    setIsUpdating(false);
-  };
+  // Parent Dashboard Content
+  const ParentDashboard = () => (
+    <div className="row g-4">
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-person-badge" style={{ fontSize: "3rem", color: "#0d6efd" }}></i>
+            </div>
+            <h5>My Children</h5>
+            <p className="text-muted">View children's profiles</p>
+            <button className="btn btn-primary btn-sm">View Children</button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-graph-up" style={{ fontSize: "3rem", color: "#198754" }}></i>
+            </div>
+            <h5>Progress Reports</h5>
+            <p className="text-muted">Track academic progress</p>
+            <button className="btn btn-success btn-sm">View Reports</button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-cash-coin" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
+            </div>
+            <h5>Fee Payment</h5>
+            <p className="text-muted">View and pay fees</p>
+            <button className="btn btn-danger btn-sm">View Fees</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Fee Department Dashboard Content
+  const FeeDepartmentDashboard = () => (
+    <>
+      {/* Quick Stats */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-3">
+          <div className="card shadow-sm border-success">
+            <div className="card-body text-center">
+              <h6 className="text-muted small">Total Collected</h6>
+              <h3 className="text-success mb-0">Rs. 0</h3>
+              <small className="text-muted">This Month</small>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm border-warning">
+            <div className="card-body text-center">
+              <h6 className="text-muted small">Pending Fees</h6>
+              <h3 className="text-warning mb-0">Rs. 0</h3>
+              <small className="text-muted">Due Amount</small>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm border-danger">
+            <div className="card-body text-center">
+              <h6 className="text-muted small">Overdue</h6>
+              <h3 className="text-danger mb-0">0</h3>
+              <small className="text-muted">Students</small>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm border-primary">
+            <div className="card-body text-center">
+              <h6 className="text-muted small">Today's Collection</h6>
+              <h3 className="text-primary mb-0">Rs. 0</h3>
+              <small className="text-muted">Cash + Online</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Features */}
+      <div className="row g-4">
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-search me-2 text-primary"></i>
+                Student Fee Overview
+              </h5>
+              <ul className="list-unstyled mt-3 small">
+                <li>✓ Search by name/class/roll</li>
+                <li>✓ View fee status</li>
+                <li>✓ Fee history</li>
+              </ul>
+              <button className="btn btn-primary btn-sm w-100 mt-2">Search Students</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-cash-stack me-2 text-success"></i>
+                Fee Collection
+              </h5>
+              <ul className="list-unstyled mt-3 small">
+                <li>✓ Generate invoices</li>
+                <li>✓ Collect payments</li>
+                <li>✓ eSewa verification</li>
+                <li>✓ Print receipts</li>
+              </ul>
+              <button className="btn btn-success btn-sm w-100 mt-2">Collect Fee</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-gear me-2 text-warning"></i>
+                Fee Structure
+              </h5>
+              <ul className="list-unstyled mt-3 small">
+                <li>✓ Set fee categories</li>
+                <li>✓ Class-wise fees</li>
+                <li>✓ Discounts & scholarships</li>
+                <li>✓ Late payment fines</li>
+              </ul>
+              <button className="btn btn-warning btn-sm w-100 mt-2">Manage Structure</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-clipboard-data me-2 text-info"></i>
+                Payment Tracking
+              </h5>
+              <ul className="list-unstyled mt-3 small">
+                <li>✓ Daily collection report</li>
+                <li>✓ Pending fee list</li>
+                <li>✓ Overdue students</li>
+                <li>✓ Partial payments</li>
+              </ul>
+              <button className="btn btn-info btn-sm w-100 mt-2">View Tracking</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-graph-up-arrow me-2 text-danger"></i>
+                Reports & Analytics
+              </h5>
+              <ul className="list-unstyled mt-3 small">
+                <li>✓ Monthly revenue</li>
+                <li>✓ Collection graphs</li>
+                <li>✓ Export PDF/Excel</li>
+                <li>✓ Payment trends</li>
+              </ul>
+              <button className="btn btn-danger btn-sm w-100 mt-2">View Reports</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-bell me-2 text-secondary"></i>
+                Notifications
+              </h5>
+              <ul className="list-unstyled mt-3 small">
+                <li>✓ Payment reminders</li>
+                <li>✓ SMS notifications</li>
+                <li>✓ Due alerts</li>
+                <li>✓ Auto reminders</li>
+              </ul>
+              <button className="btn btn-secondary btn-sm w-100 mt-2">Manage Alerts</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 
   if (!user) return null;
 
-  const stats = [
-    { label: "Total Students", value: "1,245", color: "primary", icon: FaUserGraduate },
-    { label: "Active Teachers", value: "87", color: "success", icon: FaChalkboardTeacher },
-    { label: "Attendance Today", value: "94.2%", color: "info", icon: FaCalendarCheck },
-    { label: "Pending Fees", value: "₹2.4L", color: "warning", icon: FaMoneyCheckAlt }
-  ];
-
-  const modules = [
-    {
-      title: "Student Management",
-      description: "Add, edit, and manage student records, enrollment, and academic information.",
-      icon: FaUserGraduate,
-      color: "primary",
-      link: "#"
-    },
-    {
-      title: "Attendance Tracking",
-      description: "Record and monitor daily attendance with automated reports and analytics.",
-      icon: FaCalendarCheck,
-      color: "success",
-      link: "#"
-    },
-    {
-      title: "Fee Management",
-      description: "Process fee payments, generate receipts, and track outstanding balances.",
-      icon: FaMoneyCheckAlt,
-      color: "warning",
-      link: "#"
-    },
-    {
-      title: "Academic Records",
-      description: "Maintain examination results, grades, and academic performance data.",
-      icon: FaBook,
-      color: "info",
-      link: "#"
-    },
-    {
-      title: "Reports & Analytics",
-      description: "Generate comprehensive reports on performance, attendance, and finances.",
-      icon: FaChartLine,
-      color: "danger",
-      link: "#"
-    },
-    {
-      title: "Timetable Management",
-      description: "Create and manage class schedules, periods, and teacher assignments.",
-      icon: FaClipboardList,
-      color: "secondary",
-      link: "#"
-    }
-  ];
-
   return (
-    <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: "#f8f9fa" }}>
-      {/* Top Navigation Bar */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div className="min-vh-100" style={{ backgroundColor: "#f8f9fa" }}>
+      {/* Top Navigation */}
+      <nav className="navbar navbar-dark bg-dark shadow-sm">
         <div className="container-fluid px-4">
-          <a className="navbar-brand fw-bold fs-4" href="/">
-            <FaBook className="me-2" />
-            Student Management System
-          </a>
-          <div className="d-flex align-items-center">
-            <div className="dropdown me-3">
+          <span className="navbar-brand mb-0 h1">Student Management System</span>
+          <div>
+            {user.role === "admin" && (
               <button 
-                className="btn btn-outline-light btn-sm dropdown-toggle" 
-                type="button" 
-                id="notificationDropdown" 
-                data-bs-toggle="dropdown"
+                className="btn btn-outline-warning btn-sm me-2" 
+                onClick={() => navigate("/admin")}
               >
-                <FaBell className="me-1" />
-                <span className="badge bg-danger rounded-pill ms-1">3</span>
+                Admin Panel
               </button>
-              <ul className="dropdown-menu dropdown-menu-end">
-                <li><h6 className="dropdown-header">Notifications</h6></li>
-                <li><a className="dropdown-item" href="#">New student enrollment pending</a></li>
-                <li><a className="dropdown-item" href="#">Fee payment received</a></li>
-                <li><a className="dropdown-item" href="#">Attendance report ready</a></li>
-              </ul>
-            </div>
-            <div className="dropdown">
-              <button 
-                className="btn btn-outline-light btn-sm dropdown-toggle" 
-                type="button" 
-                id="userDropdown" 
-                data-bs-toggle="dropdown"
-              >
-                <FaCog className="me-1" />
-                {user.user?.name}
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end">
-                <li>
-                  <button className="dropdown-item" onClick={handleOpenProfileModal}>
-                    Profile Settings
-                  </button>
-                </li>
-                <li><a className="dropdown-item" href="#">System Settings</a></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li>
-                  <button className="dropdown-item text-danger" onClick={handleLogout}>
-                    <FaSignOutAlt className="me-2" />
-                    Logout
-                  </button>
-                </li>
-              </ul>
-            </div>
+            )}
+            <button 
+              className="btn btn-outline-light btn-sm" 
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="container-fluid px-4 py-4 flex-grow-1">
-        {/* Welcome Section */}
+      <div className="container py-5">
         <div className="row mb-4">
           <div className="col-12">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body py-3">
-                <h4 className="mb-1">Welcome, {user.user?.name}</h4>
+            <div className="card shadow-sm">
+              <div className="card-body">
+                <h2 className="mb-2">Welcome, {user.username}!</h2>
                 <p className="text-muted mb-0">
-                  <small>{user.user?.email} | Administrator Dashboard</small>
+                  Role: <span className={`badge ${getRoleBadgeClass(user.role)}`}>{user.role.toUpperCase()}</span>
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="row mb-4">
-          {stats.map((stat, index) => (
-            <div key={index} className="col-12 col-sm-6 col-lg-3 mb-3">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <p className="text-muted mb-1 small">{stat.label}</p>
-                      <h3 className="mb-0 fw-bold">{stat.value}</h3>
-                    </div>
-                    <div className={`bg-${stat.color} bg-opacity-10 p-3 rounded`}>
-                      <stat.icon className={`text-${stat.color}`} size={28} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Module Cards */}
-        <div className="row mb-4">
-          <div className="col-12 mb-3">
-            <h5 className="fw-bold">System Modules</h5>
-            <p className="text-muted small">Access and manage various aspects of the student management system</p>
-          </div>
-          {modules.map((module, index) => (
-            <div key={index} className="col-12 col-md-6 col-lg-4 mb-4">
-              <div className="card border-0 shadow-sm h-100 hover-shadow" style={{ transition: "all 0.3s" }}>
-                <div className="card-body">
-                  <div className={`bg-${module.color} bg-opacity-10 p-3 rounded d-inline-block mb-3`}>
-                    <module.icon className={`text-${module.color}`} size={32} />
-                  </div>
-                  <h5 className="card-title fw-bold">{module.title}</h5>
-                  <p className="card-text text-muted small mb-3">{module.description}</p>
-                  <a href={module.link} className={`btn btn-${module.color} btn-sm`}>
-                    Access Module
-                  </a>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="row">
-          <div className="col-12 col-lg-8 mb-4">
-            <div className="card border-0 shadow-sm">
-              <div className="card-header bg-white border-0 py-3">
-                <h5 className="mb-0 fw-bold">Recent Activity</h5>
-              </div>
-              <div className="card-body p-0">
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th className="border-0">Activity</th>
-                        <th className="border-0">User</th>
-                        <th className="border-0">Time</th>
-                        <th className="border-0">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>New student enrollment</td>
-                        <td>Admin User</td>
-                        <td>10 minutes ago</td>
-                        <td><span className="badge bg-success">Completed</span></td>
-                      </tr>
-                      <tr>
-                        <td>Fee payment processed</td>
-                        <td>Accounts Dept</td>
-                        <td>25 minutes ago</td>
-                        <td><span className="badge bg-success">Completed</span></td>
-                      </tr>
-                      <tr>
-                        <td>Attendance marked - Class 10A</td>
-                        <td>Teacher Name</td>
-                        <td>1 hour ago</td>
-                        <td><span className="badge bg-success">Completed</span></td>
-                      </tr>
-                      <tr>
-                        <td>Report generation requested</td>
-                        <td>Principal</td>
-                        <td>2 hours ago</td>
-                        <td><span className="badge bg-warning">Pending</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="col-12 col-lg-4 mb-4">
-            <div className="card border-0 shadow-sm">
-              <div className="card-header bg-white border-0 py-3">
-                <h5 className="mb-0 fw-bold">Quick Actions</h5>
-              </div>
-              <div className="card-body">
-                <div className="d-grid gap-2">
-                  <button className="btn btn-outline-primary btn-sm text-start">
-                    <FaUserGraduate className="me-2" />
-                    Add New Student
-                  </button>
-                  <button className="btn btn-outline-success btn-sm text-start">
-                    <FaCalendarCheck className="me-2" />
-                    Mark Attendance
-                  </button>
-                  <button className="btn btn-outline-warning btn-sm text-start">
-                    <FaMoneyCheckAlt className="me-2" />
-                    Process Fee Payment
-                  </button>
-                  <button className="btn btn-outline-info btn-sm text-start">
-                    <FaChartLine className="me-2" />
-                    Generate Report
-                  </button>
-                  <button className="btn btn-outline-secondary btn-sm text-start">
-                    <FaClipboardList className="me-2" />
-                    View Timetable
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Role-specific Dashboard */}
+        {user.role === "student" && <StudentDashboard />}
+        {(user.role === "teacher" || user.role === "admin") && <TeacherDashboard />}
+        {user.role === "parent" && <ParentDashboard />}
+        {user.role === "fee_department" && <FeeDepartmentDashboard />}
       </div>
-
-      {/* Footer */}
-      <footer className="bg-dark text-white text-center py-3 mt-auto">
-        <div className="container">
-          <p className="mb-0 small">
-            &copy; {new Date().getFullYear()} Student Management System. All rights reserved.
-          </p>
-        </div>
-      </footer>
-
-      {/* Profile Settings Modal */}
-      {showProfileModal && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Profile Settings</h5>
-                <button 
-                  type="button" 
-                  className="btn-close" 
-                  onClick={() => setShowProfileModal(false)}
-                  disabled={isUpdating}
-                ></button>
-              </div>
-              <form onSubmit={handleUpdateProfile}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input 
-                      type="email" 
-                      className="form-control" 
-                      value={user.user?.email || ""} 
-                      disabled 
-                    />
-                    <small className="text-muted">Email cannot be changed</small>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Display Name</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      placeholder="Enter your name"
-                      disabled={isUpdating}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => setShowProfileModal(false)}
-                    disabled={isUpdating}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary"
-                    disabled={isUpdating}
-                  >
-                    {isUpdating ? "Updating..." : "Save Changes"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
