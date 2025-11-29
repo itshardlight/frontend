@@ -320,7 +320,7 @@ const Dashboard = () => {
       <nav className="navbar navbar-dark bg-dark shadow-sm">
         <div className="container-fluid px-4">
           <span className="navbar-brand mb-0 h1">Student Management System</span>
-          <div>
+          <div className="d-flex align-items-center">
             {user.role === "admin" && (
               <button 
                 className="btn btn-outline-warning btn-sm me-2" 
@@ -329,6 +329,22 @@ const Dashboard = () => {
                 Admin Panel
               </button>
             )}
+            <button 
+              className="btn btn-outline-info btn-sm me-2 d-flex align-items-center" 
+              onClick={() => navigate("/profile")}
+            >
+              {user.profilePicture ? (
+                <img 
+                  src={user.profilePicture} 
+                  alt={user.username}
+                  className="rounded-circle me-2"
+                  style={{ width: "24px", height: "24px", objectFit: "cover" }}
+                />
+              ) : (
+                <i className="bi bi-person-circle me-1"></i>
+              )}
+              Profile
+            </button>
             <button 
               className="btn btn-outline-light btn-sm" 
               onClick={handleLogout}
