@@ -22,11 +22,11 @@ const Dashboard = () => {
 
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case "admin": return "bg-danger";
-      case "teacher": return "bg-primary";
-      case "student": return "bg-success";
-      case "parent": return "bg-info";
-      case "fee_department": return "bg-warning";
+      case "admin": return "badge-admin";
+      case "teacher": return "badge-teacher";
+      case "student": return "badge-student";
+      case "parent": return "badge-parent";
+      case "fee_department": return "badge-fee-department";
       default: return "bg-secondary";
     }
   };
@@ -35,10 +35,10 @@ const Dashboard = () => {
   const StudentDashboard = () => (
     <div className="row g-4">
       <div className="col-md-4">
-        <div className="card shadow-sm h-100">
+        <div className="card shadow-sm h-100 dashboard-card">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-book" style={{ fontSize: "3rem", color: "#0d6efd" }}></i>
+              <i className="bi bi-book icon-primary" style={{ fontSize: "3rem" }}></i>
             </div>
             <h5>My Courses</h5>
             <p className="text-muted">View enrolled courses</p>
@@ -47,10 +47,10 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="col-md-4">
-        <div className="card shadow-sm h-100">
+        <div className="card shadow-sm h-100 dashboard-card">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-calendar-check" style={{ fontSize: "3rem", color: "#198754" }}></i>
+              <i className="bi bi-calendar-check icon-accent" style={{ fontSize: "3rem" }}></i>
             </div>
             <h5>Attendance</h5>
             <p className="text-muted">Check attendance record</p>
@@ -59,14 +59,14 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="col-md-4">
-        <div className="card shadow-sm h-100">
+        <div className="card shadow-sm h-100 dashboard-card">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-file-earmark-text" style={{ fontSize: "3rem", color: "#ffc107" }}></i>
+              <i className="bi bi-file-earmark-text icon-secondary" style={{ fontSize: "3rem" }}></i>
             </div>
             <h5>Assignments</h5>
             <p className="text-muted">View pending assignments</p>
-            <button className="btn btn-warning btn-sm">View Assignments</button>
+            <button className="btn btn-secondary btn-sm">View Assignments</button>
           </div>
         </div>
       </div>
@@ -315,9 +315,9 @@ const Dashboard = () => {
   if (!user) return null;
 
   return (
-    <div className="min-vh-100" style={{ backgroundColor: "#f8f9fa" }}>
+    <div className="min-vh-100 bg-light">
       {/* Top Navigation */}
-      <nav className="navbar navbar-dark bg-dark shadow-sm">
+      <nav className="navbar navbar-dark shadow-sm">
         <div className="container-fluid px-4">
           <span className="navbar-brand mb-0 h1">Student Management System</span>
           <div className="d-flex align-items-center">

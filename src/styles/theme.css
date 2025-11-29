@@ -1,0 +1,293 @@
+/* Custom Color Theme */
+:root {
+  /* Primary Colors */
+  --primary-color: #1E3A8A;        /* Deep Royal Blue */
+  --secondary-color: #60A5FA;      /* Soft Sky Blue */
+  --accent-color: #22C55E;         /* Fresh Green */
+  
+  /* Background Colors */
+  --bg-white: #FFFFFF;             /* Pure White */
+  --bg-light: #F3F4F6;             /* Soft Light Gray */
+  
+  /* Text Colors */
+  --text-dark: #374151;            /* Dark Charcoal Gray */
+  --text-light: #6B7280;           /* Soft Cool Gray */
+  
+  /* Additional Shades */
+  --primary-hover: #1e40af;
+  --secondary-hover: #3b82f6;
+  --accent-hover: #16a34a;
+}
+
+/* Global Styles */
+body {
+  background-color: var(--bg-light) !important;
+  color: var(--text-dark) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Override Bootstrap Primary Color */
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: white !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-hover) !important;
+  border-color: var(--secondary-hover) !important;
+}
+
+/* Success/Accent Button */
+.btn-success {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.btn-success:hover {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+/* Info Button */
+.btn-info,
+.btn-outline-info {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: white !important;
+}
+
+.btn-info:hover,
+.btn-outline-info:hover {
+  background-color: var(--secondary-hover) !important;
+  border-color: var(--secondary-hover) !important;
+  color: white !important;
+}
+
+/* Navbar */
+.navbar-dark {
+  background-color: var(--primary-color) !important;
+}
+
+.navbar-brand {
+  color: white !important;
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-white) !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.card-header {
+  background-color: var(--bg-light) !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  color: var(--text-dark) !important;
+}
+
+/* Badges */
+.badge.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--accent-color) !important;
+}
+
+.badge.bg-info {
+  background-color: var(--secondary-color) !important;
+}
+
+/* Form Controls */
+.form-control:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.25) !important;
+}
+
+.form-label {
+  color: var(--text-dark) !important;
+  font-weight: 500;
+}
+
+/* Links */
+a {
+  color: var(--primary-color) !important;
+}
+
+a:hover {
+  color: var(--primary-hover) !important;
+}
+
+.btn-link {
+  color: var(--primary-color) !important;
+}
+
+.btn-link:hover {
+  color: var(--primary-hover) !important;
+}
+
+/* Text Colors */
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-secondary {
+  color: var(--secondary-color) !important;
+}
+
+.text-muted {
+  color: var(--text-light) !important;
+}
+
+/* Alerts */
+.alert-success {
+  background-color: #d1fae5 !important;
+  border-color: var(--accent-color) !important;
+  color: #065f46 !important;
+}
+
+.alert-danger {
+  background-color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #991b1b !important;
+}
+
+.alert-info {
+  background-color: #dbeafe !important;
+  border-color: var(--secondary-color) !important;
+  color: #1e40af !important;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Profile Avatar */
+.profile-avatar {
+  border: 3px solid var(--primary-color) !important;
+}
+
+.profile-avatar-initials {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+}
+
+/* Role Badges */
+.badge-admin {
+  background-color: #dc2626 !important;
+}
+
+.badge-teacher {
+  background-color: var(--primary-color) !important;
+}
+
+.badge-student {
+  background-color: var(--accent-color) !important;
+}
+
+.badge-parent {
+  background-color: var(--secondary-color) !important;
+}
+
+.badge-fee-department {
+  background-color: #f59e0b !important;
+}
+
+/* Shadows */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Background Utilities */
+.bg-light {
+  background-color: var(--bg-light) !important;
+}
+
+.bg-white {
+  background-color: var(--bg-white) !important;
+}
+
+/* Border Colors */
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+.border-success {
+  border-color: var(--accent-color) !important;
+}
+
+.border-info {
+  border-color: var(--secondary-color) !important;
+}
+
+/* Icon Colors */
+.icon-primary {
+  color: var(--primary-color);
+}
+
+.icon-secondary {
+  color: var(--secondary-color);
+}
+
+.icon-accent {
+  color: var(--accent-color);
+}
+
+/* Loading Spinner */
+.spinner-border-primary {
+  border-color: var(--primary-color);
+  border-right-color: transparent;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}

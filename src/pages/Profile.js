@@ -9,7 +9,9 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [formData, setFormData] = useState({
+    fullName: "",
     username: "",
     email: "",
     currentPassword: "",
@@ -26,6 +28,7 @@ const Profile = () => {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
       setFormData({
+        fullName: parsedUser.fullName || "",
         username: parsedUser.username,
         email: parsedUser.email,
         currentPassword: "",
@@ -44,8 +47,8 @@ const Profile = () => {
     setError("");
     setSuccess("");
 
-    if (!formData.username || !formData.email) {
-      setError("Username and email are required");
+    if (!formData.fullName || !formData.username || !formData.email) {
+      setError("All fields are required");
       return;
     }
 
@@ -55,17 +58,14 @@ const Profile = () => {
       const response = await axios.put(
         `http://localhost:5000/api/users/profile/${user.id}`,
         {
+          fullName: formData.fullName,
           username: formData.username,
           email: formData.email
         }
       );
 
       if (response.data.success) {
-        const updatedUser = {
-          ...user,
-          username: response.data.user.username,
-          email: response.data.user.email
-        };
+        const updatedUser = response.data.user;
         localStorage.setItem("user", JSON.stringify(updatedUser));
         setUser(updatedUser);
         setSuccess("Profile updated successfully!");
@@ -117,6 +117,7 @@ const Profile = () => {
           newPassword: "",
           confirmPassword: ""
         });
+        setShowPasswordModal(false);
       }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to change password");
@@ -125,18 +126,24 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case "admin": return "bg-danger";
-      case "teacher": return "bg-primary";
-      case "student": return "bg-success";
-      case "parent": return "bg-info";
-      case "fee_department": return "bg-warning";
+      case "admin": return "badge-admin";
+      case "teacher": return "badge-teacher";
+      case "student": return "badge-student";
+      case "parent": return "badge-parent";
+      case "fee_department": return "badge-fee-department";
       default: return "bg-secondary";
     }
   };
 
   const getInitials = (name) => {
+    if (!name) return "U";
     return name
       .split(" ")
       .map(word => word[0])
@@ -145,49 +152,42 @@ const Profile = () => {
       .slice(0, 2);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "Never";
+    const date = new Date(dateString);
+    return date.toLocaleString('en-GB', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (!user) return null;
 
   return (
-    <div className="min-vh-100" style={{ backgroundColor: "#f8f9fa" }}>
+    <div className="min-vh-100 bg-light">
       {/* Top Navigation */}
-      <nav className="navbar navbar-dark bg-dark shadow-sm">
+      <nav className="navbar navbar-dark shadow-sm">
         <div className="container-fluid px-4">
           <span className="navbar-brand mb-0 h1">Student Management System</span>
           <button 
             className="btn btn-outline-light btn-sm" 
             onClick={() => navigate("/dashboard")}
           >
-            Back to Dashboard
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="container py-5">
-        <div className="row justify-content-center">
-          <div className="col-lg-8">
-            {/* Profile Header Card */}
-            <div className="card shadow-sm mb-4">
-              <div className="card-body text-center py-5">
-                {user.profilePicture ? (
-                  <img 
-                    src={user.profilePicture} 
-                    alt={user.username}
-                    className="rounded-circle mb-3"
-                    style={{ width: "100px", height: "100px", objectFit: "cover", border: "3px solid #0d6efd" }}
-                  />
-                ) : (
-                  <div 
-                    className="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
-                    style={{ width: "100px", height: "100px", fontSize: "2rem", fontWeight: "bold" }}
-                  >
-                    {getInitials(user.username)}
-                  </div>
-                )}
-                <h3 className="mb-2">{user.username}</h3>
-                <p className="text-muted mb-2">{user.email}</p>
-                <span className={`badge ${getRoleBadgeClass(user.role)} px-3 py-2`}>
-                  {user.role.toUpperCase()}
+            <i className="bi bi-arrow-left me-2"></i>
+            Back to Dashrole.toUpperCase()}
                 </span>
               </div>
             </div>
