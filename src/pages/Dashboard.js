@@ -330,19 +330,10 @@ const Dashboard = () => {
               </button>
             )}
             <button 
-              className="btn btn-outline-info btn-sm me-2 d-flex align-items-center" 
+              className="btn btn-outline-info btn-sm me-2" 
               onClick={() => navigate("/profile")}
             >
-              {user.profilePicture ? (
-                <img 
-                  src={user.profilePicture} 
-                  alt={user.username}
-                  className="rounded-circle me-2"
-                  style={{ width: "24px", height: "24px", objectFit: "cover" }}
-                />
-              ) : (
-                <i className="bi bi-person-circle me-1"></i>
-              )}
+              <i className="bi bi-person-circle me-1"></i>
               Profile
             </button>
             <button 

@@ -9,7 +9,7 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -117,18 +117,12 @@ const Profile = () => {
           newPassword: "",
           confirmPassword: ""
         });
-        setShowPasswordModal(false);
       }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to change password");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
   };
 
   const getRoleBadgeClass = (role) => {
@@ -152,26 +146,9 @@ const Profile = () => {
       .slice(0, 2);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    });
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "Never";
-    const date = new Date(dateString);
-    return date.toLocaleString('en-GB', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   if (!user) return null;
@@ -187,7 +164,57 @@ const Profile = () => {
             onClick={() => navigate("/dashboard")}
           >
             <i className="bi bi-arrow-left me-2"></i>
-            Back to Dashrole.toUpperCase()}
+            Back to Dashboard
+          </button>
+        </div>
+      </nav>
+
+      {/* Profile Container */}
+      <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-lg-8">
+            {/* Profile Header */}
+            <div className="card shadow-sm mb-4">
+              <div className="card-body text-center py-4">
+                {user.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt={user.username}
+                    className="rounded-circle mb-3"
+                    style={{ 
+                      width: '120px', 
+                      height: '120px', 
+                      objectFit: 'cover',
+                      border: '4px solid #f0f0f0'
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className="profile-avatar mb-3"
+                  style={{ 
+                    display: user.profilePicture ? 'none' : 'flex',
+                    width: '120px',
+                    height: '120px',
+                    margin: '0 auto',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    borderRadius: '50%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '2.5rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {getInitials(user.username)}
+                </div>
+                <h3 className="mb-1">{user.username}</h3>
+                <p className="text-muted mb-2">{user.email}</p>
+                <span className={`badge ${getRoleBadgeClass(user.role)}`}>
+                  {user.role.toUpperCase()}
                 </span>
               </div>
             </div>
@@ -302,57 +329,78 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Change Password Card */}
-            <div className="card shadow-sm">
-              <div className="card-header bg-white">
+            {/* Change Password Card - Collapsible */}
+            <div className="card shadow-sm mb-4">
+              <div 
+                className="card-header bg-white d-flex justify-content-between align-items-center" 
+                style={{ cursor: 'pointer' }}
+                onClick={() => setShowPasswordSection(!showPasswordSection)}
+              >
                 <h5 className="mb-0">Change Password</h5>
+                <i className={`bi bi-chevron-${showPasswordSection ? 'up' : 'down'}`}></i>
               </div>
-              <div className="card-body">
-                <form onSubmit={handleChangePassword}>
-                  <div className="mb-3">
-                    <label className="form-label">Current Password</label>
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      className="form-control"
-                      placeholder="Enter current password"
-                      value={formData.currentPassword}
-                      onChange={handleChange}
+              {showPasswordSection && (
+                <div className="card-body">
+                  <form onSubmit={handleChangePassword}>
+                    <div className="mb-3">
+                      <label className="form-label">Current Password</label>
+                      <input
+                        type="password"
+                        name="currentPassword"
+                        className="form-control"
+                        placeholder="Enter current password"
+                        value={formData.currentPassword}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">New Password</label>
+                      <input
+                        type="password"
+                        name="newPassword"
+                        className="form-control"
+                        placeholder="Enter new password (min 6 characters)"
+                        value={formData.newPassword}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Confirm New Password</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        className="form-control"
+                        placeholder="Re-enter new password"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                    </div>
+                    <button 
+                      type="submit" 
+                      className="btn btn-warning"
                       disabled={loading}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">New Password</label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      className="form-control"
-                      placeholder="Enter new password (min 6 characters)"
-                      value={formData.newPassword}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Confirm New Password</label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      className="form-control"
-                      placeholder="Re-enter new password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                  </div>
-                  <button 
-                    type="submit" 
-                    className="btn btn-warning"
-                    disabled={loading}
-                  >
-                    {loading ? "Changing..." : "Change Password"}
-                  </button>
-                </form>
+                    >
+                      {loading ? "Changing..." : "Change Password"}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* Logout Card */}
+            <div className="card shadow-sm">
+              <div className="card-body text-center">
+                <h5 className="mb-3">Account Actions</h5>
+                <button 
+                  className="btn btn-danger"
+                  onClick={handleLogout}
+                >
+                  <i className="bi bi-box-arrow-right me-2"></i>
+                  Logout
+                </button>
               </div>
             </div>
           </div>
