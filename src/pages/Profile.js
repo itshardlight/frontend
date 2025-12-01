@@ -47,7 +47,7 @@ const Profile = () => {
     setError("");
     setSuccess("");
 
-    if (!formData.fullName || !formData.username || !formData.email) {
+    if (!formData.username || !formData.email) {
       setError("All fields are required");
       return;
     }
