@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   return (
     <>
       {/* Quick Stats */}
@@ -94,7 +96,7 @@ const AdminDashboard = () => {
                 <li><i className="bi bi-check-circle text-success me-2"></i>Monthly reports</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Absentee alerts</li>
               </ul>
-              <button className="btn btn-info btn-sm w-100 mt-2">View Attendance</button>
+              <button className="btn btn-info btn-sm w-100 mt-2" onClick={() => navigate("/attendance")}>View Attendance</button>
             </div>
           </div>
         </div>
@@ -166,7 +168,7 @@ const AdminDashboard = () => {
                 <li><i className="bi bi-check-circle text-success me-2"></i>Pending approvals</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Admission records</li>
               </ul>
-              <button className="btn btn-info btn-sm w-100 mt-2">View Admissions</button>
+              <button className="btn btn-info btn-sm w-100 mt-2" onClick={() => navigate("/student-registration")}>View Admissions</button>
             </div>
           </div>
         </div>

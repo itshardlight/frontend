@@ -8,6 +8,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import AdminPanel from "./pages/AdminPanel";
+import Attendance from "./pages/Attendance";
+import StudentRegistration from "./pages/StudentRegistration";
 
 const GOOGLE_CLIENT_ID = "778363983589-j716s0a5ddtapkpbqu758t00elk6hd3g.apps.googleusercontent.com";
 
@@ -23,6 +25,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/student-registration" element={<StudentRegistration />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </GoogleOAuthProvider>

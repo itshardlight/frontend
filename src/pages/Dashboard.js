@@ -54,7 +54,7 @@ const Dashboard = () => {
             </div>
             <h5>Attendance</h5>
             <p className="text-muted">Check attendance record</p>
-            <button className="btn btn-success btn-sm">View Attendance</button>
+            <button className="btn btn-success btn-sm" onClick={() => navigate("/attendance")}>View Attendance</button>
           </div>
         </div>
       </div>
@@ -84,7 +84,7 @@ const Dashboard = () => {
             </div>
             <h5>My Students</h5>
             <p className="text-muted">Manage student records</p>
-            <button className="btn btn-primary btn-sm">View Students</button>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-registration")}>View Students</button>
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@ const Dashboard = () => {
             </div>
             <h5>Attendance</h5>
             <p className="text-muted">Mark student attendance</p>
-            <button className="btn btn-success btn-sm">Take Attendance</button>
+            <button className="btn btn-success btn-sm" onClick={() => navigate("/attendance")}>Take Attendance</button>
           </div>
         </div>
       </div>
@@ -329,7 +329,7 @@ const Dashboard = () => {
                 Admin Panel
               </button>
             )}
-            <button 
+            <button cd fron
               className="btn btn-outline-info btn-sm me-2" 
               onClick={() => navigate("/profile")}
             >
