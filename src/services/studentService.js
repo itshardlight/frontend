@@ -69,8 +69,13 @@ export const studentService = {
     return handleResponse(response);
   },
 
-  // Update student
+  // Update student (requires authentication)
   updateStudent: async (id, studentData) => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Authentication required. Please login first.');
+    }
+
     const response = await fetch(`${API_BASE_URL}/students/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -80,8 +85,13 @@ export const studentService = {
     return handleResponse(response);
   },
 
-  // Delete student
+  // Delete student (requires authentication)
   deleteStudent: async (id) => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Authentication required. Please login first.');
+    }
+
     const response = await fetch(`${API_BASE_URL}/students/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
