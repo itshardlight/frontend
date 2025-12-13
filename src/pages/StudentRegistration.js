@@ -1,10 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { studentService } from "../services/studentService";
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("list");
+  const [students, setStudents] = useState([]);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeStudents: 0,
+    newThisMonth: 0,
+    totalClasses: 8
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -29,58 +40,86 @@ const StudentRegistration = () => {
     medicalConditions: ""
   });
 
-  // Dummy student data
-  const students = [
-    {
-      id: 1,
-      name: "John Doe",
-      rollNo: "001",
-      class: "10-A",
-      email: "john@example.com",
-      phone: "+1234567890",
-      admissionDate: "2024-01-15",
-      status: "active"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      rollNo: "002",
-      class: "10-A",
-      email: "jane@example.com",
-      phone: "+1234567891",
-      admissionDate: "2024-01-16",
-      status: "active"
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      rollNo: "003",
-      class: "10-B",
-      email: "mike@example.com",
-      phone: "+1234567892",
-      admissionDate: "2024-01-17",
-      status: "active"
-    },
-    {
-      id: 4,
-      name: "Sarah Williams",
-      rollNo: "004",
-      class: "9-A",
-      email: "sarah@example.com",
-      phone: "+1234567893",
-      admissionDate: "2024-01-18",
-      status: "inactive"
+  // Load students and stats on component mount
+  useEffect(() => {
+    loadStudents();
+    loadStats();
+  }, []);
+
+  const loadStudents = async () => {
+    try {
+      setLoading(true);
+      const response = await studentService.getStudents();
+      setStudents(response.data || []);
+    } catch (err) {
+      setError("Failed to load students: " + err.message);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const loadStats = async () => {
+    try {
+      const response = await studentService.getStudentStats();
+      setStats(response.data);
+    } catch (err) {
+      console.error("Failed to load stats:", err);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Student registration submitted! (Dummy action)");
-    console.log("Form Data:", formData);
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await studentService.createStudent(formData);
+      setSuccess("Student registered successfully!");
+      
+      // Reset form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        dateOfBirth: "",
+        gender: "",
+        bloodGroup: "",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        class: "",
+        section: "",
+        rollNumber: "",
+        admissionDate: "",
+        parentName: "",
+        parentPhone: "",
+        parentEmail: "",
+        emergencyContact: "",
+        previousSchool: "",
+        medicalConditions: ""
+      });
+
+      // Reload students and stats
+      loadStudents();
+      loadStats();
+      
+      // Switch to list tab to see the new student
+      setTimeout(() => {
+        setActiveTab("list");
+      }, 2000);
+      
+    } catch (err) {
+      setError("Failed to register student: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -109,7 +148,7 @@ const StudentRegistration = () => {
           <div className="card shadow-sm border-primary">
             <div className="card-body text-center">
               <i className="bi bi-people-fill text-primary" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{students.length}</h3>
+              <h3 className="mt-2 mb-0">{stats.totalStudents}</h3>
               <small className="text-muted">Total Students</small>
             </div>
           </div>
@@ -118,7 +157,7 @@ const StudentRegistration = () => {
           <div className="card shadow-sm border-success">
             <div className="card-body text-center">
               <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{students.filter(s => s.status === "active").length}</h3>
+              <h3 className="mt-2 mb-0">{stats.activeStudents}</h3>
               <small className="text-muted">Active Students</small>
             </div>
           </div>
@@ -127,7 +166,7 @@ const StudentRegistration = () => {
           <div className="card shadow-sm border-warning">
             <div className="card-body text-center">
               <i className="bi bi-person-plus-fill text-warning" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">12</h3>
+              <h3 className="mt-2 mb-0">{stats.newThisMonth}</h3>
               <small className="text-muted">New This Month</small>
             </div>
           </div>
@@ -136,7 +175,7 @@ const StudentRegistration = () => {
           <div className="card shadow-sm border-info">
             <div className="card-body text-center">
               <i className="bi bi-door-open text-info" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">8</h3>
+              <h3 className="mt-2 mb-0">{stats.totalClasses}</h3>
               <small className="text-muted">Total Classes</small>
             </div>
           </div>
@@ -165,7 +204,14 @@ const StudentRegistration = () => {
 
       {/* Student List Tab */}
       {activeTab === "list" && (
-        <div className="card shadow-sm">
+        <>
+          {error && (
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              {error}
+              <button type="button" className="btn-close" onClick={() => setError("")}></button>
+            </div>
+          )}
+          <div className="card shadow-sm">
           <div className="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 className="mb-0">Registered Students</h5>
             <div className="d-flex gap-2">
@@ -199,46 +245,64 @@ const StudentRegistration = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id}>
-                      <td className="align-middle">
-                        <strong>{student.rollNo}</strong>
-                      </td>
-                      <td className="align-middle">
-                        <div className="d-flex align-items-center">
-                          <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                               style={{ width: "35px", height: "35px", fontSize: "14px" }}>
-                            {student.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          {student.name}
-                        </div>
-                      </td>
-                      <td className="align-middle">
-                        <span className="badge bg-info">{student.class}</span>
-                      </td>
-                      <td className="align-middle">{student.email}</td>
-                      <td className="align-middle">{student.phone}</td>
-                      <td className="align-middle">{student.admissionDate}</td>
-                      <td className="align-middle">
-                        <span className={getStatusBadge(student.status)}>
-                          {student.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="align-middle">
-                        <div className="btn-group btn-group-sm">
-                          <button className="btn btn-outline-primary" title="View">
-                            <i className="bi bi-eye"></i>
-                          </button>
-                          <button className="btn btn-outline-success" title="Edit">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button className="btn btn-outline-danger" title="Delete">
-                            <i className="bi bi-trash"></i>
-                          </button>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="8" className="text-center py-4">
+                        <div className="spinner-border text-primary" role="status">
+                          <span className="visually-hidden">Loading...</span>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ) : students.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="text-center py-4 text-muted">
+                        No students found
+                      </td>
+                    </tr>
+                  ) : (
+                    students.map((student) => (
+                      <tr key={student._id}>
+                        <td className="align-middle">
+                          <strong>{student.rollNumber}</strong>
+                        </td>
+                        <td className="align-middle">
+                          <div className="d-flex align-items-center">
+                            <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style={{ width: "35px", height: "35px", fontSize: "14px" }}>
+                              {student.firstName[0]}{student.lastName[0]}
+                            </div>
+                            {student.fullName}
+                          </div>
+                        </td>
+                        <td className="align-middle">
+                          <span className="badge bg-info">{student.classSection}</span>
+                        </td>
+                        <td className="align-middle">{student.email}</td>
+                        <td className="align-middle">{student.phone}</td>
+                        <td className="align-middle">
+                          {new Date(student.admissionDate).toLocaleDateString()}
+                        </td>
+                        <td className="align-middle">
+                          <span className={getStatusBadge(student.status)}>
+                            {student.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="align-middle">
+                          <div className="btn-group btn-group-sm">
+                            <button className="btn btn-outline-primary" title="View">
+                              <i className="bi bi-eye"></i>
+                            </button>
+                            <button className="btn btn-outline-success" title="Edit">
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button className="btn btn-outline-danger" title="Delete">
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -268,6 +332,7 @@ const StudentRegistration = () => {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Registration Form Tab */}
@@ -277,6 +342,18 @@ const StudentRegistration = () => {
             <h5 className="mb-0">New Student Registration Form</h5>
           </div>
           <div className="card-body">
+            {error && (
+              <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                {error}
+                <button type="button" className="btn-close" onClick={() => setError("")}></button>
+              </div>
+            )}
+            {success && (
+              <div className="alert alert-success alert-dismissible fade show" role="alert">
+                {success}
+                <button type="button" className="btn-close" onClick={() => setSuccess("")}></button>
+              </div>
+            )}
             <form onSubmit={handleSubmit}>
               {/* Personal Information */}
               <h6 className="text-primary mb-3">
@@ -568,8 +645,17 @@ const StudentRegistration = () => {
                 <button type="button" className="btn btn-outline-secondary">
                   <i className="bi bi-x-circle me-2"></i>Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  <i className="bi bi-check-circle me-2"></i>Register Student
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                      Registering...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-check-circle me-2"></i>Register Student
+                    </>
+                  )}
                 </button>
               </div>
             </form>
