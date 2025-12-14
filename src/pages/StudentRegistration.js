@@ -46,6 +46,8 @@ const StudentRegistration = () => {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Load students and stats on component mount
   useEffect(() => {
@@ -240,6 +242,11 @@ const StudentRegistration = () => {
       return;
     }
     handleDeleteClick(student);
+  };
+
+  const handleViewProfile = (student) => {
+    setSelectedStudent(student);
+    setShowProfileModal(true);
   };
 
   const getStatusBadge = (status) => {
@@ -476,7 +483,11 @@ const StudentRegistration = () => {
                         </td>
                         <td className="align-middle">
                           <div className="btn-group btn-group-sm">
-                            <button className="btn btn-outline-primary" title="View">
+                            <button 
+                              className="btn btn-outline-primary" 
+                              title="View Profile"
+                              onClick={() => handleViewProfile(student)}
+                            >
                               <i className="bi bi-eye"></i>
                             </button>
                             <button 
@@ -930,6 +941,243 @@ const StudentRegistration = () => {
                       Delete Student
                     </>
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student Profile Modal */}
+      {showProfileModal && selectedStudent && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">
+                  <i className="bi bi-person-circle me-2"></i>
+                  Student Profile
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close btn-close-white" 
+                  onClick={() => setShowProfileModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body p-0">
+                {/* Profile Header */}
+                <div className="bg-light p-4 text-center border-bottom">
+                  <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                       style={{ width: "80px", height: "80px", fontSize: "2rem" }}>
+                    {selectedStudent.firstName[0]}{selectedStudent.lastName[0]}
+                  </div>
+                  <h4 className="mb-1">{selectedStudent.fullName}</h4>
+                  <p className="text-muted mb-2">Roll Number: {selectedStudent.rollNumber}</p>
+                  <span className={`badge ${getStatusBadge(selectedStudent.status)} fs-6`}>
+                    {selectedStudent.status.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Profile Details */}
+                <div className="p-4">
+                  {/* Personal Information */}
+                  <div className="mb-4">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-person me-2"></i>Personal Information
+                    </h6>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Full Name:</strong>
+                          <span>{selectedStudent.fullName}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Date of Birth:</strong>
+                          <span>{new Date(selectedStudent.dateOfBirth).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Gender:</strong>
+                          <span className="text-capitalize">{selectedStudent.gender}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Blood Group:</strong>
+                          <span>{selectedStudent.bloodGroup || 'Not specified'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="mb-4">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-telephone me-2"></i>Contact Information
+                    </h6>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Email:</strong>
+                          <span>{selectedStudent.email}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Phone:</strong>
+                          <span>{selectedStudent.phone}</span>
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="d-flex">
+                          <strong className="me-2">Address:</strong>
+                          <span>{selectedStudent.address}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex">
+                          <strong className="me-2">City:</strong>
+                          <span>{selectedStudent.city}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex">
+                          <strong className="me-2">State:</strong>
+                          <span>{selectedStudent.state}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex">
+                          <strong className="me-2">Zip Code:</strong>
+                          <span>{selectedStudent.zipCode}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Academic Information */}
+                  <div className="mb-4">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-book me-2"></i>Academic Information
+                    </h6>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Class:</strong>
+                          <span className="badge bg-info">{selectedStudent.classSection}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Admission Date:</strong>
+                          <span>{new Date(selectedStudent.admissionDate).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="d-flex">
+                          <strong className="me-2">Previous School:</strong>
+                          <span>{selectedStudent.previousSchool || 'Not specified'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Parent/Guardian Information */}
+                  <div className="mb-4">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-people me-2"></i>Parent/Guardian Information
+                    </h6>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Parent Name:</strong>
+                          <span>{selectedStudent.parentName}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Parent Phone:</strong>
+                          <span>{selectedStudent.parentPhone}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Parent Email:</strong>
+                          <span>{selectedStudent.parentEmail || 'Not specified'}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Emergency Contact:</strong>
+                          <span>{selectedStudent.emergencyContact}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Medical Information */}
+                  {selectedStudent.medicalConditions && (
+                    <div className="mb-4">
+                      <h6 className="text-primary mb-3">
+                        <i className="bi bi-heart-pulse me-2"></i>Medical Information
+                      </h6>
+                      <div className="alert alert-info">
+                        <strong>Medical Conditions:</strong><br />
+                        {selectedStudent.medicalConditions}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Registration Details */}
+                  <div className="mb-0">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-info-circle me-2"></i>Registration Details
+                    </h6>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Student ID:</strong>
+                          <span className="font-monospace">{selectedStudent._id}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Registration Date:</strong>
+                          <span>{new Date(selectedStudent.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Last Updated:</strong>
+                          <span>{new Date(selectedStudent.updatedAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                {isAdmin && (
+                  <button 
+                    type="button" 
+                    className="btn btn-success me-auto"
+                    onClick={() => {
+                      setShowProfileModal(false);
+                      handleEdit(selectedStudent);
+                    }}
+                  >
+                    <i className="bi bi-pencil me-2"></i>Edit Student
+                  </button>
+                )}
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowProfileModal(false)}
+                >
+                  Close
                 </button>
               </div>
             </div>
