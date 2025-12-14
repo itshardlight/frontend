@@ -250,7 +250,26 @@ const StudentRegistration = () => {
   };
 
   const getStatusBadge = (status) => {
-    return status === "active" ? "badge bg-success" : "badge bg-secondary";
+    switch(status) {
+      case "active": return "badge bg-success";
+      case "inactive": return "badge bg-secondary";
+      case "suspended": return "badge bg-warning";
+      case "graduated": return "badge bg-info";
+      default: return "badge bg-secondary";
+    }
+  };
+
+  const calculateAge = (dateOfBirth) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
   };
 
   return (
@@ -972,10 +991,34 @@ const StudentRegistration = () => {
                     {selectedStudent.firstName[0]}{selectedStudent.lastName[0]}
                   </div>
                   <h4 className="mb-1">{selectedStudent.fullName}</h4>
-                  <p className="text-muted mb-2">Roll Number: {selectedStudent.rollNumber}</p>
-                  <span className={`badge ${getStatusBadge(selectedStudent.status)} fs-6`}>
-                    {selectedStudent.status.toUpperCase()}
-                  </span>
+                  <p className="text-muted mb-2">Roll Number: {selectedStudent.rollNumber} | Class: {selectedStudent.classSection}</p>
+                  <div className="d-flex justify-content-center gap-2 mb-3">
+                    <span className={`badge ${getStatusBadge(selectedStudent.status)} fs-6`}>
+                      {selectedStudent.status.toUpperCase()}
+                    </span>
+                    <span className="badge bg-info fs-6">
+                      Age: {calculateAge(selectedStudent.dateOfBirth)} years
+                    </span>
+                    {selectedStudent.bloodGroup && (
+                      <span className="badge bg-danger fs-6">
+                        {selectedStudent.bloodGroup}
+                      </span>
+                    )}
+                  </div>
+                  <div className="row g-2 text-start">
+                    <div className="col-md-6">
+                      <small className="text-muted">
+                        <i className="bi bi-envelope me-1"></i>
+                        {selectedStudent.email}
+                      </small>
+                    </div>
+                    <div className="col-md-6">
+                      <small className="text-muted">
+                        <i className="bi bi-telephone me-1"></i>
+                        {selectedStudent.phone}
+                      </small>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Profile Details */}
@@ -988,8 +1031,20 @@ const StudentRegistration = () => {
                     <div className="row g-3">
                       <div className="col-md-6">
                         <div className="d-flex">
+                          <strong className="me-2">First Name:</strong>
+                          <span>{selectedStudent.firstName}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Last Name:</strong>
+                          <span>{selectedStudent.lastName}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
                           <strong className="me-2">Full Name:</strong>
-                          <span>{selectedStudent.fullName}</span>
+                          <span className="fw-bold">{selectedStudent.fullName}</span>
                         </div>
                       </div>
                       <div className="col-md-6">
@@ -1000,14 +1055,22 @@ const StudentRegistration = () => {
                       </div>
                       <div className="col-md-6">
                         <div className="d-flex">
+                          <strong className="me-2">Age:</strong>
+                          <span className="badge bg-info">{calculateAge(selectedStudent.dateOfBirth)} years</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
                           <strong className="me-2">Gender:</strong>
-                          <span className="text-capitalize">{selectedStudent.gender}</span>
+                          <span className="text-capitalize badge bg-light text-dark">{selectedStudent.gender}</span>
                         </div>
                       </div>
                       <div className="col-md-6">
                         <div className="d-flex">
                           <strong className="me-2">Blood Group:</strong>
-                          <span>{selectedStudent.bloodGroup || 'Not specified'}</span>
+                          <span className={`badge ${selectedStudent.bloodGroup ? 'bg-danger text-white' : 'bg-secondary'}`}>
+                            {selectedStudent.bloodGroup || 'Not specified'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1020,39 +1083,49 @@ const StudentRegistration = () => {
                     </h6>
                     <div className="row g-3">
                       <div className="col-md-6">
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
                           <strong className="me-2">Email:</strong>
-                          <span>{selectedStudent.email}</span>
+                          <span>
+                            <a href={`mailto:${selectedStudent.email}`} className="text-decoration-none">
+                              <i className="bi bi-envelope me-1"></i>
+                              {selectedStudent.email}
+                            </a>
+                          </span>
                         </div>
                       </div>
                       <div className="col-md-6">
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
                           <strong className="me-2">Phone:</strong>
-                          <span>{selectedStudent.phone}</span>
+                          <span>
+                            <a href={`tel:${selectedStudent.phone}`} className="text-decoration-none">
+                              <i className="bi bi-telephone me-1"></i>
+                              {selectedStudent.phone}
+                            </a>
+                          </span>
                         </div>
                       </div>
                       <div className="col-12">
                         <div className="d-flex">
-                          <strong className="me-2">Address:</strong>
+                          <strong className="me-2">Full Address:</strong>
                           <span>{selectedStudent.address}</span>
                         </div>
                       </div>
                       <div className="col-md-4">
                         <div className="d-flex">
                           <strong className="me-2">City:</strong>
-                          <span>{selectedStudent.city}</span>
+                          <span className="badge bg-light text-dark">{selectedStudent.city}</span>
                         </div>
                       </div>
                       <div className="col-md-4">
                         <div className="d-flex">
                           <strong className="me-2">State:</strong>
-                          <span>{selectedStudent.state}</span>
+                          <span className="badge bg-light text-dark">{selectedStudent.state}</span>
                         </div>
                       </div>
                       <div className="col-md-4">
                         <div className="d-flex">
                           <strong className="me-2">Zip Code:</strong>
-                          <span>{selectedStudent.zipCode}</span>
+                          <span className="badge bg-light text-dark">{selectedStudent.zipCode}</span>
                         </div>
                       </div>
                     </div>
@@ -1064,10 +1137,28 @@ const StudentRegistration = () => {
                       <i className="bi bi-book me-2"></i>Academic Information
                     </h6>
                     <div className="row g-3">
-                      <div className="col-md-6">
+                      <div className="col-md-4">
                         <div className="d-flex">
                           <strong className="me-2">Class:</strong>
+                          <span className="badge bg-info">{selectedStudent.class}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex">
+                          <strong className="me-2">Section:</strong>
+                          <span className="badge bg-secondary">{selectedStudent.section}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex">
+                          <strong className="me-2">Class-Section:</strong>
                           <span className="badge bg-info">{selectedStudent.classSection}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Roll Number:</strong>
+                          <span className="badge bg-primary">{selectedStudent.rollNumber}</span>
                         </div>
                       </div>
                       <div className="col-md-6">
@@ -1093,68 +1184,137 @@ const StudentRegistration = () => {
                     <div className="row g-3">
                       <div className="col-md-6">
                         <div className="d-flex">
-                          <strong className="me-2">Parent Name:</strong>
-                          <span>{selectedStudent.parentName}</span>
+                          <strong className="me-2">Parent/Guardian Name:</strong>
+                          <span className="fw-bold">{selectedStudent.parentName}</span>
                         </div>
                       </div>
                       <div className="col-md-6">
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
                           <strong className="me-2">Parent Phone:</strong>
-                          <span>{selectedStudent.parentPhone}</span>
+                          <span>
+                            <a href={`tel:${selectedStudent.parentPhone}`} className="text-decoration-none">
+                              <i className="bi bi-telephone me-1"></i>
+                              {selectedStudent.parentPhone}
+                            </a>
+                          </span>
                         </div>
                       </div>
                       <div className="col-md-6">
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
                           <strong className="me-2">Parent Email:</strong>
-                          <span>{selectedStudent.parentEmail || 'Not specified'}</span>
+                          <span>
+                            {selectedStudent.parentEmail ? (
+                              <a href={`mailto:${selectedStudent.parentEmail}`} className="text-decoration-none">
+                                <i className="bi bi-envelope me-1"></i>
+                                {selectedStudent.parentEmail}
+                              </a>
+                            ) : (
+                              <span className="text-muted">Not specified</span>
+                            )}
+                          </span>
                         </div>
                       </div>
                       <div className="col-md-6">
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
                           <strong className="me-2">Emergency Contact:</strong>
-                          <span>{selectedStudent.emergencyContact}</span>
+                          <span>
+                            <a href={`tel:${selectedStudent.emergencyContact}`} className="text-decoration-none text-danger">
+                              <i className="bi bi-exclamation-triangle me-1"></i>
+                              {selectedStudent.emergencyContact}
+                            </a>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Medical Information */}
-                  {selectedStudent.medicalConditions && (
-                    <div className="mb-4">
-                      <h6 className="text-primary mb-3">
-                        <i className="bi bi-heart-pulse me-2"></i>Medical Information
-                      </h6>
+                  <div className="mb-4">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-heart-pulse me-2"></i>Medical Information
+                    </h6>
+                    {selectedStudent.medicalConditions ? (
                       <div className="alert alert-info">
                         <strong>Medical Conditions:</strong><br />
                         {selectedStudent.medicalConditions}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="alert alert-success">
+                        <i className="bi bi-check-circle me-2"></i>
+                        No medical conditions reported
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Registration Details */}
-                  <div className="mb-0">
+                  {/* System Information */}
+                  <div className="mb-4">
                     <h6 className="text-primary mb-3">
-                      <i className="bi bi-info-circle me-2"></i>Registration Details
+                      <i className="bi bi-gear me-2"></i>System Information
                     </h6>
                     <div className="row g-3">
                       <div className="col-md-6">
                         <div className="d-flex">
-                          <strong className="me-2">Student ID:</strong>
-                          <span className="font-monospace">{selectedStudent._id}</span>
+                          <strong className="me-2">Current Status:</strong>
+                          <span className={`badge ${getStatusBadge(selectedStudent.status)} fs-6`}>
+                            {selectedStudent.status.toUpperCase()}
+                          </span>
                         </div>
                       </div>
                       <div className="col-md-6">
                         <div className="d-flex">
                           <strong className="me-2">Registration Date:</strong>
-                          <span>{new Date(selectedStudent.createdAt).toLocaleDateString()}</span>
+                          <span>{selectedStudent.registrationDate ? new Date(selectedStudent.registrationDate).toLocaleDateString() : 'Not available'}</span>
                         </div>
                       </div>
                       <div className="col-md-6">
                         <div className="d-flex">
                           <strong className="me-2">Last Updated:</strong>
-                          <span>{new Date(selectedStudent.updatedAt).toLocaleDateString()}</span>
+                          <span>{selectedStudent.lastUpdated ? new Date(selectedStudent.lastUpdated).toLocaleDateString() : new Date(selectedStudent.updatedAt).toLocaleDateString()}</span>
                         </div>
                       </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">User Account:</strong>
+                          <span className={`badge ${selectedStudent.userId ? 'bg-success' : 'bg-secondary'}`}>
+                            {selectedStudent.userId ? 'Linked' : 'Not Linked'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Registration Details */}
+                  <div className="mb-0">
+                    <h6 className="text-primary mb-3">
+                      <i className="bi bi-info-circle me-2"></i>Technical Details
+                    </h6>
+                    <div className="row g-3">
+                      <div className="col-12">
+                        <div className="d-flex">
+                          <strong className="me-2">Student ID:</strong>
+                          <span className="font-monospace text-muted small">{selectedStudent._id}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Created At:</strong>
+                          <span className="small">{new Date(selectedStudent.createdAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex">
+                          <strong className="me-2">Updated At:</strong>
+                          <span className="small">{new Date(selectedStudent.updatedAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      {selectedStudent.userId && (
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="me-2">User Account ID:</strong>
+                            <span className="font-monospace text-muted small">{selectedStudent.userId}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
