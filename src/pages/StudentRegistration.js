@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { studentService } from "../services/studentService";
+import LoginModal from "../components/LoginModal";
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
@@ -48,19 +49,21 @@ const StudentRegistration = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Load students and stats on component mount
   useEffect(() => {
     loadStudents();
     loadStats();
     
-    // Check if user is logged in and has admin role
+    // Check if user is logged in and has appropriate role
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     if (token && user) {
       const userData = JSON.parse(user);
       setCurrentUser(userData);
-      setIsAdmin(userData.role === 'admin');
+      // Allow admin, teacher, and staff roles to edit/delete
+      setIsAdmin(['admin', 'teacher', 'staff'].includes(userData.role));
     }
   }, []);
 
@@ -229,16 +232,26 @@ const StudentRegistration = () => {
   };
 
   const handleEditClick = (student) => {
+    if (!currentUser) {
+      setError("Please login to edit students.");
+      setShowLoginModal(true);
+      return;
+    }
     if (!isAdmin) {
-      setError("Only admin users can edit students. Please login with an admin account.");
+      setError("You don't have permission to edit students. Contact your administrator.");
       return;
     }
     handleEdit(student);
   };
 
   const handleDeleteClickAuth = (student) => {
+    if (!currentUser) {
+      setError("Please login to delete students.");
+      setShowLoginModal(true);
+      return;
+    }
     if (!isAdmin) {
-      setError("Only admin users can delete students. Please login with an admin account.");
+      setError("You don't have permission to delete students. Contact your administrator.");
       return;
     }
     handleDeleteClick(student);
@@ -247,6 +260,22 @@ const StudentRegistration = () => {
   const handleViewProfile = (student) => {
     setSelectedStudent(student);
     setShowProfileModal(true);
+  };
+
+  const handleLogin = (user, token) => {
+    setCurrentUser(user);
+    setIsAdmin(user.role === 'admin' || user.role === 'teacher' || user.role === 'staff');
+    setSuccess(`Welcome ${user.fullName}! You are logged in as ${user.role}.`);
+    setError("");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setCurrentUser(null);
+    setIsAdmin(false);
+    setSuccess("Logged out successfully!");
+    setError("");
   };
 
   const getStatusBadge = (status) => {
@@ -284,7 +313,7 @@ const StudentRegistration = () => {
           <p className="text-muted mb-0">Register and manage student records</p>
         </div>
         <div className="d-flex gap-2 align-items-center">
-          {currentUser && (
+          {currentUser ? (
             <div className="d-flex align-items-center gap-2">
               <span className={`badge ${isAdmin ? 'bg-success' : 'bg-secondary'}`}>
                 <i className="bi bi-person-circle me-1"></i>
@@ -296,7 +325,23 @@ const StudentRegistration = () => {
                   Edit/Delete Access
                 </small>
               )}
+              <button 
+                className="btn btn-outline-danger btn-sm" 
+                onClick={handleLogout}
+                title="Logout"
+              >
+                <i className="bi bi-box-arrow-right me-1"></i>
+                Logout
+              </button>
             </div>
+          ) : (
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={() => setShowLoginModal(true)}
+            >
+              <i className="bi bi-box-arrow-in-right me-1"></i>
+              Login
+            </button>
           )}
           <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
             <i className="bi bi-arrow-left me-2"></i>Back
@@ -403,13 +448,18 @@ const StudentRegistration = () => {
                 {!isAdmin && currentUser && (
                   <small className="text-warning">
                     <i className="bi bi-info-circle me-1"></i>
-                    Admin role required for edit/delete operations
+                    Your role ({currentUser.role}) doesn't have edit/delete permissions
                   </small>
                 )}
                 {!currentUser && (
                   <small className="text-info">
                     <i className="bi bi-info-circle me-1"></i>
-                    Login with admin account to edit/delete students
+                    <button 
+                      className="btn btn-link btn-sm p-0 text-decoration-none" 
+                      onClick={() => setShowLoginModal(true)}
+                    >
+                      Login
+                    </button> to edit/delete students
                   </small>
                 )}
               </div>
@@ -511,14 +561,22 @@ const StudentRegistration = () => {
                             </button>
                             <button 
                               className={`btn ${isAdmin ? 'btn-outline-success' : 'btn-outline-secondary'}`}
-                              title={isAdmin ? "Edit Student" : "Admin access required to edit"}
+                              title={
+                                !currentUser ? "Login required to edit" :
+                                isAdmin ? "Edit Student" : 
+                                "Insufficient permissions to edit"
+                              }
                               onClick={() => handleEditClick(student)}
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
                             <button 
                               className={`btn ${isAdmin ? 'btn-outline-danger' : 'btn-outline-secondary'}`}
-                              title={isAdmin ? "Delete Student" : "Admin access required to delete"}
+                              title={
+                                !currentUser ? "Login required to delete" :
+                                isAdmin ? "Delete Student" : 
+                                "Insufficient permissions to delete"
+                              }
                               onClick={() => handleDeleteClickAuth(student)}
                             >
                               <i className="bi bi-trash"></i>
@@ -1345,6 +1403,12 @@ const StudentRegistration = () => {
         </div>
       )}
 
+      {/* Login Modal */}
+      <LoginModal 
+        show={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={handleLogin}
+      />
 
     </div>
   );
