@@ -104,8 +104,53 @@ const StudentRegistration = () => {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    
+    // For editing existing students, allow direct changes to email and rollNumber
+    if (editingStudent && (name === 'email' || name === 'rollNumber')) {
+      setFormData({ ...formData, [name]: value });
+      return;
+    }
+    
+    const updatedFormData = { ...formData, [name]: value };
+    
+    // Auto-generate roll number and email when firstName, class, or section changes (only for new students)
+    if (!editingStudent && (name === 'firstName' || name === 'class' || name === 'section')) {
+      const firstName = name === 'firstName' ? value : formData.firstName;
+      const classValue = name === 'class' ? value : formData.class;
+      const section = name === 'section' ? value : formData.section;
+      
+      if (firstName && classValue && section) {
+        try {
+          // Generate unique roll number from backend
+          const rollResponse = await studentService.generateRollNumber(classValue, section);
+          const rollNumber = rollResponse.data.rollNumber;
+          
+          // Generate email: firstname + rollnumber + @gmail.com
+          const email = `${firstName.toLowerCase()}${rollNumber}@gmail.com`;
+          
+          updatedFormData.rollNumber = rollNumber;
+          updatedFormData.email = email;
+        } catch (error) {
+          console.error('Error generating roll number:', error);
+          // Fallback to client-side generation
+          const rollNumber = `${classValue}${section}${Math.floor(100 + Math.random() * 900)}`;
+          const email = `${firstName.toLowerCase()}${rollNumber}@gmail.com`;
+          
+          updatedFormData.rollNumber = rollNumber;
+          updatedFormData.email = email;
+        }
+      } else {
+        // Clear auto-generated fields if required data is missing
+        if (!editingStudent) {
+          updatedFormData.rollNumber = "";
+          updatedFormData.email = "";
+        }
+      }
+    }
+    
+    setFormData(updatedFormData);
   };
 
   const resetForm = () => {
@@ -722,14 +767,29 @@ const StudentRegistration = () => {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    className="form-control"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div className="input-group">
+                    <input
+                      type="email"
+                      name="email"
+                      className={`form-control ${!editingStudent ? 'bg-light' : ''}`}
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      readOnly={!editingStudent}
+                      placeholder={!editingStudent ? "Auto-generated" : ""}
+                      title={!editingStudent ? "Email will be auto-generated as firstname+rollnumber@gmail.com" : ""}
+                    />
+                    <span className="input-group-text">
+                      <i className={`bi ${editingStudent ? 'bi-pencil' : 'bi-gear'} text-muted`} 
+                         title={editingStudent ? "Editable" : "Auto-generated"}></i>
+                    </span>
+                  </div>
+                  {!editingStudent && (
+                    <small className="text-muted">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Auto-generated as firstname+rollnumber@gmail.com
+                    </small>
+                  )}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Phone Number *</label>
@@ -833,14 +893,55 @@ const StudentRegistration = () => {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Roll Number *</label>
-                  <input
-                    type="text"
-                    name="rollNumber"
-                    className="form-control"
-                    value={formData.rollNumber}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      name="rollNumber"
+                      className={`form-control ${!editingStudent ? 'bg-light' : ''}`}
+                      value={formData.rollNumber}
+                      onChange={handleChange}
+                      required
+                      readOnly={!editingStudent}
+                      placeholder={!editingStudent ? "Auto-generated" : ""}
+                      title={!editingStudent ? "Roll number will be auto-generated based on class and section" : ""}
+                    />
+                    <span className="input-group-text">
+                      <i className={`bi ${editingStudent ? 'bi-pencil' : 'bi-gear'} text-muted`} 
+                         title={editingStudent ? "Editable" : "Auto-generated"}></i>
+                    </span>
+                    {!editingStudent && formData.class && formData.section && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={async () => {
+                          try {
+                            const rollResponse = await studentService.generateRollNumber(formData.class, formData.section);
+                            const rollNumber = rollResponse.data.rollNumber;
+                            const email = formData.firstName ? 
+                              `${formData.firstName.toLowerCase()}${rollNumber}@gmail.com` : 
+                              formData.email;
+                            
+                            setFormData({
+                              ...formData,
+                              rollNumber,
+                              email
+                            });
+                          } catch (error) {
+                            setError('Failed to generate new roll number: ' + error.message);
+                          }
+                        }}
+                        title="Generate new roll number"
+                      >
+                        <i className="bi bi-arrow-clockwise"></i>
+                      </button>
+                    )}
+                  </div>
+                  {!editingStudent && (
+                    <small className="text-muted">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Auto-generated when class and section are selected
+                    </small>
+                  )}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Admission Date *</label>

@@ -110,6 +110,19 @@ export const studentService = {
     });
 
     return handleResponse(response);
+  },
+
+  // Generate unique roll number (public)
+  generateRollNumber: async (classValue, section) => {
+    const response = await fetch(`${API_BASE_URL}/students/generate-rollnumber`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ class: classValue, section })
+    });
+
+    return handleResponse(response);
   }
 };
 
