@@ -17,6 +17,8 @@ const Attendance = () => {
   const [success, setSuccess] = useState("");
   const [attendance, setAttendance] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [attendanceHistory, setAttendanceHistory] = useState([]);
 
   // Load current user
   useEffect(() => {
@@ -31,11 +33,99 @@ const Attendance = () => {
   useEffect(() => {
     if (selectedClass !== "all") {
       loadStudents();
+      loadExistingAttendance(); // Load existing attendance for the selected date
     } else {
       setStudents([]);
       setAttendance({});
     }
-  }, [selectedClass, selectedSection]);
+  }, [selectedClass, selectedSection, selectedDate, selectedSubject, selectedPeriod]);
+
+  // Load existing attendance when date/subject/period changes
+  useEffect(() => {
+    if (selectedClass !== "all" && students.length > 0) {
+      loadExistingAttendance();
+    }
+  }, [selectedDate, selectedSubject, selectedPeriod, students]);
+
+  const loadExistingAttendance = async () => {
+    if (selectedClass === "all" || students.length === 0) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?date=${selectedDate}&subject=${selectedSubject}&period=${selectedPeriod}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Update attendance state with existing data
+          const existingAttendance = {};
+          
+          result.data.students.forEach(studentData => {
+            if (studentData.attendance) {
+              existingAttendance[studentData.student._id] = studentData.attendance.status;
+            } else {
+              existingAttendance[studentData.student._id] = "not_marked";
+            }
+          });
+          
+          setAttendance(existingAttendance);
+          
+          if (Object.values(existingAttendance).some(status => status !== "not_marked")) {
+            setSuccess(`Loaded existing attendance for ${selectedDate} - ${selectedSubject} Period ${selectedPeriod}`);
+            setTimeout(() => setSuccess(""), 3000);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error loading existing attendance:", err);
+      // Don't show error to user as this is background loading
+    }
+  };
+
+  const loadAttendanceHistory = async () => {
+    if (selectedClass === "all") {
+      setError("Please select a specific class to view history");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      // Get last 30 days of attendance for this class
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Use the history data from the updated API response
+          const historyData = result.data.history || [];
+          setAttendanceHistory(historyData);
+          setShowHistoryModal(true);
+        }
+      }
+    } catch (err) {
+      setError("Failed to load attendance history: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadStudents = async () => {
     try {
@@ -67,6 +157,46 @@ const Attendance = () => {
 
   const handleStatusChange = (studentId, status) => {
     setAttendance({ ...attendance, [studentId]: status });
+  };
+
+  const handleTestEndpoint = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/test`, {
+        method: 'GET'
+      });
+      
+      const result = await response.json();
+      console.log("🧪 Test endpoint result:", result);
+      setSuccess("Test endpoint working: " + result.message);
+    } catch (err) {
+      console.error("🧪 Test endpoint failed:", err);
+      setError("Test endpoint failed: " + err.message);
+    }
+  };
+
+  const handleTestMarkEndpoint = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/test-mark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          test: "data",
+          class: selectedClass,
+          section: selectedSection
+        })
+      });
+      
+      const result = await response.json();
+      console.log("🧪 Test mark endpoint result:", result);
+      setSuccess("Test mark endpoint working: " + result.message);
+    } catch (err) {
+      console.error("🧪 Test mark endpoint failed:", err);
+      setError("Test mark endpoint failed: " + err.message);
+    }
   };
 
   const handleSaveAttendance = async () => {
@@ -106,6 +236,16 @@ const Attendance = () => {
 
       // Call API to save attendance
       const token = localStorage.getItem('token');
+      console.log("🔐 Token exists:", !!token);
+      console.log("📤 Sending attendance data:", {
+        class: selectedClass,
+        section: selectedSection === "all" ? "A" : selectedSection,
+        date: selectedDate,
+        subject: selectedSubject,
+        period: selectedPeriod,
+        attendanceData
+      });
+
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/mark-attendance`, {
         method: 'POST',
         headers: {
@@ -122,7 +262,19 @@ const Attendance = () => {
         })
       });
 
+      console.log("📥 Response status:", response.status);
+      console.log("📥 Response headers:", response.headers);
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.error("❌ Non-JSON response:", textResponse);
+        throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
+      }
+
       const result = await response.json();
+      console.log("📥 Response data:", result);
 
       if (result.success) {
         setSuccess(`Attendance saved successfully for ${attendanceData.length} students!`);
@@ -189,6 +341,17 @@ const Attendance = () => {
               {currentUser.fullName} ({currentUser.role})
             </span>
           )}
+          <div className="d-flex gap-2">
+            <button className="btn btn-outline-info btn-sm" onClick={handleTestEndpoint}>
+              <i className="bi bi-bug me-1"></i>Test API
+            </button>
+            <button className="btn btn-outline-warning btn-sm" onClick={handleTestMarkEndpoint}>
+              <i className="bi bi-bug me-1"></i>Test Mark
+            </button>
+            <button className="btn btn-outline-info btn-sm" onClick={loadAttendanceHistory}>
+              <i className="bi bi-clock-history me-1"></i>View History
+            </button>
+          </div>
           <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
             <i className="bi bi-arrow-left me-2"></i>Back
           </button>
@@ -362,7 +525,15 @@ const Attendance = () => {
       <div className="card shadow-sm">
         <div className="card-header bg-white">
           <div className="d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">Student Attendance</h5>
+            <h5 className="mb-0">
+              Student Attendance
+              {Object.values(attendance).some(status => status !== "not_marked" && status !== undefined) && (
+                <span className="badge bg-info ms-2">
+                  <i className="bi bi-database me-1"></i>
+                  Data from Database
+                </span>
+              )}
+            </h5>
             {selectedClass !== "all" && (
               <div className="d-flex gap-2">
                 <button 
@@ -523,6 +694,91 @@ const Attendance = () => {
           </div>
         </div>
       </div>
+
+      {/* Attendance History Modal */}
+      {showHistoryModal && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-xl modal-dialog-scrollable">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-clock-history me-2"></i>
+                  Attendance History - Class {selectedClass}-{selectedSection === "all" ? "All" : selectedSection}
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setShowHistoryModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {attendanceHistory.length === 0 ? (
+                  <div className="text-center py-4">
+                    <i className="bi bi-calendar-x text-muted" style={{ fontSize: "3rem" }}></i>
+                    <p className="text-muted mt-2">No attendance history found for the last 30 days.</p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Date</th>
+                          <th>Subject</th>
+                          <th>Period</th>
+                          <th>Student</th>
+                          <th>Roll No</th>
+                          <th>Status</th>
+                          <th>Time In</th>
+                          <th>Marked At</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {attendanceHistory.map((record, index) => (
+                          <tr key={index}>
+                            <td>{new Date(record.date).toLocaleDateString()}</td>
+                            <td className="fw-bold">{record.subject}</td>
+                            <td>
+                              <span className="badge bg-secondary">{record.period}</span>
+                            </td>
+                            <td>{record.studentName}</td>
+                            <td><strong>{record.rollNumber}</strong></td>
+                            <td>
+                              <span className={`badge ${
+                                record.status === 'present' ? 'bg-success' :
+                                record.status === 'absent' ? 'bg-danger' :
+                                record.status === 'late' ? 'bg-warning' : 'bg-info'
+                              }`}>
+                                {record.status.toUpperCase()}
+                              </span>
+                            </td>
+                            <td>
+                              {record.timeIn ? new Date(record.timeIn).toLocaleTimeString() : '-'}
+                            </td>
+                            <td>
+                              <small className="text-muted">
+                                {new Date(record.markedAt).toLocaleString()}
+                              </small>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowHistoryModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
