@@ -142,15 +142,29 @@ const AdminDashboard = () => {
             <div className="card-body">
               <h5 className="card-title">
                 <i className="bi bi-file-earmark-bar-graph me-2 text-danger"></i>
-                Report Generator
+                Academic Results Overview
               </h5>
-              <p className="text-muted small">Generate academic and financial reports</p>
+              <p className="text-muted small">Monitor school-wide academic performance</p>
+              <div className="small mb-3">
+                <div className="d-flex justify-content-between mb-2">
+                  <span>School Average:</span>
+                  <span className="badge bg-success">81.2%</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Top Performers:</span>
+                  <span className="badge bg-warning text-dark">45</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Results Published:</span>
+                  <span className="badge bg-info">8/10</span>
+                </div>
+              </div>
               <ul className="list-unstyled small">
-                <li><i className="bi bi-check-circle text-success me-2"></i>Academic reports</li>
-                <li><i className="bi bi-check-circle text-success me-2"></i>Financial reports</li>
-                <li><i className="bi bi-check-circle text-success me-2"></i>Export to PDF/Excel</li>
+                <li><i className="bi bi-check-circle text-success me-2"></i>Class-wise performance</li>
+                <li><i className="bi bi-check-circle text-success me-2"></i>Subject analysis</li>
+                <li><i className="bi bi-check-circle text-success me-2"></i>Export reports</li>
               </ul>
-              <button className="btn btn-danger btn-sm w-100 mt-2">Generate Reports</button>
+              <button className="btn btn-danger btn-sm w-100 mt-2">View Results</button>
             </div>
           </div>
         </div>
@@ -169,6 +183,24 @@ const AdminDashboard = () => {
                 <li><i className="bi bi-check-circle text-success me-2"></i>Admission records</li>
               </ul>
               <button className="btn btn-info btn-sm w-100 mt-2" onClick={() => navigate("/student-registration")}>View Admissions</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100 dashboard-card">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-printer me-2 text-secondary"></i>
+                Report Generator
+              </h5>
+              <p className="text-muted small">Generate comprehensive reports</p>
+              <ul className="list-unstyled small">
+                <li><i className="bi bi-check-circle text-success me-2"></i>Academic reports</li>
+                <li><i className="bi bi-check-circle text-success me-2"></i>Financial reports</li>
+                <li><i className="bi bi-check-circle text-success me-2"></i>Export to PDF/Excel</li>
+              </ul>
+              <button className="btn btn-secondary btn-sm w-100 mt-2">Generate Reports</button>
             </div>
           </div>
         </div>

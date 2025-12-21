@@ -102,15 +102,29 @@ const TeacherDashboard = () => {
             <div className="card-body">
               <h5 className="card-title">
                 <i className="bi bi-journal-text me-2 text-warning"></i>
-                Upload Grades
+                Student Results Management
               </h5>
               <p className="text-muted small">Enter and manage student grades</p>
+              <div className="small mb-3">
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Pending Grades:</span>
+                  <span className="badge bg-warning text-dark">5</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Recent Uploads:</span>
+                  <span className="badge bg-success">12</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Class Average:</span>
+                  <span className="badge bg-info">78.5%</span>
+                </div>
+              </div>
               <ul className="list-unstyled small">
                 <li><i className="bi bi-check-circle text-success me-2"></i>Test scores</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Assignment marks</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Final grades</li>
               </ul>
-              <button className="btn btn-warning btn-sm w-100 mt-2">Upload Grades</button>
+              <button className="btn btn-warning btn-sm w-100 mt-2">Upload Results</button>
             </div>
           </div>
         </div>

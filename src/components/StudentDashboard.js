@@ -101,15 +101,29 @@ const StudentDashboard = () => {
             <div className="card-body">
               <h5 className="card-title">
                 <i className="bi bi-graph-up me-2 text-info"></i>
-                Grades & Report Card
+                My Results & Grades
               </h5>
               <p className="text-muted small">View your academic performance</p>
+              <div className="small mb-3">
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Current Average:</span>
+                  <span className="badge bg-success">83.4%</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Class Rank:</span>
+                  <span className="badge bg-info">12/45</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Latest Grade:</span>
+                  <span className="badge bg-primary">A</span>
+                </div>
+              </div>
               <ul className="list-unstyled small">
                 <li><i className="bi bi-check-circle text-success me-2"></i>Subject grades</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Test scores</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Download report card</li>
               </ul>
-              <button className="btn btn-info btn-sm w-100 mt-2">View Grades</button>
+              <button className="btn btn-info btn-sm w-100 mt-2">View Full Results</button>
             </div>
           </div>
         </div>

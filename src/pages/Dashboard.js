@@ -70,6 +70,18 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100 dashboard-card">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-graph-up icon-primary" style={{ fontSize: "3rem" }}></i>
+            </div>
+            <h5>My Results</h5>
+            <p className="text-muted">View exam results and grades</p>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-profile")}>View Results</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -112,6 +124,18 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-graph-up" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
+            </div>
+            <h5>Student Results</h5>
+            <p className="text-muted">Upload and manage exam results</p>
+            <button className="btn btn-danger btn-sm">Manage Results</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -136,9 +160,9 @@ const Dashboard = () => {
             <div className="mb-3">
               <i className="bi bi-graph-up" style={{ fontSize: "3rem", color: "#198754" }}></i>
             </div>
-            <h5>Progress Reports</h5>
-            <p className="text-muted">Track academic progress</p>
-            <button className="btn btn-success btn-sm">View Reports</button>
+            <h5>Academic Results</h5>
+            <p className="text-muted">View children's exam results</p>
+            <button className="btn btn-success btn-sm">View Results</button>
           </div>
         </div>
       </div>
