@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import AchievementSection from '../components/AchievementSection';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminStudentProfile = () => {
@@ -595,7 +596,7 @@ const AdminStudentProfile = () => {
 
             {/* Additional Information */}
             {(student.emergencyContact || student.medicalInfo || student.notes) && (
-              <div className="card shadow-sm">
+              <div className="card shadow-sm mb-4">
                 <div className="card-header bg-danger text-white">
                   <h5 className="mb-0">
                     <i className="bi bi-exclamation-triangle me-2"></i>
@@ -653,6 +654,26 @@ const AdminStudentProfile = () => {
                 </div>
               </div>
             )}
+
+            {/* Student Achievements */}
+            <div className="card shadow-sm">
+              <div className="card-header bg-success text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-trophy me-2"></i>
+                  Student Achievements
+                </h5>
+              </div>
+              <div className="card-body">
+                <AchievementSection
+                  profile={student}
+                  currentUser={{ 
+                    id: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).id : null,
+                    role: 'admin'
+                  }}
+                  onUpdate={fetchStudentDetails}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

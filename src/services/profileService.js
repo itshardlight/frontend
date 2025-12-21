@@ -77,6 +77,33 @@ const profileService = {
     }
   },
 
+  // Update achievement (Students only)
+  updateAchievement: async (profileId, achievementId, achievement) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/profiles/${profileId}/achievements/${achievementId}`,
+        achievement,
+        { headers: createAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to update achievement' };
+    }
+  },
+
+  // Delete achievement (Students only)
+  deleteAchievement: async (profileId, achievementId) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/profiles/${profileId}/achievements/${achievementId}`,
+        { headers: createAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to delete achievement' };
+    }
+  },
+
   // Get all profiles (Admin/Teachers only)
   getAllProfiles: async (filters = {}) => {
     try {
