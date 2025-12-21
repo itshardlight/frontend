@@ -55,7 +55,7 @@ const Attendance = () => {
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?date=${selectedDate}&subject=${selectedSubject}&period=${selectedPeriod}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?date=${selectedDate}&subject=${selectedSubject}&period=${selectedPeriod}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -105,7 +105,7 @@ const Attendance = () => {
       startDate.setDate(startDate.getDate() - 30);
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -161,7 +161,7 @@ const Attendance = () => {
 
   const handleTestEndpoint = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/test`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/test`, {
         method: 'GET'
       });
       
@@ -177,7 +177,7 @@ const Attendance = () => {
   const handleTestMarkEndpoint = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/test-mark`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/test-mark`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -246,7 +246,7 @@ const Attendance = () => {
         attendanceData
       });
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/mark-attendance`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/mark-attendance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

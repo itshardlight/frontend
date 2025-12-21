@@ -52,7 +52,7 @@ const AttendanceView = () => {
       if (filters.subject) params.append('subject', filters.subject);
 
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/attendance/my-attendance?${params}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/my-attendance?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

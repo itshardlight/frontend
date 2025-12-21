@@ -38,11 +38,11 @@ const Dashboard = () => {
         <div className="card shadow-sm h-100 dashboard-card">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-book icon-primary" style={{ fontSize: "3rem" }}></i>
+              <i className="bi bi-person-badge icon-primary" style={{ fontSize: "3rem" }}></i>
             </div>
-            <h5>My Courses</h5>
-            <p className="text-muted">View enrolled courses</p>
-            <button className="btn btn-primary btn-sm">View Courses</button>
+            <h5>My Profile</h5>
+            <p className="text-muted">View and edit personal details</p>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-profile")}>View Profile</button>
           </div>
         </div>
       </div>
@@ -62,11 +62,11 @@ const Dashboard = () => {
         <div className="card shadow-sm h-100 dashboard-card">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-file-earmark-text icon-secondary" style={{ fontSize: "3rem" }}></i>
+              <i className="bi bi-trophy icon-secondary" style={{ fontSize: "3rem" }}></i>
             </div>
-            <h5>Assignments</h5>
-            <p className="text-muted">View pending assignments</p>
-            <button className="btn btn-secondary btn-sm">View Assignments</button>
+            <h5>Achievements</h5>
+            <p className="text-muted">View and add achievements</p>
+            <button className="btn btn-warning btn-sm" onClick={() => navigate("/student-profile")}>Manage Achievements</button>
           </div>
         </div>
       </div>
@@ -329,7 +329,7 @@ const Dashboard = () => {
                 Admin Panel
               </button>
             )}
-            <button cd fron
+            <button 
               className="btn btn-outline-info btn-sm me-2" 
               onClick={() => navigate("/profile")}
             >
