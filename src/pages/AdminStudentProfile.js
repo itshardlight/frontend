@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import AchievementSection from '../components/AchievementSection';
+import AdminAttendanceCard from '../components/AdminAttendanceCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminStudentProfile = () => {
@@ -233,7 +234,7 @@ const AdminStudentProfile = () => {
             </div>
 
             {/* Quick Info Card */}
-            <div className="card shadow-sm">
+            <div className="card shadow-sm mb-4">
               <div className="card-header bg-secondary text-white">
                 <h6 className="mb-0">
                   <i className="bi bi-info-circle me-2"></i>
@@ -261,6 +262,9 @@ const AdminStudentProfile = () => {
                 </div>
               </div>
             </div>
+
+            {/* Attendance Summary Card */}
+            <AdminAttendanceCard studentId={id} />
           </div>
 
           {/* Right Column - Detailed Information */}
