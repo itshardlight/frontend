@@ -299,8 +299,10 @@ const ProfileCard = ({ profileId, currentUser }) => {
           {profile.academic?.rollNumber && (
             <p className="roll-number">Roll No: {profile.academic.rollNumber}</p>
           )}
-          {profile.currentClass && (
-            <p className="class-info">Class: {profile.currentClass}</p>
+          {profile.academic?.currentGrade && profile.academic?.section && (
+            <p className="class-info">
+              Class: {profile.academic.currentGrade}-{profile.academic.section}
+            </p>
           )}
           <p className="user-role">Role: {currentUser.role}</p>
         </div>
@@ -335,6 +337,14 @@ const ProfileCard = ({ profileId, currentUser }) => {
           editing={editing}
           editData={editData}
           setEditData={setEditData}
+          onResultsUpdate={(results) => {
+            // Update profile header with latest performance data
+            if (results && results.length > 0) {
+              const totalPercentage = results.reduce((sum, result) => sum + result.percentage, 0);
+              const averagePercentage = (totalPercentage / results.length).toFixed(1);
+              // You can use this data to update the header display
+            }
+          }}
         />
         
         <FeeSection 

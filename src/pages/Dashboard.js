@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ResultsManagement from "../components/ResultsManagement";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [activeComponent, setActiveComponent] = useState('dashboard');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -132,7 +134,12 @@ const Dashboard = () => {
             </div>
             <h5>Student Results</h5>
             <p className="text-muted">Upload and manage exam results</p>
-            <button className="btn btn-danger btn-sm">Manage Results</button>
+            <button 
+              className="btn btn-danger btn-sm"
+              onClick={() => setActiveComponent('results')}
+            >
+              Manage Results
+            </button>
           </div>
         </div>
       </div>
@@ -337,6 +344,55 @@ const Dashboard = () => {
   );
 
   if (!user) return null;
+
+  // If showing results component, render it with back button
+  if (activeComponent === 'results') {
+    return (
+      <div className="min-vh-100 bg-light">
+        {/* Top Navigation */}
+        <nav className="navbar navbar-dark shadow-sm">
+          <div className="container-fluid px-4">
+            <span className="navbar-brand mb-0 h1">Student Management System</span>
+            <div className="d-flex align-items-center">
+              <button 
+                className="btn btn-outline-secondary btn-sm me-2"
+                onClick={() => setActiveComponent('dashboard')}
+              >
+                <i className="bi bi-arrow-left me-2"></i>
+                Back to Dashboard
+              </button>
+              {user.role === "admin" && (
+                <button 
+                  className="btn btn-outline-warning btn-sm me-2" 
+                  onClick={() => navigate("/admin")}
+                >
+                  Admin Panel
+                </button>
+              )}
+              <button 
+                className="btn btn-outline-info btn-sm me-2" 
+                onClick={() => navigate("/profile")}
+              >
+                <i className="bi bi-person-circle me-1"></i>
+                Profile
+              </button>
+              <button 
+                className="btn btn-outline-light btn-sm" 
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {/* Results Management Component */}
+        <div className="container py-5">
+          <ResultsManagement />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-vh-100 bg-light">

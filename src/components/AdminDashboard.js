@@ -1,21 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ResultsManagement from './ResultsManagement';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  return (
-    <>
-      {/* Quick Stats */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card shadow-sm border-primary">
-            <div className="card-body text-center">
-              <i className="bi bi-people-fill icon-primary" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">0</h3>
-              <small className="text-muted">Total Students</small>
-            </div>
-          </div>
-        </div>
+  const [activeComponent, setActiveComponent] = useState('dashboard');
+  const renderComponent = () => {
+    console.log('Current activeComponent:', activeComponent);
+    switch (activeComponent) {
+      case 'results':
+        console.log('Rendering ResultsManagement component');
+        return <ResultsManagement />;
+      default:
+        console.log('Rendering default dashboard');
+        return (
+          <>
+            {/* Quick Stats */}
+            <div className="row g-3 mb-4">
+              <div className="col-md-3">
+                <div className="card shadow-sm border-primary">
+                  <div className="card-body text-center">
+                    <i className="bi bi-people-fill icon-primary" style={{ fontSize: "2rem" }}></i>
+                    <h3 className="mt-2 mb-0">0</h3>
+                    <small className="text-muted">Total Students</small>
+                  </div>
+                </div>
+              </div>
         <div className="col-md-3">
           <div className="card shadow-sm border-success">
             <div className="card-body text-center">
@@ -164,7 +174,15 @@ const AdminDashboard = () => {
                 <li><i className="bi bi-check-circle text-success me-2"></i>Subject analysis</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Export reports</li>
               </ul>
-              <button className="btn btn-danger btn-sm w-100 mt-2">View Results</button>
+              <button 
+                className="btn btn-danger btn-sm w-100 mt-2"
+                onClick={() => {
+                  console.log('Manage Results clicked - switching to results');
+                  setActiveComponent('results');
+                }}
+              >
+                Manage Results
+              </button>
             </div>
           </div>
         </div>
@@ -223,7 +241,26 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    </>
+          </>
+        );
+    }
+  };
+
+  return (
+    <div>
+      {activeComponent !== 'dashboard' && (
+        <div className="mb-3">
+          <button 
+            className="btn btn-outline-secondary"
+            onClick={() => setActiveComponent('dashboard')}
+          >
+            <i className="bi bi-arrow-left me-2"></i>
+            Back to Dashboard
+          </button>
+        </div>
+      )}
+      {renderComponent()}
+    </div>
   );
 };
 
