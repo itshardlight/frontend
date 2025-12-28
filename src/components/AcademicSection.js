@@ -22,7 +22,7 @@ const AcademicSection = ({ profile, currentUser, editing, editData, setEditData 
       setLoadingResults(true);
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `/api/results/student/${profile._id}?academicYear=${selectedAcademicYear}`,
+        `http://localhost:5000/api/results/student/${profile._id}?academicYear=${selectedAcademicYear}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

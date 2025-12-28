@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import profileService from '../services/profileService';
 import AchievementSection from '../components/AchievementSection';
+import ResultsSection from '../components/ResultsSection';
 import TokenDebugger from '../components/TokenDebugger';
 import QuickLogin from '../components/QuickLogin';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -432,7 +433,7 @@ const StudentProfile = () => {
           {renderParentInfo()}
           
           {/* Achievements Section */}
-          <div className="card">
+          <div className="card mb-4">
             <div className="card-header bg-dark text-white">
               <h5 className="mb-0">
                 <i className="bi bi-trophy me-2"></i>
@@ -445,6 +446,19 @@ const StudentProfile = () => {
                 currentUser={currentUser}
                 onUpdate={fetchProfile}
               />
+            </div>
+          </div>
+
+          {/* Results Section */}
+          <div className="card">
+            <div className="card-header bg-primary text-white">
+              <h5 className="mb-0">
+                <i className="bi bi-graph-up me-2"></i>
+                My Results
+              </h5>
+            </div>
+            <div className="card-body">
+              <ResultsSection studentId={profile?._id} />
             </div>
           </div>
         </div>
