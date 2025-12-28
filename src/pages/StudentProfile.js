@@ -162,31 +162,39 @@ const StudentProfile = () => {
       </div>
       <div className="card-body">
         <div className="row g-3">
-          <div className="col-md-4">
-            <label className="form-label fw-bold">Roll Number:</label>
-            <p className="mb-0">
-              <span className="badge bg-primary fs-6">{profile.academic?.rollNumber}</span>
-            </p>
+          <div className="col-12">
+            <div className="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <span className="fw-bold">Roll Number:</span>
+              <span className="badge bg-primary fs-6">
+                {profile.academic?.rollNumber || 'N/A'}
+              </span>
+            </div>
           </div>
-          <div className="col-md-4">
-            <label className="form-label fw-bold">Class:</label>
-            <p className="mb-0">
-              <span className="badge bg-info fs-6">{profile.currentClass}</span>
-            </p>
+          <div className="col-12">
+            <div className="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <span className="fw-bold">Class:</span>
+              <span className="badge bg-info fs-6">
+                {profile.currentClass || 'N/A'}
+              </span>
+            </div>
           </div>
-          <div className="col-md-4">
-            <label className="form-label fw-bold">Admission Date:</label>
-            <p className="mb-0">
-              {profile.academic?.admissionDate ? 
-                new Date(profile.academic.admissionDate).toLocaleDateString() : 
-                'Not specified'
-              }
-            </p>
+          <div className="col-12">
+            <div className="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <span className="fw-bold">Admission Date:</span>
+              <span>
+                {profile.academic?.admissionDate ? 
+                  new Date(profile.academic.admissionDate).toLocaleDateString() : 
+                  'Not specified'
+                }
+              </span>
+            </div>
           </div>
           {profile.academic?.previousSchool && (
             <div className="col-12">
-              <label className="form-label fw-bold">Previous School:</label>
-              <p className="mb-0">{profile.academic.previousSchool}</p>
+              <div className="d-flex justify-content-between align-items-center py-2">
+                <span className="fw-bold">Previous School:</span>
+                <span>{profile.academic.previousSchool}</span>
+              </div>
             </div>
           )}
         </div>
