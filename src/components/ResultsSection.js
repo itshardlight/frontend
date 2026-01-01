@@ -8,6 +8,8 @@ const ResultsSection = ({ studentId }) => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('2024-25');
   const [availableYears, setAvailableYears] = useState(['2024-25', '2023-24', '2022-23']);
+  const [selectedGrade, setSelectedGrade] = useState('all');
+  const [availableGrades, setAvailableGrades] = useState([]);
 
   useEffect(() => {
     if (studentId) {
@@ -17,9 +19,9 @@ const ResultsSection = ({ studentId }) => {
 
   useEffect(() => {
     if (activeTab && allResults.length > 0) {
-      filterResultsByYear(activeTab);
+      filterResults();
     }
-  }, [activeTab, allResults]);
+  }, [activeTab, selectedGrade, allResults]);
 
   const fetchAllResults = async () => {
     try {
@@ -49,8 +51,20 @@ const ResultsSection = ({ studentId }) => {
           setActiveTab(years[0]); // Set the most recent year as active
         }
         
-        // Filter results for the active tab
-        filterResultsByYear(years[0] || '2024-25');
+        // Extract unique grades from results
+        const grades = [...new Set(allResultsData.map(result => result.class))].sort((a, b) => {
+          // Sort grades numerically if they are numbers, otherwise alphabetically
+          const numA = parseInt(a);
+          const numB = parseInt(b);
+          if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+          }
+          return a.localeCompare(b);
+        });
+        setAvailableGrades(grades);
+        
+        // Filter results for the active tab and selected grade
+        filterResults(years[0] || '2024-25', selectedGrade);
       } else {
         setError(response.data.message || 'Failed to load results');
       }
@@ -62,9 +76,21 @@ const ResultsSection = ({ studentId }) => {
     }
   };
 
-  const filterResultsByYear = (year) => {
-    const filteredResults = allResults.filter(result => result.academicYear === year);
+  const filterResults = (year = activeTab, grade = selectedGrade) => {
+    console.log('Filtering results:', { year, grade, totalResults: allResults.length });
+    let filteredResults = allResults.filter(result => result.academicYear === year);
+    console.log('After year filter:', filteredResults.length);
+    
+    if (grade && grade !== 'all') {
+      filteredResults = filteredResults.filter(result => result.class === grade);
+      console.log('After grade filter:', filteredResults.length);
+    }
+    
     setResults(filteredResults);
+  };
+
+  const filterResultsByYear = (year) => {
+    filterResults(year, selectedGrade);
   };
 
   const calculateGrade = (percentage) => {
@@ -134,7 +160,13 @@ const ResultsSection = ({ studentId }) => {
 
   const handleTabChange = (year) => {
     setActiveTab(year);
-    filterResultsByYear(year);
+    filterResults(year, selectedGrade);
+  };
+
+  const handleGradeChange = (grade) => {
+    console.log('Grade changed to:', grade);
+    setSelectedGrade(grade);
+    filterResults(activeTab, grade);
   };
 
   if (loading) {
@@ -188,6 +220,52 @@ const ResultsSection = ({ studentId }) => {
         </ul>
       </div>
 
+      {/* Grade Filter */}
+      {availableGrades.length > 0 && (
+        <div className="col-12">
+          <div className="card border-secondary mb-3">
+            <div className="card-body py-2">
+              <div className="d-flex align-items-center gap-3">
+                <label className="form-label mb-0 fw-bold text-secondary">
+                  <i className="bi bi-funnel me-2"></i>
+                  Filter by Grade:
+                </label>
+                <div className="d-flex gap-2 flex-wrap">
+                  <button
+                    className={`btn btn-sm ${selectedGrade === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+                    onClick={() => handleGradeChange('all')}
+                  >
+                    All Grades ({allResults.filter(r => r.academicYear === activeTab).length})
+                  </button>
+                  {availableGrades.map((grade) => {
+                    const gradeCount = allResults.filter(r => 
+                      r.academicYear === activeTab && r.class === grade
+                    ).length;
+                    return (
+                      <button
+                        key={grade}
+                        className={`btn btn-sm ${selectedGrade === grade ? 'btn-success' : 'btn-outline-success'}`}
+                        onClick={() => handleGradeChange(grade)}
+                      >
+                        Class {grade} ({gradeCount})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {selectedGrade !== 'all' && (
+                <div className="mt-2">
+                  <small className="text-muted">
+                    <i className="bi bi-info-circle me-1"></i>
+                    Showing results for Class {selectedGrade} in {activeTab}
+                  </small>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Current Year Results */}
       <div className="col-12">
         <div className="tab-content" id="results-tabContent">
@@ -195,7 +273,8 @@ const ResultsSection = ({ studentId }) => {
             {results.length === 0 ? (
               <div className="alert alert-info" role="alert">
                 <i className="bi bi-info-circle me-2"></i>
-                No results found for academic year {activeTab}.
+                No results found for academic year {activeTab}
+                {selectedGrade !== 'all' ? ` and Class ${selectedGrade}` : ''}.
               </div>
             ) : (
               <div className="row g-3">
@@ -204,7 +283,10 @@ const ResultsSection = ({ studentId }) => {
                   <div key={result._id} className="col-md-6">
                     <div className={`card border-${index % 2 === 0 ? 'info' : 'warning'}`}>
                       <div className={`card-header ${index % 2 === 0 ? 'bg-info text-white' : 'bg-warning text-dark'}`}>
-                        <h6 className="mb-0">{formatExamType(result.examType)} - {result.examName}</h6>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <h6 className="mb-0">{formatExamType(result.examType)} - {result.examName}</h6>
+                          <span className="badge bg-light text-dark">Class {result.class}</span>
+                        </div>
                       </div>
                       <div className="card-body">
                         <div className="table-responsive">
@@ -258,7 +340,9 @@ const ResultsSection = ({ studentId }) => {
                     <div className="col-12 mt-4">
                       <div className="card border-success">
                         <div className="card-header bg-success text-white">
-                          <h6 className="mb-0">Annual Summary {activeTab}</h6>
+                          <h6 className="mb-0">
+                            {selectedGrade !== 'all' ? `Class ${selectedGrade} ` : ''}Summary {activeTab}
+                          </h6>
                         </div>
                         <div className="card-body">
                           <div className="row text-center">
@@ -308,10 +392,15 @@ const ResultsSection = ({ studentId }) => {
                 Performance Trend
               </h6>
               <p className="mb-0">
-                <strong>Academic Progress:</strong> Student has appeared in {allResults.length} exams across {availableYears.length} academic years. 
+                <strong>Academic Progress:</strong> Student has appeared in {results.length} exams 
+                {selectedGrade !== 'all' ? ` in Class ${selectedGrade}` : ''} for {activeTab}. 
                 {availableYears.length >= 2 && (() => {
-                  const currentYearStats = calculateYearlyStats(groupedResults[availableYears[0]] || []);
-                  const previousYearStats = calculateYearlyStats(groupedResults[availableYears[1]] || []);
+                  const currentYearStats = calculateYearlyStats(results);
+                  const previousYearResults = allResults.filter(r => 
+                    r.academicYear === availableYears[1] && 
+                    (selectedGrade === 'all' || r.class === selectedGrade)
+                  );
+                  const previousYearStats = calculateYearlyStats(previousYearResults);
                   
                   if (currentYearStats && previousYearStats) {
                     const improvement = currentYearStats.averagePercentage - previousYearStats.averagePercentage;
