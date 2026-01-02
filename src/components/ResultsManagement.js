@@ -11,7 +11,6 @@ const ResultsManagement = () => {
     section: '',
     examType: '',
     academicYear: '2024-25',
-    status: '',
     search: ''
   });
   
@@ -36,8 +35,7 @@ const ResultsManagement = () => {
       { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
     ],
     remarks: '',
-    attendance: 100,
-    status: 'draft'
+    attendance: 100
   });
 
   // Constants for dropdowns
@@ -54,37 +52,6 @@ const ResultsManagement = () => {
 
   const classes = ['', '9', '10', '11', '12'];
   const sections = ['', 'A', 'B', 'C'];
-  const statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'published', label: 'Published' },
-    { value: 'verified', label: 'Verified' }
-  ];
-
-  // Predefined subject templates for quick loading
-  const subjectTemplates = {
-    '9-10': [
-      { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Social Studies', subjectCode: 'SST', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Hindi', subjectCode: 'HIN', maxMarks: 100, obtainedMarks: '', remarks: '' }
-    ],
-    '11-12_science': [
-      { subjectName: 'Physics', subjectCode: 'PHY', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Chemistry', subjectCode: 'CHE', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Biology', subjectCode: 'BIO', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
-    ],
-    '11-12_commerce': [
-      { subjectName: 'Accountancy', subjectCode: 'ACC', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Business Studies', subjectCode: 'BST', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Economics', subjectCode: 'ECO', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
-    ]
-  };
 
   // Calculate totals and grades
   const calculateTotals = () => {
@@ -112,7 +79,6 @@ const ResultsManagement = () => {
       const matchesClass = !filters.class || result.studentClass === filters.class;
       const matchesSection = !filters.section || result.studentSection === filters.section;
       const matchesExamType = !filters.examType || result.examType === filters.examType;
-      const matchesStatus = !filters.status || result.status === filters.status;
       const matchesAcademicYear = !filters.academicYear || result.academicYear === filters.academicYear;
       const matchesSearch = !filters.search || 
         (result.studentId?.firstName?.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -121,7 +87,7 @@ const ResultsManagement = () => {
          result.examName?.toLowerCase().includes(filters.search.toLowerCase()));
 
       return matchesClass && matchesSection && matchesExamType && 
-             matchesStatus && matchesAcademicYear && matchesSearch;
+             matchesAcademicYear && matchesSearch;
     });
   }, [results, filters]);
 
@@ -177,17 +143,6 @@ const ResultsManagement = () => {
     }
   };
 
-  // Load subject template based on class
-  const loadSubjectTemplate = (className) => {
-    const classNum = parseInt(className);
-    if (classNum >= 9 && classNum <= 10) {
-      setResultForm(prev => ({ ...prev, subjects: [...subjectTemplates['9-10']] }));
-    } else if (classNum >= 11 && classNum <= 12) {
-      // You could add a dropdown for stream selection here
-      setResultForm(prev => ({ ...prev, subjects: [...subjectTemplates['11-12_science']] }));
-    }
-  };
-
   // Handle filter changes
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -203,7 +158,6 @@ const ResultsManagement = () => {
       section: '',
       examType: '',
       academicYear: '2024-25',
-      status: '',
       search: ''
     });
   };
@@ -269,8 +223,7 @@ const ResultsManagement = () => {
           remarks: sub.remarks || ''
         })),
         remarks: result.remarks || '',
-        attendance: result.attendance || 100,
-        status: result.status
+        attendance: result.attendance || 100
       });
 
       setIsEditing(true);
@@ -350,7 +303,6 @@ const ResultsManagement = () => {
         })),
         remarks: resultForm.remarks,
         attendance: parseInt(resultForm.attendance),
-        status: resultForm.status,
         totalMaxMarks: totals.totalMaxMarks,
         totalObtainedMarks: totals.totalObtainedMarks,
         percentage: totals.percentage,
@@ -391,8 +343,7 @@ const ResultsManagement = () => {
           { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
         ],
         remarks: '',
-        attendance: 100,
-        status: 'draft'
+        attendance: 100
       });
 
       // Refresh data
@@ -451,8 +402,7 @@ const ResultsManagement = () => {
         { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
       ],
       remarks: '',
-      attendance: 100,
-      status: 'draft'
+      attendance: 100
     });
   };
 
@@ -467,9 +417,6 @@ const ResultsManagement = () => {
         studentClass: student.class,
         studentSection: student.section
       }));
-      
-      // Load subject template based on class
-      loadSubjectTemplate(student.class);
     }
   };
 
@@ -576,18 +523,6 @@ const ResultsManagement = () => {
                       >
                         {examTypes.map(exam => (
                           <option key={exam.value} value={exam.value}>{exam.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Status</label>
-                      <select
-                        className="form-select"
-                        value={filters.status}
-                        onChange={(e) => handleFilterChange('status', e.target.value)}
-                      >
-                        {statusOptions.map(status => (
-                          <option key={status.value} value={status.value}>{status.label}</option>
                         ))}
                       </select>
                     </div>
@@ -773,56 +708,7 @@ const ResultsManagement = () => {
                       </div>
 
                       <form onSubmit={handleSubmitResult}>
-                        {/* Exam Details */}
-                        <div className="card mb-4">
-                          <div className="card-header bg-light">
-                            <h6 className="mb-0">
-                              <i className="bi bi-card-checklist me-2"></i>
-                              Exam Details
-                            </h6>
-                          </div>
-                          <div className="card-body">
-                            <div className="row g-3">
-                              <div className="col-md-6">
-                                <label className="form-label">Exam Name *</label>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  value={resultForm.examName}
-                                  onChange={(e) => setResultForm(prev => ({ ...prev, examName: e.target.value }))}
-                                  placeholder="e.g., Mid Term Examination 2024"
-                                  required
-                                />
-                              </div>
-                              <div className="col-md-3">
-                                <label className="form-label">Exam Type</label>
-                                <select
-                                  className="form-select"
-                                  value={filters.examType}
-                                  onChange={(e) => handleFilterChange('examType', e.target.value)}
-                                  required
-                                >
-                                  <option value="">Select Exam Type</option>
-                                  {examTypes.filter(e => e.value !== '').map(exam => (
-                                    <option key={exam.value} value={exam.value}>{exam.label}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div className="col-md-3">
-                                <label className="form-label">Status</label>
-                                <select
-                                  className="form-select"
-                                  value={resultForm.status}
-                                  onChange={(e) => setResultForm(prev => ({ ...prev, status: e.target.value }))}
-                                >
-                                  {statusOptions.filter(s => s.value !== '').map(status => (
-                                    <option key={status.value} value={status.value}>{status.label}</option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                 
 
                         {/* Student Details */}
                         <div className="card mb-4">
@@ -839,10 +725,7 @@ const ResultsManagement = () => {
                                 <select
                                   className="form-select"
                                   value={resultForm.studentClass}
-                                  onChange={(e) => {
-                                    setResultForm(prev => ({ ...prev, studentClass: e.target.value }));
-                                    loadSubjectTemplate(e.target.value);
-                                  }}
+                                  onChange={(e) => setResultForm(prev => ({ ...prev, studentClass: e.target.value }))}
                                   required
                                 >
                                   <option value="">Select Class</option>
@@ -977,34 +860,6 @@ const ResultsManagement = () => {
                                 </tbody>
                               </table>
                             </div>
-                            
-                            {/* Quick Templates */}
-                            <div className="mt-3">
-                              <label className="form-label small text-muted">Quick Templates:</label>
-                              <div className="btn-group btn-group-sm">
-                                <button
-                                  type="button"
-                                  className="btn btn-outline-secondary"
-                                  onClick={() => loadSubjectTemplate('9')}
-                                >
-                                  Class 9-10
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-outline-secondary"
-                                  onClick={() => setResultForm(prev => ({ ...prev, subjects: [...subjectTemplates['11-12_science']] }))}
-                                >
-                                  Class 11-12 Science
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-outline-secondary"
-                                  onClick={() => setResultForm(prev => ({ ...prev, subjects: [...subjectTemplates['11-12_commerce']] }))}
-                                >
-                                  Class 11-12 Commerce
-                                </button>
-                              </div>
-                            </div>
                           </div>
                         </div>
 
@@ -1102,27 +957,6 @@ const ResultsManagement = () => {
                           >
                             Cancel
                           </button>
-                          
-                          <button
-                            type="button"
-                            className="btn btn-outline-info ms-auto"
-                            onClick={() => {
-                              // Auto-fill with sample data for testing
-                              const sampleSubjects = resultForm.subjects.map(sub => ({
-                                ...sub,
-                                obtainedMarks: Math.floor(Math.random() * (parseInt(sub.maxMarks) - 60)) + 60
-                              }));
-                              setResultForm(prev => ({
-                                ...prev,
-                                examName: prev.examName || 'Sample Exam 2024',
-                                subjects: sampleSubjects,
-                                remarks: prev.remarks || 'Good performance overall.'
-                              }));
-                            }}
-                          >
-                            <i className="bi bi-magic me-1"></i>
-                            Fill Sample
-                          </button>
                         </div>
                       </form>
                     </div>
@@ -1159,7 +993,6 @@ const ResultsManagement = () => {
                             <th width="8%">Percentage</th>
                             <th width="8%">Grade</th>
                             <th width="8%">Result</th>
-                            <th width="10%">Status</th>
                             <th width="10%">Actions</th>
                           </tr>
                         </thead>
@@ -1204,15 +1037,6 @@ const ResultsManagement = () => {
                               <td>
                                 <span className={`badge ${result.result === 'pass' ? 'bg-success' : 'bg-danger'}`}>
                                   {result.result.toUpperCase()}
-                                </span>
-                              </td>
-                              <td>
-                                <span className={`badge ${
-                                  result.status === 'draft' ? 'bg-secondary' :
-                                  result.status === 'published' ? 'bg-primary' :
-                                  result.status === 'verified' ? 'bg-success' : 'bg-warning'
-                                }`}>
-                                  {result.status.charAt(0).toUpperCase() + result.status.slice(1)}
                                 </span>
                               </td>
                               <td>
