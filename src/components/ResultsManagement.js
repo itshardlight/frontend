@@ -11,7 +11,11 @@ const ResultsManagement = () => {
     section: '',
     examType: '',
     academicYear: '2024-25',
-    search: ''
+    search: '',
+    result: '', // pass/fail filter
+    grade: '', // grade filter
+    minPercentage: '',
+    maxPercentage: ''
   });
   
   // States for data management
@@ -52,6 +56,12 @@ const ResultsManagement = () => {
 
   const classes = ['', '9', '10', '11', '12'];
   const sections = ['', 'A', 'B', 'C'];
+  const grades = ['', 'A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F'];
+  const resultOptions = [
+    { value: '', label: 'All Results' },
+    { value: 'pass', label: 'Passed' },
+    { value: 'fail', label: 'Failed' }
+  ];
 
   // Calculate totals and grades
   const calculateTotals = () => {
@@ -76,18 +86,35 @@ const ResultsManagement = () => {
   // Filter results based on all filter criteria
   const filteredResults = useMemo(() => {
     return results.filter(result => {
-      const matchesClass = !filters.class || result.studentClass === filters.class;
-      const matchesSection = !filters.section || result.studentSection === filters.section;
+      const matchesClass = !filters.class || result.studentClass === filters.class || result.class === filters.class;
+      const matchesSection = !filters.section || result.studentSection === filters.section || result.section === filters.section;
       const matchesExamType = !filters.examType || result.examType === filters.examType;
       const matchesAcademicYear = !filters.academicYear || result.academicYear === filters.academicYear;
+      const matchesResult = !filters.result || result.result === filters.result;
+      const matchesGrade = !filters.grade || result.overallGrade === filters.grade;
+      
+      // Percentage range filter
+      const matchesMinPercentage = !filters.minPercentage || result.percentage >= parseFloat(filters.minPercentage);
+      const matchesMaxPercentage = !filters.maxPercentage || result.percentage <= parseFloat(filters.maxPercentage);
+      
+      // Enhanced search - search in multiple fields
       const matchesSearch = !filters.search || 
         (result.studentId?.firstName?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.studentId?.lastName?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.rollNumber?.toString().includes(filters.search) ||
-         result.examName?.toLowerCase().includes(filters.search.toLowerCase()));
+         result.examName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         result.examType?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         result.overallGrade?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         result.result?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         // Search in subjects
+         result.subjects?.some(subject => 
+           subject.subjectName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+           subject.subjectCode?.toLowerCase().includes(filters.search.toLowerCase())
+         ));
 
       return matchesClass && matchesSection && matchesExamType && 
-             matchesAcademicYear && matchesSearch;
+             matchesAcademicYear && matchesSearch && matchesResult && 
+             matchesGrade && matchesMinPercentage && matchesMaxPercentage;
     });
   }, [results, filters]);
 
@@ -158,7 +185,11 @@ const ResultsManagement = () => {
       section: '',
       examType: '',
       academicYear: '2024-25',
-      search: ''
+      search: '',
+      result: '',
+      grade: '',
+      minPercentage: '',
+      maxPercentage: ''
     });
   };
 
@@ -571,31 +602,171 @@ const ResultsManagement = () => {
                   </div>
                   
                   {activeTab === 'view' && (
-                    <div className="row mt-3">
-                      <div className="col-md-6">
-                        <label className="form-label">Search</label>
-                        <div className="input-group">
-                          <span className="input-group-text">
-                            <i className="bi bi-search"></i>
-                          </span>
+                    <>
+                      <div className="row mt-3">
+                        <div className="col-md-3">
+                          <label className="form-label">Search</label>
+                          <div className="input-group">
+                            <span className="input-group-text">
+                              <i className="bi bi-search"></i>
+                            </span>
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="Search by name, roll, exam, subject, grade..."
+                              value={filters.search}
+                              onChange={(e) => handleFilterChange('search', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="col-md-2">
+                          <label className="form-label">Result Status</label>
+                          <select
+                            className="form-select"
+                            value={filters.result}
+                            onChange={(e) => handleFilterChange('result', e.target.value)}
+                          >
+                            {resultOptions.map(option => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-2">
+                          <label className="form-label">Grade</label>
+                          <select
+                            className="form-select"
+                            value={filters.grade}
+                            onChange={(e) => handleFilterChange('grade', e.target.value)}
+                          >
+                            <option value="">All Grades</option>
+                            {grades.filter(g => g !== '').map(grade => (
+                              <option key={grade} value={grade}>{grade}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-2">
+                          <label className="form-label">Min %</label>
                           <input
-                            type="text"
+                            type="number"
                             className="form-control"
-                            placeholder="Search by name, roll number, or exam..."
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            placeholder="0"
+                            min="0"
+                            max="100"
+                            value={filters.minPercentage}
+                            onChange={(e) => handleFilterChange('minPercentage', e.target.value)}
                           />
                         </div>
-                      </div>
-                      <div className="col-md-6 d-flex align-items-end">
-                        <div className="text-muted small">
-                          Showing {filteredResults.length} of {results.length} results
+                        <div className="col-md-2">
+                          <label className="form-label">Max %</label>
+                          <input
+                            type="number"
+                            className="form-control"
+                            placeholder="100"
+                            min="0"
+                            max="100"
+                            value={filters.maxPercentage}
+                            onChange={(e) => handleFilterChange('maxPercentage', e.target.value)}
+                          />
+                        </div>
+                        <div className="col-md-1 d-flex align-items-end">
+                          <button
+                            className="btn btn-outline-info btn-sm w-100"
+                            onClick={resetFilters}
+                            title="Clear all filters"
+                          >
+                            <i className="bi bi-funnel"></i>
+                          </button>
                         </div>
                       </div>
-                    </div>
+                      <div className="row mt-2">
+                        <div className="col-12">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="text-muted small">
+                              Showing <strong>{filteredResults.length}</strong> of <strong>{results.length}</strong> results
+                              {filteredResults.length !== results.length && (
+                                <span className="text-info ms-2">
+                                  <i className="bi bi-funnel-fill me-1"></i>
+                                  Filtered
+                                </span>
+                              )}
+                            </div>
+                            <div className="small text-muted">
+                              Pass Rate: <strong>
+                                {filteredResults.length > 0 
+                                  ? Math.round((filteredResults.filter(r => r.result === 'pass').length / filteredResults.length) * 100)
+                                  : 0
+                                }%
+                              </strong>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
+
+              {/* Quick Stats for View Tab */}
+              {activeTab === 'view' && filteredResults.length > 0 && (
+                <div className="card mb-4">
+                  <div className="card-header bg-light">
+                    <h6 className="mb-0">
+                      <i className="bi bi-graph-up me-2"></i>
+                      Quick Statistics
+                    </h6>
+                  </div>
+                  <div className="card-body">
+                    <div className="row text-center">
+                      <div className="col-md-2">
+                        <div className="p-2 bg-primary bg-opacity-10 rounded">
+                          <div className="text-muted small">Total Results</div>
+                          <div className="h5 mb-0 text-primary">{filteredResults.length}</div>
+                        </div>
+                      </div>
+                      <div className="col-md-2">
+                        <div className="p-2 bg-success bg-opacity-10 rounded">
+                          <div className="text-muted small">Passed</div>
+                          <div className="h5 mb-0 text-success">
+                            {filteredResults.filter(r => r.result === 'pass').length}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-2">
+                        <div className="p-2 bg-danger bg-opacity-10 rounded">
+                          <div className="text-muted small">Failed</div>
+                          <div className="h5 mb-0 text-danger">
+                            {filteredResults.filter(r => r.result === 'fail').length}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-2">
+                        <div className="p-2 bg-info bg-opacity-10 rounded">
+                          <div className="text-muted small">Avg %</div>
+                          <div className="h5 mb-0 text-info">
+                            {Math.round(filteredResults.reduce((sum, r) => sum + r.percentage, 0) / filteredResults.length)}%
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-2">
+                        <div className="p-2 bg-warning bg-opacity-10 rounded">
+                          <div className="text-muted small">Highest %</div>
+                          <div className="h5 mb-0 text-warning">
+                            {Math.max(...filteredResults.map(r => r.percentage))}%
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-2">
+                        <div className="p-2 bg-secondary bg-opacity-10 rounded">
+                          <div className="text-muted small">Lowest %</div>
+                          <div className="h5 mb-0 text-secondary">
+                            {Math.min(...filteredResults.map(r => r.percentage))}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Error and Success Messages */}
               {error && (
@@ -1049,14 +1220,15 @@ const ResultsManagement = () => {
                       <table className="table table-striped table-hover">
                         <thead className="table-dark">
                           <tr>
-                            <th width="15%">Student</th>
-                            <th width="8%">Roll No.</th>
-                            <th width="8%">Class-Sec</th>
-                            <th width="15%">Exam</th>
-                            <th width="10%">Marks</th>
+                            <th width="10%">Student Details</th>
+                            <th width="7%">Class-Sec</th>
+                            <th width="10%">Exam Details</th>
+                            <th width="20%">Subject Breakdown</th>
+                            <th width="8%">Total Marks</th>
                             <th width="8%">Percentage</th>
-                            <th width="8%">Grade</th>
-                            <th width="8%">Result</th>
+                            <th width="6%">Grade</th>
+                            <th width="6%">Result</th>
+                            <th width="7%">Attendance</th>
                             <th width="10%">Actions</th>
                           </tr>
                         </thead>
@@ -1067,20 +1239,43 @@ const ResultsManagement = () => {
                                 <div className="d-flex align-items-center">
                                   <i className="bi bi-person-circle me-2 text-primary"></i>
                                   <div>
-                                    <div className="fw-semibold">{result.studentId?.firstName} {result.studentId?.lastName}</div>
-                                    <small className="text-muted">{result.examType?.replace('_', ' ')}</small>
+                                    <div className="fw-semibold">
+                                      {result.studentId?.firstName || 'N/A'} {result.studentId?.lastName || ''}
+                                    </div>
+                                    <small className="text-muted">Roll: {result.rollNumber || 'N/A'}</small>
                                   </div>
                                 </div>
                               </td>
-                              <td className="fw-bold">{result.rollNumber}</td>
                               <td>
                                 <span className="badge bg-secondary">
-                                  {result.studentClass}-{result.studentSection}
+                                  {result.studentClass || result.class}-{result.studentSection || result.section}
                                 </span>
                               </td>
                               <td>
-                                <div className="small">{result.examName}</div>
-                                <div className="text-muted x-small">{result.academicYear}</div>
+                                <div>
+                                  <div className="fw-semibold small">{result.examName}</div>
+                                  <div className="text-muted x-small">
+                                    {examTypes.find(e => e.value === result.examType)?.label || result.examType}
+                                  </div>
+                                  <div className="text-muted x-small">{result.academicYear}</div>
+                                </div>
+                              </td>
+                              <td>
+                                <div className="small">
+                                  {result.subjects?.map((subject, idx) => (
+                                    <div key={idx} className="d-flex justify-content-between mb-1">
+                                      <span className="text-truncate" style={{maxWidth: '100px'}} title={subject.subjectName}>
+                                        {subject.subjectName}:
+                                      </span>
+                                      <span className={`fw-bold ${subject.obtainedMarks >= subject.maxMarks * 0.33 ? 'text-success' : 'text-danger'}`}>
+                                        {subject.obtainedMarks}/{subject.maxMarks}
+                                        <small className="text-muted ms-1">
+                                          ({Math.round((subject.obtainedMarks / subject.maxMarks) * 100)}%)
+                                        </small>
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
                               </td>
                               <td>
                                 <div>
@@ -1089,23 +1284,57 @@ const ResultsManagement = () => {
                                 </div>
                               </td>
                               <td>
-                                <span className={`fw-bold ${result.percentage >= 33 ? 'text-success' : 'text-danger'}`}>
-                                  {result.percentage}%
-                                </span>
+                                <div className="d-flex align-items-center">
+                                  <span className={`fw-bold ${result.percentage >= 33 ? 'text-success' : 'text-danger'}`}>
+                                    {result.percentage}%
+                                  </span>
+                                  <div className="progress ms-2" style={{width: '40px', height: '6px'}}>
+                                    <div 
+                                      className={`progress-bar ${result.percentage >= 33 ? 'bg-success' : 'bg-danger'}`}
+                                      style={{width: `${Math.min(result.percentage, 100)}%`}}
+                                    ></div>
+                                  </div>
+                                </div>
                               </td>
                               <td>
-                                <span className={`badge ${result.overallGrade === 'F' ? 'bg-danger' : result.overallGrade === 'A+' ? 'bg-success' : 'bg-info'}`}>
+                                <span className={`badge ${
+                                  result.overallGrade === 'F' ? 'bg-danger' : 
+                                  result.overallGrade === 'A+' ? 'bg-success' : 
+                                  result.overallGrade === 'A' ? 'bg-primary' :
+                                  'bg-info'
+                                }`}>
                                   {result.overallGrade}
                                 </span>
                               </td>
                               <td>
                                 <span className={`badge ${result.result === 'pass' ? 'bg-success' : 'bg-danger'}`}>
+                                  <i className={`bi ${result.result === 'pass' ? 'bi-check-circle' : 'bi-x-circle'} me-1`}></i>
                                   {result.result.toUpperCase()}
                                 </span>
                               </td>
                               <td>
+                                <div className="small">
+                                  <span className={`badge ${
+                                    result.attendance >= 90 ? 'bg-success' :
+                                    result.attendance >= 75 ? 'bg-warning' :
+                                    'bg-danger'
+                                  }`}>
+                                    {result.attendance}%
+                                  </span>
+                                </div>
+                              </td>
+                              <td>
                                 <div className="btn-group btn-group-sm">
-                               
+                                  <button
+                                    className="btn btn-outline-info"
+                                    title="View Details"
+                                    onClick={() => {
+                                      // You can add a modal or expand functionality here
+                                      alert(`Detailed view for ${result.studentId?.firstName} ${result.studentId?.lastName}\n\nSubjects:\n${result.subjects?.map(s => `${s.subjectName}: ${s.obtainedMarks}/${s.maxMarks}`).join('\n')}\n\nRemarks: ${result.remarks || 'No remarks'}`);
+                                    }}
+                                  >
+                                    <i className="bi bi-eye"></i>
+                                  </button>
                                   <button
                                     className="btn btn-outline-warning"
                                     title="Edit Result"
