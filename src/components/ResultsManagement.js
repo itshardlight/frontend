@@ -1105,16 +1105,7 @@ const ResultsManagement = () => {
                               </td>
                               <td>
                                 <div className="btn-group btn-group-sm">
-                                  <button
-                                    className="btn btn-outline-primary"
-                                    title="View Details"
-                                    onClick={() => {
-                                      // View result details - could be implemented with modal
-                                      alert(`Viewing result for ${result.studentId?.firstName}`);
-                                    }}
-                                  >
-                                    <i className="bi bi-eye"></i>
-                                  </button>
+                               
                                   <button
                                     className="btn btn-outline-warning"
                                     title="Edit Result"
