@@ -27,7 +27,6 @@ const ResultsManagement = () => {
   // Form state for creating/editing results
   const [resultForm, setResultForm] = useState({
     examName: '',
-    examType: '',
     studentClass: '',
     studentSection: '',
     subjects: [
@@ -109,7 +108,7 @@ const ResultsManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setStudents(response.data.data || []);
+      setStudents(response.data.data);
     } catch (error) {
       console.error('Error fetching students:', error);
       setError(error.response?.data?.message || 'Error fetching students');
@@ -128,7 +127,6 @@ const ResultsManagement = () => {
       const params = new URLSearchParams();
       if (filters.class) params.append('class', filters.class);
       if (filters.section) params.append('section', filters.section);
-      if (filters.examType) params.append('examType', filters.examType);
       if (filters.academicYear) params.append('academicYear', filters.academicYear);
 
       const response = await axios.get(
@@ -136,7 +134,7 @@ const ResultsManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setResults(response.data.data || []);
+      setResults(response.data.data);
     } catch (error) {
       console.error('Error fetching results:', error);
       setError(error.response?.data?.message || 'Error fetching results');
@@ -148,13 +146,9 @@ const ResultsManagement = () => {
   // Handle filter changes
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
-    
-    // Only reset student selection if changing class/section
-    if (field === 'class' || field === 'section') {
-      setSelectedStudent(null);
-      setIsEditing(false);
-      setEditingResultId(null);
-    }
+    setSelectedStudent(null);
+    setIsEditing(false);
+    setEditingResultId(null);
   };
 
   // Reset all filters
@@ -217,28 +211,15 @@ const ResultsManagement = () => {
       );
 
       const result = response.data.data;
-      
-      // Ensure we have the complete student data
-      let studentData = result.studentId;
-      if (typeof result.studentId === 'string') {
-        // If studentId is just an ID, fetch the student details
-        const studentResponse = await axios.get(
-          `http://localhost:5000/api/students/${result.studentId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        studentData = studentResponse.data.data;
-      }
-
       setResultForm({
-        examName: result.examName || '',
-        examType: result.examType || '',
-        studentClass: result.studentClass || result.class,
-        studentSection: result.studentSection || result.section,
+        examName: result.examName,
+        studentClass: result.studentClass,
+        studentSection: result.studentSection,
         subjects: result.subjects.map(sub => ({
           subjectName: sub.subjectName,
           subjectCode: sub.subjectCode,
           maxMarks: sub.maxMarks,
-          obtainedMarks: sub.obtainedMarks.toString(),
+          obtainedMarks: sub.obtainedMarks,
           remarks: sub.remarks || ''
         })),
         remarks: result.remarks || '',
@@ -248,13 +229,13 @@ const ResultsManagement = () => {
       setIsEditing(true);
       setEditingResultId(resultId);
       setActiveTab('create');
-      setSelectedStudent(studentData);
+      setSelectedStudent(result.studentId);
       
       // Set filters based on the result being edited
       setFilters(prev => ({
         ...prev,
-        class: result.studentClass || result.class,
-        section: result.studentSection || result.section,
+        class: result.studentClass,
+        section: result.studentSection,
         examType: result.examType,
         academicYear: result.academicYear
       }));
@@ -268,6 +249,22 @@ const ResultsManagement = () => {
     }
   };
 
+  // Handle exam type change with auto-population
+  const handleExamTypeChange = (value) => {
+    setFilters(prev => ({ ...prev, examType: value }));
+    
+    // Auto-populate exam name if not already set
+    if (value && !resultForm.examName.trim()) {
+      const selectedExam = examTypes.find(exam => exam.value === value);
+      if (selectedExam && selectedExam.label !== 'All Exam Types') {
+        setResultForm(prev => ({ 
+          ...prev, 
+          examName: selectedExam.label 
+        }));
+      }
+    }
+  };
+
   // Submit result (create or update)
   const handleSubmitResult = async (e) => {
     e.preventDefault();
@@ -277,13 +274,13 @@ const ResultsManagement = () => {
       return;
     }
 
-    if (!resultForm.examName.trim()) {
-      setError('Please enter exam name');
+    if (!filters.examType) {
+      setError('Please select exam type');
       return;
     }
 
-    if (!resultForm.examType && !isEditing) {
-      setError('Please select an exam type');
+    if (!resultForm.examName.trim()) {
+      setError('Please enter exam name');
       return;
     }
 
@@ -297,7 +294,6 @@ const ResultsManagement = () => {
       !subject.subjectName.trim() ||
       !subject.subjectCode.trim() ||
       subject.obtainedMarks === '' ||
-      isNaN(parseInt(subject.obtainedMarks)) ||
       parseInt(subject.obtainedMarks) > parseInt(subject.maxMarks)
     );
 
@@ -316,17 +312,13 @@ const ResultsManagement = () => {
 
       const resultData = {
         studentId: selectedStudent._id,
-        rollNumber: selectedStudent.rollNumber,
-        examType: isEditing ? resultForm.examType : filters.examType,
+        examType: filters.examType,
         examName: resultForm.examName,
         academicYear: filters.academicYear,
         studentClass: resultForm.studentClass,
         studentSection: resultForm.studentSection,
-        class: resultForm.studentClass, // Also include for backend compatibility
-        section: resultForm.studentSection, // Also include for backend compatibility
         subjects: resultForm.subjects.map(subject => ({
-          subjectName: subject.subjectName,
-          subjectCode: subject.subjectCode,
+          ...subject,
           maxMarks: parseInt(subject.maxMarks),
           obtainedMarks: parseInt(subject.obtainedMarks)
         })),
@@ -339,8 +331,6 @@ const ResultsManagement = () => {
         result: totals.result
       };
 
-      console.log('Submitting result data:', resultData);
-
       let response;
       if (isEditing && editingResultId) {
         // Update existing result
@@ -349,7 +339,6 @@ const ResultsManagement = () => {
           resultData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log('Update response:', response.data);
         setSuccess('Result updated successfully!');
       } else {
         // Create new result
@@ -358,7 +347,6 @@ const ResultsManagement = () => {
           resultData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log('Create response:', response.data);
         setSuccess('Result created successfully!');
       }
 
@@ -368,7 +356,6 @@ const ResultsManagement = () => {
       setEditingResultId(null);
       setResultForm({
         examName: '',
-        examType: '',
         studentClass: '',
         studentSection: '',
         subjects: [
@@ -381,8 +368,11 @@ const ResultsManagement = () => {
       });
 
       // Refresh data
-      fetchStudentsForBulkEntry();
-      fetchResults();
+      if (activeTab === 'create') {
+        fetchStudentsForBulkEntry();
+      } else {
+        fetchResults();
+      }
     } catch (error) {
       console.error('Error saving result:', error);
       console.error('Error response:', error.response?.data);
@@ -410,7 +400,6 @@ const ResultsManagement = () => {
 
       setSuccess('Result deleted successfully!');
       fetchResults();
-      fetchStudentsForBulkEntry();
     } catch (error) {
       console.error('Error deleting result:', error);
       setError(error.response?.data?.message || 'Error deleting result');
@@ -426,7 +415,6 @@ const ResultsManagement = () => {
     setSelectedStudent(null);
     setResultForm({
       examName: '',
-      examType: '',
       studentClass: '',
       studentSection: '',
       subjects: [
@@ -462,13 +450,6 @@ const ResultsManagement = () => {
     }
   }, [filters.class, filters.section, filters.academicYear, activeTab]);
 
-  // Also fetch results when examType changes in view mode
-  useEffect(() => {
-    if (activeTab === 'view') {
-      fetchResults();
-    }
-  }, [filters.examType]);
-
   const totals = calculateTotals();
 
   return (
@@ -484,7 +465,7 @@ const ResultsManagement = () => {
               {isEditing && (
                 <span className="badge bg-warning">
                   <i className="bi bi-pencil me-1"></i>
-                  Editing Result
+                  Editing Mode
                 </span>
               )}
             </div>
@@ -507,10 +488,7 @@ const ResultsManagement = () => {
                 <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === 'view' ? 'active' : ''}`}
-                    onClick={() => {
-                      setActiveTab('view');
-                      fetchResults();
-                    }}
+                    onClick={() => setActiveTab('view')}
                   >
                     <i className="bi bi-table me-2"></i>
                     View Results
@@ -563,7 +541,6 @@ const ResultsManagement = () => {
                         className="form-select"
                         value={filters.examType}
                         onChange={(e) => handleFilterChange('examType', e.target.value)}
-                        disabled={isEditing}
                       >
                         {examTypes.map(exam => (
                           <option key={exam.value} value={exam.value}>{exam.label}</option>
@@ -586,7 +563,6 @@ const ResultsManagement = () => {
                       <button
                         className="btn btn-outline-secondary w-100"
                         onClick={resetFilters}
-                        disabled={isEditing}
                       >
                         <i className="bi bi-arrow-clockwise me-1"></i>
                         Reset
@@ -668,10 +644,10 @@ const ResultsManagement = () => {
                               <div
                                 className={`card h-100 ${student.hasResult ? 'border-warning' : 'border-primary'} hover-shadow transition-all`}
                                 style={{ 
-                                  cursor: 'pointer',
+                                  cursor: student.hasResult ? 'default' : 'pointer',
                                   opacity: student.hasResult ? 0.8 : 1
                                 }}
-                                onClick={() => preloadStudentData(student)}
+                                onClick={() => !student.hasResult && preloadStudentData(student)}
                               >
                                 <div className="card-body text-center">
                                   <div className="mb-2">
@@ -693,12 +669,7 @@ const ResultsManagement = () => {
                                         className="btn btn-link btn-sm mt-2"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          // First load the student, then try to edit the existing result
-                                          preloadStudentData(student);
-                                          // If student has existingResultId, use it
-                                          if (student.existingResultId) {
-                                            loadResultForEditing(student.existingResultId);
-                                          }
+                                          loadResultForEditing(student.existingResultId);
                                         }}
                                       >
                                         <i className="bi bi-pencil me-1"></i>
@@ -734,12 +705,7 @@ const ResultsManagement = () => {
                           </h5>
                           <p className="text-muted mb-0">
                             Roll: {selectedStudent.rollNumber} | 
-                            Class: {selectedStudent.class}-{selectedStudent.section} |
-                            {isEditing ? (
-                              <span className="badge bg-info ms-2">Editing Mode</span>
-                            ) : (
-                              <span className="badge bg-info ms-2">{filters.examType ? examTypes.find(e => e.value === filters.examType)?.label : 'Select Exam Type'}</span>
-                            )}
+                            Class: {selectedStudent.class}-{selectedStudent.section}
                           </p>
                         </div>
                         <div className="d-flex gap-2">
@@ -774,42 +740,35 @@ const ResultsManagement = () => {
                           <div className="card-body">
                             <div className="row g-3">
                               <div className="col-md-6">
+                                <label className="form-label">Exam Type *</label>
+                                <select
+                                  className="form-select"
+                                  value={filters.examType}
+                                  onChange={(e) => handleExamTypeChange(e.target.value)}
+                                  required
+                                >
+                                  <option value="">Select Exam Type</option>
+                                  {examTypes
+                                    .filter(exam => exam.value !== '')
+                                    .map(exam => (
+                                      <option key={exam.value} value={exam.value}>
+                                        {exam.label}
+                                      </option>
+                                    ))}
+                                </select>
+                                <small className="text-muted">Select the type of exam</small>
+                              </div>
+                              <div className="col-md-6">
                                 <label className="form-label">Exam Name *</label>
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="e.g., Mathematics Final Exam, Science Unit Test"
                                   value={resultForm.examName}
                                   onChange={(e) => setResultForm(prev => ({ ...prev, examName: e.target.value }))}
+                                  placeholder="Enter exam name (e.g., 'First Term Exam')"
                                   required
                                 />
-                              </div>
-                              <div className="col-md-6">
-                                <label className="form-label">Exam Type *</label>
-                                {isEditing ? (
-                                  <select
-                                    className="form-select"
-                                    value={resultForm.examType}
-                                    onChange={(e) => setResultForm(prev => ({ ...prev, examType: e.target.value }))}
-                                    required
-                                  >
-                                    {examTypes.filter(exam => exam.value !== '').map(exam => (
-                                      <option key={exam.value} value={exam.value}>{exam.label}</option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <select
-                                    className="form-select"
-                                    value={filters.examType}
-                                    onChange={(e) => handleFilterChange('examType', e.target.value)}
-                                    required
-                                  >
-                                    <option value="">Select Exam Type</option>
-                                    {examTypes.filter(exam => exam.value !== '').map(exam => (
-                                      <option key={exam.value} value={exam.value}>{exam.label}</option>
-                                    ))}
-                                  </select>
-                                )}
+                                <small className="text-muted">Custom name for this exam</small>
                               </div>
                             </div>
                           </div>
@@ -898,90 +857,70 @@ const ResultsManagement = () => {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {resultForm.subjects.map((subject, index) => {
-                                    const subjectPercentage = subject.maxMarks > 0 && subject.obtainedMarks
-                                      ? Math.round((parseInt(subject.obtainedMarks) || 0) / subject.maxMarks * 100)
-                                      : 0;
-                                    const isInvalid = subject.obtainedMarks && 
-                                      parseInt(subject.obtainedMarks) > parseInt(subject.maxMarks);
-                                    
-                                    return (
-                                      <tr key={index} className={isInvalid ? 'table-warning' : ''}>
-                                        <td>
-                                          <input
-                                            type="text"
-                                            className="form-control"
-                                            value={subject.subjectName}
-                                            onChange={(e) => handleSubjectChange(index, 'subjectName', e.target.value)}
-                                            required
-                                          />
-                                        </td>
-                                        <td>
-                                          <input
-                                            type="text"
-                                            className="form-control"
-                                            value={subject.subjectCode}
-                                            onChange={(e) => handleSubjectChange(index, 'subjectCode', e.target.value)}
-                                            required
-                                          />
-                                        </td>
-                                        <td>
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            value={subject.maxMarks}
-                                            onChange={(e) => handleSubjectChange(index, 'maxMarks', e.target.value)}
-                                            min="1"
-                                            required
-                                          />
-                                        </td>
-                                        <td>
-                                          <div className="input-group">
-                                            <input
-                                              type="number"
-                                              className={`form-control ${isInvalid ? 'is-invalid' : ''}`}
-                                              value={subject.obtainedMarks}
-                                              onChange={(e) => handleSubjectChange(index, 'obtainedMarks', e.target.value)}
-                                              min="0"
-                                              max={subject.maxMarks}
-                                              required
-                                            />
-                                            {subject.obtainedMarks && !isInvalid && (
-                                              <span className="input-group-text">
-                                                {subjectPercentage}%
-                                              </span>
-                                            )}
-                                          </div>
-                                          {isInvalid && (
-                                            <div className="invalid-feedback d-block">
-                                              Obtained marks cannot exceed max marks
-                                            </div>
-                                          )}
-                                        </td>
-                                        <td>
-                                          <input
-                                            type="text"
-                                            className="form-control"
-                                            value={subject.remarks}
-                                            onChange={(e) => handleSubjectChange(index, 'remarks', e.target.value)}
-                                            placeholder="Good/Excellent/..."
-                                          />
-                                        </td>
-                                        <td>
-                                          {resultForm.subjects.length > 1 && (
-                                            <button
-                                              type="button"
-                                              className="btn btn-outline-danger btn-sm"
-                                              onClick={() => removeSubject(index)}
-                                              title="Remove Subject"
-                                            >
-                                              <i className="bi bi-trash"></i>
-                                            </button>
-                                          )}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
+                                  {resultForm.subjects.map((subject, index) => (
+                                    <tr key={index}>
+                                      <td>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          value={subject.subjectName}
+                                          onChange={(e) => handleSubjectChange(index, 'subjectName', e.target.value)}
+                                          required
+                                        />
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          value={subject.subjectCode}
+                                          onChange={(e) => handleSubjectChange(index, 'subjectCode', e.target.value)}
+                                          required
+                                        />
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="number"
+                                          className="form-control"
+                                          value={subject.maxMarks}
+                                          onChange={(e) => handleSubjectChange(index, 'maxMarks', e.target.value)}
+                                          min="1"
+                                          required
+                                        />
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="number"
+                                          className="form-control"
+                                          value={subject.obtainedMarks}
+                                          onChange={(e) => handleSubjectChange(index, 'obtainedMarks', e.target.value)}
+                                          min="0"
+                                          max={subject.maxMarks}
+                                          required
+                                        />
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          value={subject.remarks}
+                                          onChange={(e) => handleSubjectChange(index, 'remarks', e.target.value)}
+                                          placeholder="Good/Excellent/..."
+                                        />
+                                      </td>
+                                      <td>
+                                        {resultForm.subjects.length > 1 && (
+                                          <button
+                                            type="button"
+                                            className="btn btn-outline-danger btn-sm"
+                                            onClick={() => removeSubject(index)}
+                                            title="Remove Subject"
+                                          >
+                                            <i className="bi bi-trash"></i>
+                                          </button>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
                                 </tbody>
                               </table>
                             </div>
@@ -1039,7 +978,7 @@ const ResultsManagement = () => {
                                 <div className="p-3 bg-light rounded">
                                   <div className="text-muted small">Grade</div>
                                   <div className="h4 mb-0">
-                                    <span className={`badge ${totals.grade === 'F' ? 'bg-danger' : totals.grade === 'A+' ? 'bg-success' : 'bg-info'} fs-6`}>
+                                    <span className={`badge ${totals.grade === 'F' ? 'bg-danger' : 'bg-success'} fs-6`}>
                                       {totals.grade}
                                     </span>
                                   </div>
@@ -1128,17 +1067,15 @@ const ResultsManagement = () => {
                                 <div className="d-flex align-items-center">
                                   <i className="bi bi-person-circle me-2 text-primary"></i>
                                   <div>
-                                    <div className="fw-semibold">
-                                      {result.studentId?.firstName || 'N/A'} {result.studentId?.lastName || ''}
-                                    </div>
-                                    <small className="text-muted">{result.examType?.replace('_', ' ') || 'N/A'}</small>
+                                    <div className="fw-semibold">{result.studentId?.firstName} {result.studentId?.lastName}</div>
+                                    <small className="text-muted">{result.examType?.replace('_', ' ')}</small>
                                   </div>
                                 </div>
                               </td>
-                              <td className="fw-bold">{result.rollNumber || 'N/A'}</td>
+                              <td className="fw-bold">{result.rollNumber}</td>
                               <td>
                                 <span className="badge bg-secondary">
-                                  {result.studentClass || result.class}-{result.studentSection || result.section}
+                                  {result.studentClass}-{result.studentSection}
                                 </span>
                               </td>
                               <td>
@@ -1168,6 +1105,16 @@ const ResultsManagement = () => {
                               </td>
                               <td>
                                 <div className="btn-group btn-group-sm">
+                                  <button
+                                    className="btn btn-outline-primary"
+                                    title="View Details"
+                                    onClick={() => {
+                                      // View result details - could be implemented with modal
+                                      alert(`Viewing result for ${result.studentId?.firstName}`);
+                                    }}
+                                  >
+                                    <i className="bi bi-eye"></i>
+                                  </button>
                                   <button
                                     className="btn btn-outline-warning"
                                     title="Edit Result"
