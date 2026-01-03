@@ -10,7 +10,7 @@ const ResultsManagement = () => {
     class: '',
     section: '',
     examType: '',
-    academicYear: '2024-25',
+    academicYear: '',
     search: '',
     result: '', // pass/fail filter
     grade: '', // grade filter
@@ -131,7 +131,7 @@ const ResultsManagement = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:5000/api/results/bulk-entry/${filters.class}/${filters.section}?academicYear=${filters.academicYear}`,
+        `http://localhost:5000/api/results/bulk-entry/${filters.class}/${filters.section}?academicYear=${filters.academicYear || '2024-25'}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -184,7 +184,7 @@ const ResultsManagement = () => {
       class: '',
       section: '',
       examType: '',
-      academicYear: '2024-25',
+      academicYear: '',
       search: '',
       result: '',
       grade: '',
@@ -345,7 +345,7 @@ const ResultsManagement = () => {
         studentId: selectedStudent._id,
         examType: filters.examType,
         examName: resultForm.examName,
-        academicYear: filters.academicYear,
+        academicYear: filters.academicYear || '2024-25',
         studentClass: resultForm.studentClass,
         studentSection: resultForm.studentSection,
         subjects: resultForm.subjects.map(subject => ({
@@ -585,9 +585,11 @@ const ResultsManagement = () => {
                         value={filters.academicYear}
                         onChange={(e) => handleFilterChange('academicYear', e.target.value)}
                       >
+                        <option value="">All Academic Years</option>
                         <option value="2024-25">2024-25</option>
                         <option value="2023-24">2023-24</option>
                         <option value="2022-23">2022-23</option>
+                        <option value="2021-22">2021-22</option>
                       </select>
                     </div>
                     <div className="col-md-2 d-flex align-items-end">
