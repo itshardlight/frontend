@@ -120,9 +120,15 @@ const Dashboard = () => {
             <div className="mb-3">
               <i className="bi bi-journal-text" style={{ fontSize: "3rem", color: "#6f42c1" }}></i>
             </div>
-            <h5>Assignments</h5>
-            <p className="text-muted">Create and grade assignments</p>
-            <button className="btn btn-purple btn-sm" style={{ backgroundColor: "#6f42c1", color: "white" }}>Manage Assignments</button>
+            <h5>Results Management</h5>
+            <p className="text-muted">Upload and manage exam results</p>
+            <button 
+              className="btn btn-sm"
+              style={{ backgroundColor: "#6f42c1", color: "white" }}
+              onClick={() => navigate("/results")}
+            >
+              Manage Results
+            </button>
           </div>
         </div>
       </div>
@@ -130,16 +136,28 @@ const Dashboard = () => {
         <div className="card shadow-sm h-100">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-graph-up" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
+              <i className="bi bi-cash-stack" style={{ fontSize: "3rem", color: "#198754" }}></i>
             </div>
-            <h5>Student Results</h5>
-            <p className="text-muted">Upload and manage exam results</p>
+            <h5>Fee Management</h5>
+            <p className="text-muted">Manage student fees and payments</p>
             <button 
-              className="btn btn-danger btn-sm"
-              onClick={() => setActiveComponent('results')}
+              className="btn btn-success btn-sm"
+              onClick={() => navigate("/fees")}
             >
-              Manage Results
+              Manage Fees
             </button>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body text-center">
+            <div className="mb-3">
+              <i className="bi bi-journal-text" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
+            </div>
+            <h5>Assignments</h5>
+            <p className="text-muted">Create and grade assignments</p>
+            <button className="btn btn-danger btn-sm" style={{ color: "white" }}>Manage Assignments</button>
           </div>
         </div>
       </div>
@@ -255,15 +273,20 @@ const Dashboard = () => {
             <div className="card-body">
               <h5 className="card-title">
                 <i className="bi bi-cash-stack me-2 text-success"></i>
-                Fee Collection
+                Fee Management System
               </h5>
               <ul className="list-unstyled mt-3 small">
-                <li>✓ Generate invoices</li>
-                <li>✓ Collect payments</li>
-                <li>✓ eSewa verification</li>
-                <li>✓ Print receipts</li>
+                <li>✓ Complete fee management</li>
+                <li>✓ Payment processing</li>
+                <li>✓ Student fee tracking</li>
+                <li>✓ Reports & analytics</li>
               </ul>
-              <button className="btn btn-success btn-sm w-100 mt-2">Collect Fee</button>
+              <button 
+                className="btn btn-success btn-sm w-100 mt-2"
+                onClick={() => navigate("/fees")}
+              >
+                Open Fee Management
+              </button>
             </div>
           </div>
         </div>

@@ -12,6 +12,8 @@ import AdminPanel from "./pages/AdminPanel";
 import AdminStudentProfile from "./pages/AdminStudentProfile";
 import Attendance from "./pages/Attendance";
 import StudentRegistration from "./pages/StudentRegistration";
+import ResultsPage from "./pages/ResultsPage";
+import FeePage from "./pages/FeePage";
 
 const GOOGLE_CLIENT_ID = "778363983589-j716s0a5ddtapkpbqu758t00elk6hd3g.apps.googleusercontent.com";
 
@@ -31,6 +33,8 @@ function App() {
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/student-registration" element={<StudentRegistration />} />
+        <Route path="/results" element={<ResultsPage />} />
+        <Route path="/fees" element={<FeePage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </GoogleOAuthProvider>

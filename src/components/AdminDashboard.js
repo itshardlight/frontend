@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResultsManagement from './ResultsManagement';
+import FeeManagement from './FeeManagement';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -11,6 +12,9 @@ const AdminDashboard = () => {
       case 'results':
         console.log('Rendering ResultsManagement component');
         return <ResultsManagement />;
+      case 'fees':
+        console.log('Rendering FeeManagement component');
+        return <FeeManagement />;
       default:
         console.log('Rendering default dashboard');
         return (
@@ -88,7 +92,7 @@ const AdminDashboard = () => {
                 <li><i className="bi bi-check-circle text-success me-2"></i>Pending payments</li>
                 <li><i className="bi bi-check-circle text-success me-2"></i>Overdue students</li>
               </ul>
-              <button className="btn btn-success btn-sm w-100 mt-2">View Fees</button>
+              <button className="btn btn-success btn-sm w-100 mt-2" onClick={() => setActiveComponent('fees')}>View Fees</button>
             </div>
           </div>
         </div>
