@@ -44,7 +44,7 @@ const FeeDepartmentDashboard = () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    if (!token || user.role !== 'fee_department') {
+    if (!token || !['fee_department', 'admin'].includes(user.role)) {
       navigate('/dashboard');
       return;
     }
@@ -236,7 +236,10 @@ const FeeDepartmentDashboard = () => {
         <div className="container-fluid">
           <span className="navbar-brand">
             <i className="bi bi-cash-stack me-2"></i>
-            Fee Department Dashboard
+            {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' 
+              ? 'Fee Management (Admin)' 
+              : 'Fee Department Dashboard'
+            }
           </span>
           <div className="navbar-nav ms-auto d-flex flex-row">
             <button

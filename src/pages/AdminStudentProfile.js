@@ -4,6 +4,7 @@ import axios from 'axios';
 import AchievementSection from '../components/AchievementSection';
 import AdminAttendanceCard from '../components/AdminAttendanceCard';
 import ResultsSection from '../components/ResultsSection';
+import FeeInformationCard from '../components/FeeInformationCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminStudentProfile = () => {
@@ -565,6 +566,9 @@ const AdminStudentProfile = () => {
   </div>
 </div>
 
+
+            {/* Fee Information */}
+            <FeeInformationCard studentId={id} />
 
             {/* Parent/Guardian Information */}
             <div className="card shadow-sm mb-4">
