@@ -7,15 +7,21 @@ const FeePage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     if (!token) {
       navigate('/login');
       return;
     }
 
-    // Check if user has permission to access fee management
-    if (!['admin', 'teacher'].includes(userRole)) {
+    // Redirect fee department users to their dedicated dashboard
+    if (user.role === 'fee_department') {
+      navigate('/fee-department');
+      return;
+    }
+
+    // Check if user has permission to access fee management (only admin now)
+    if (!['admin'].includes(user.role)) {
       navigate('/dashboard');
       return;
     }

@@ -136,23 +136,6 @@ const Dashboard = () => {
         <div className="card shadow-sm h-100">
           <div className="card-body text-center">
             <div className="mb-3">
-              <i className="bi bi-cash-stack" style={{ fontSize: "3rem", color: "#198754" }}></i>
-            </div>
-            <h5>Fee Management</h5>
-            <p className="text-muted">Manage student fees and payments</p>
-            <button 
-              className="btn btn-success btn-sm"
-              onClick={() => navigate("/fees")}
-            >
-              Manage Fees
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-4">
-        <div className="card shadow-sm h-100">
-          <div className="card-body text-center">
-            <div className="mb-3">
               <i className="bi bi-journal-text" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
             </div>
             <h5>Assignments</h5>
@@ -283,7 +266,7 @@ const Dashboard = () => {
               </ul>
               <button 
                 className="btn btn-success btn-sm w-100 mt-2"
-                onClick={() => navigate("/fees")}
+                onClick={() => navigate("/fee-department")}
               >
                 Open Fee Management
               </button>

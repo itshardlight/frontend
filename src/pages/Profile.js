@@ -5,11 +5,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [showFeeSection, setShowFeeSection] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -22,7 +24,8 @@ const Profile = () => {
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-    if (!userData) {
+    const token = localStorage.getItem("token");
+    if (!userData || !token) {
       navigate("/login");
     } else {
       const parsedUser = JSON.parse(userData);
@@ -35,8 +38,30 @@ const Profile = () => {
         newPassword: "",
         confirmPassword: ""
       });
+      
+      // Fetch detailed profile information
+      fetchProfile(token);
     }
   }, [navigate]);
+
+  const fetchProfile = async (token) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "http://localhost:5000/api/profiles/me/profile",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (response.data.success) {
+        setProfile(response.data.profile);
+      }
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+      // Don't show error for missing profile - it's optional
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -127,11 +152,11 @@ const Profile = () => {
 
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case "admin": return "badge-admin";
-      case "teacher": return "badge-teacher";
-      case "student": return "badge-student";
-      case "parent": return "badge-parent";
-      case "fee_department": return "badge-fee-department";
+      case "admin": return "bg-danger";
+      case "teacher": return "bg-primary";
+      case "student": return "bg-success";
+      case "parent": return "bg-info";
+      case "fee_department": return "bg-warning";
       default: return "bg-secondary";
     }
   };
@@ -389,6 +414,269 @@ const Profile = () => {
                 </div>
               )}
             </div>
+
+            {/* Fee Information Card - For Students and Parents */}
+            {profile && (user.role === 'student' || user.role === 'parent') && profile.feeInfo && (
+              <div className="card shadow-sm mb-4">
+                <div 
+                  className="card-header bg-white d-flex justify-content-between align-items-center" 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setShowFeeSection(!showFeeSection)}
+                >
+                  <h5 className="mb-0">
+                    <i className="bi bi-cash-stack me-2"></i>
+                    Fee Information
+                    {(profile.firstName && profile.lastName) ? (
+                      <small className="text-muted ms-2">
+                        - {profile.firstName} {profile.lastName}
+                      </small>
+                    ) : user.fullName ? (
+                      <small className="text-muted ms-2">
+                        - {user.fullName}
+                      </small>
+                    ) : (
+                      <small className="text-muted ms-2">
+                        - {user.username}
+                      </small>
+                    )}
+                  </h5>
+                  <i className={`bi bi-chevron-${showFeeSection ? 'up' : 'down'}`}></i>
+                </div>
+                {showFeeSection && (
+                  <div className="card-body">
+                    {/* Student Info Header */}
+                    <div className="alert alert-info mb-3">
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Student:</strong> {
+                            (profile.firstName && profile.lastName) 
+                              ? `${profile.firstName} ${profile.lastName}`
+                              : user.fullName || user.username
+                          }
+                        </div>
+                        <div className="col-md-6">
+                          {profile.academic && (
+                            <>
+                              <strong>Class:</strong> {profile.academic.currentGrade}-{profile.academic.section}
+                              {profile.academic.rollNumber && (
+                                <span className="ms-2">
+                                  <strong>Roll:</strong> {profile.academic.rollNumber}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="card bg-light mb-3">
+                          <div className="card-body">
+                            <h6 className="card-title text-primary">
+                              <i className="bi bi-currency-rupee me-1"></i>
+                              Fee Summary
+                            </h6>
+                            <div className="row mb-2">
+                              <div className="col-6">
+                                <strong>Total Fee:</strong>
+                              </div>
+                              <div className="col-6 text-end">
+                                ₹{(profile.feeInfo.totalFee || 0).toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="row mb-2">
+                              <div className="col-6">
+                                <strong>Paid Amount:</strong>
+                              </div>
+                              <div className="col-6 text-end text-success">
+                                ₹{(profile.feeInfo.paidAmount || 0).toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="row mb-2">
+                              <div className="col-6">
+                                <strong>Pending Amount:</strong>
+                              </div>
+                              <div className="col-6 text-end text-danger">
+                                ₹{(profile.feeInfo.pendingAmount || 0).toLocaleString()}
+                              </div>
+                            </div>
+                            <hr />
+                            <div className="row">
+                              <div className="col-6">
+                                <strong>Payment Status:</strong>
+                              </div>
+                              <div className="col-6 text-end">
+                                {(() => {
+                                  const pending = profile.feeInfo.pendingAmount || 0;
+                                  const paid = profile.feeInfo.paidAmount || 0;
+                                  const total = profile.feeInfo.totalFee || 0;
+                                  
+                                  if (pending <= 0 && total > 0) {
+                                    return <span className="badge bg-success">Fully Paid</span>;
+                                  } else if (paid > 0 && pending > 0) {
+                                    return <span className="badge bg-warning">Partially Paid</span>;
+                                  } else if (paid === 0 && total > 0) {
+                                    return <span className="badge bg-danger">Pending</span>;
+                                  } else {
+                                    return <span className="badge bg-secondary">No Fee Set</span>;
+                                  }
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="col-md-6">
+                        <div className="card bg-light mb-3">
+                          <div className="card-body">
+                            <h6 className="card-title text-info">
+                              <i className="bi bi-pie-chart me-1"></i>
+                              Fee Breakdown
+                            </h6>
+                            {profile.feeInfo.tuitionFee > 0 && (
+                              <div className="row mb-1">
+                                <div className="col-8">Tuition Fee:</div>
+                                <div className="col-4 text-end">₹{profile.feeInfo.tuitionFee.toLocaleString()}</div>
+                              </div>
+                            )}
+                            {profile.feeInfo.admissionFee > 0 && (
+                              <div className="row mb-1">
+                                <div className="col-8">Admission Fee:</div>
+                                <div className="col-4 text-end">₹{profile.feeInfo.admissionFee.toLocaleString()}</div>
+                              </div>
+                            )}
+                            {profile.feeInfo.examFee > 0 && (
+                              <div className="row mb-1">
+                                <div className="col-8">Exam Fee:</div>
+                                <div className="col-4 text-end">₹{profile.feeInfo.examFee.toLocaleString()}</div>
+                              </div>
+                            )}
+                            {profile.feeInfo.libraryFee > 0 && (
+                              <div className="row mb-1">
+                                <div className="col-8">Library Fee:</div>
+                                <div className="col-4 text-end">₹{profile.feeInfo.libraryFee.toLocaleString()}</div>
+                              </div>
+                            )}
+                            {profile.feeInfo.sportsFee > 0 && (
+                              <div className="row mb-1">
+                                <div className="col-8">Sports Fee:</div>
+                                <div className="col-4 text-end">₹{profile.feeInfo.sportsFee.toLocaleString()}</div>
+                              </div>
+                            )}
+                            {profile.feeInfo.otherFees > 0 && (
+                              <div className="row mb-1">
+                                <div className="col-8">Other Fees:</div>
+                                <div className="col-4 text-end">₹{profile.feeInfo.otherFees.toLocaleString()}</div>
+                              </div>
+                            )}
+                            {profile.feeInfo.dueDate && (
+                              <div className="row mt-2 pt-2 border-top">
+                                <div className="col-8">
+                                  <strong>Due Date:</strong>
+                                </div>
+                                <div className="col-4 text-end">
+                                  <strong>{new Date(profile.feeInfo.dueDate).toLocaleDateString()}</strong>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Payment History */}
+                    {profile.feeInfo.feeHistory && profile.feeInfo.feeHistory.length > 0 && (
+                      <div className="card bg-light">
+                        <div className="card-body">
+                          <h6 className="card-title text-success">
+                            <i className="bi bi-clock-history me-1"></i>
+                            Payment History
+                          </h6>
+                          <div className="table-responsive">
+                            <table className="table table-sm">
+                              <thead>
+                                <tr>
+                                  <th>Date</th>
+                                  <th>Amount</th>
+                                  <th>Method</th>
+                                  <th>Receipt</th>
+                                  <th>Description</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {profile.feeInfo.feeHistory.slice(-5).reverse().map((payment, index) => (
+                                  <tr key={index}>
+                                    <td>{new Date(payment.paymentDate).toLocaleDateString()}</td>
+                                    <td className="text-success">₹{payment.amount.toLocaleString()}</td>
+                                    <td>
+                                      <span className="badge bg-secondary">
+                                        {payment.paymentMethod.toUpperCase()}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <small className="text-muted">{payment.receiptNumber}</small>
+                                    </td>
+                                    <td>
+                                      <small>{payment.description || '-'}</small>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          {profile.feeInfo.feeHistory.length > 5 && (
+                            <small className="text-muted">
+                              Showing last 5 payments. Total payments: {profile.feeInfo.feeHistory.length}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Academic Information Card - For Students */}
+            {profile && user.role === 'student' && profile.academic && (
+              <div className="card shadow-sm mb-4">
+                <div className="card-header bg-white">
+                  <h5 className="mb-0">
+                    <i className="bi bi-mortarboard me-2"></i>
+                    Academic Information
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="mb-3">
+                        <strong>Class:</strong> {profile.academic.currentGrade || 'Not Set'}
+                      </div>
+                      <div className="mb-3">
+                        <strong>Section:</strong> {profile.academic.section || 'Not Set'}
+                      </div>
+                      <div className="mb-3">
+                        <strong>Roll Number:</strong> {profile.academic.rollNumber || 'Not Assigned'}
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      {profile.academic.admissionDate && (
+                        <div className="mb-3">
+                          <strong>Admission Date:</strong> {new Date(profile.academic.admissionDate).toLocaleDateString()}
+                        </div>
+                      )}
+                      {profile.academic.previousSchool && (
+                        <div className="mb-3">
+                          <strong>Previous School:</strong> {profile.academic.previousSchool}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Logout Card */}
             <div className="card shadow-sm">
