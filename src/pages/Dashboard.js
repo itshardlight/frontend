@@ -154,7 +154,7 @@ const Dashboard = () => {
       const lastPayment = profile.feeInfo.feeHistory[profile.feeInfo.feeHistory.length - 1];
       activities.push({
         icon: 'bi-cash',
-        text: `Payment of ₹${lastPayment.amount.toLocaleString()} recorded`,
+        text: `Payment of Rs.${lastPayment.amount.toLocaleString()} recorded`,
         time: new Date(lastPayment.paymentDate).toLocaleDateString(),
         type: 'success'
       });
@@ -172,7 +172,7 @@ const Dashboard = () => {
     if (profile?.feeInfo?.pendingAmount > 0) {
       activities.push({
         icon: 'bi-exclamation-circle',
-        text: `₹${profile.feeInfo.pendingAmount.toLocaleString()} fee pending`,
+        text: `Rs.${profile.feeInfo.pendingAmount.toLocaleString()} fee pending`,
         time: 'Due soon',
         type: 'warning'
       });
@@ -194,7 +194,7 @@ const Dashboard = () => {
     if (feeAnalytics.totalPaidAmount > 0) {
       activities.push({
         icon: 'bi-cash-stack',
-        text: `₹${(feeAnalytics.totalPaidAmount || 0).toLocaleString()} collected this year`,
+        text: `Rs.${(feeAnalytics.totalPaidAmount || 0).toLocaleString()} collected this year`,
         time: 'Year to date',
         type: 'info'
       });
@@ -229,7 +229,7 @@ const Dashboard = () => {
             <div className="card-body text-center">
               <i className="bi bi-cash-stack text-primary" style={{ fontSize: '2rem' }}></i>
               <h4 className="mt-2 mb-0 text-primary">
-                ₹{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
+                Rs.{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
               </h4>
               <small className="text-muted">Fee Paid</small>
             </div>
@@ -240,7 +240,7 @@ const Dashboard = () => {
             <div className="card-body text-center">
               <i className="bi bi-clock text-warning" style={{ fontSize: '2rem' }}></i>
               <h4 className="mt-2 mb-0 text-warning">
-                ₹{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
+                Rs.{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
               </h4>
               <small className="text-muted">Fee Pending</small>
             </div>
@@ -383,7 +383,7 @@ const Dashboard = () => {
             <div className="card-body text-center">
               <i className="bi bi-cash-stack text-success" style={{ fontSize: '2rem' }}></i>
               <h4 className="mt-2 mb-0 text-success">
-                ₹{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
+                Rs.{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
               </h4>
               <small className="text-muted">Fee Collected</small>
             </div>
@@ -394,7 +394,7 @@ const Dashboard = () => {
             <div className="card-body text-center">
               <i className="bi bi-clock text-warning" style={{ fontSize: '2rem' }}></i>
               <h4 className="mt-2 mb-0 text-warning">
-                ₹{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
+                Rs.{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
               </h4>
               <small className="text-muted">Pending Fees</small>
             </div>
@@ -477,7 +477,7 @@ const Dashboard = () => {
                 <h5>Fee Management</h5>
                 <p className="text-muted">Manage student fees and payments</p>
                 <div className="mb-2">
-                  <span className="badge bg-success">₹{dashboardStats.totalFeeCollected.toLocaleString()} Collected</span>
+                  <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()} Collected</span>
                 </div>
                 <button 
                   className="btn btn-success btn-sm"
@@ -600,7 +600,7 @@ const Dashboard = () => {
             <div className="card-body text-center">
               <h6 className="text-muted small">Total Collected</h6>
               <h3 className="text-success mb-0">
-                ₹{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
+                Rs.{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
               </h3>
               <small className="text-muted">This Year</small>
             </div>
@@ -611,7 +611,7 @@ const Dashboard = () => {
             <div className="card-body text-center">
               <h6 className="text-muted small">Pending Fees</h6>
               <h3 className="text-warning mb-0">
-                ₹{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
+                Rs.{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
               </h3>
               <small className="text-muted">Due Amount</small>
             </div>

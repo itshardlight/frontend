@@ -482,7 +482,7 @@ const Profile = () => {
                                 <strong>Total Fee:</strong>
                               </div>
                               <div className="col-6 text-end">
-                                ₹{(profile.feeInfo.totalFee || 0).toLocaleString()}
+                                Rs.{(profile.feeInfo.totalFee || 0).toLocaleString()}
                               </div>
                             </div>
                             <div className="row mb-2">
@@ -490,7 +490,7 @@ const Profile = () => {
                                 <strong>Paid Amount:</strong>
                               </div>
                               <div className="col-6 text-end text-success">
-                                ₹{(profile.feeInfo.paidAmount || 0).toLocaleString()}
+                                Rs.{(profile.feeInfo.paidAmount || 0).toLocaleString()}
                               </div>
                             </div>
                             <div className="row mb-2">
