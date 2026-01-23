@@ -498,7 +498,7 @@ const Profile = () => {
                                 <strong>Pending Amount:</strong>
                               </div>
                               <div className="col-6 text-end text-danger">
-                                ₹{(profile.feeInfo.pendingAmount || 0).toLocaleString()}
+                                Rs.{(profile.feeInfo.pendingAmount || 0).toLocaleString()}
                               </div>
                             </div>
                             <hr />
@@ -538,37 +538,37 @@ const Profile = () => {
                             {profile.feeInfo.tuitionFee > 0 && (
                               <div className="row mb-1">
                                 <div className="col-8">Tuition Fee:</div>
-                                <div className="col-4 text-end">₹{profile.feeInfo.tuitionFee.toLocaleString()}</div>
+                                <div className="col-4 text-end">Rs.{profile.feeInfo.tuitionFee.toLocaleString()}</div>
                               </div>
                             )}
                             {profile.feeInfo.admissionFee > 0 && (
                               <div className="row mb-1">
                                 <div className="col-8">Admission Fee:</div>
-                                <div className="col-4 text-end">₹{profile.feeInfo.admissionFee.toLocaleString()}</div>
+                                <div className="col-4 text-end">Rs.{profile.feeInfo.admissionFee.toLocaleString()}</div>
                               </div>
                             )}
                             {profile.feeInfo.examFee > 0 && (
                               <div className="row mb-1">
                                 <div className="col-8">Exam Fee:</div>
-                                <div className="col-4 text-end">₹{profile.feeInfo.examFee.toLocaleString()}</div>
+                                <div className="col-4 text-end">Rs.{profile.feeInfo.examFee.toLocaleString()}</div>
                               </div>
                             )}
                             {profile.feeInfo.libraryFee > 0 && (
                               <div className="row mb-1">
                                 <div className="col-8">Library Fee:</div>
-                                <div className="col-4 text-end">₹{profile.feeInfo.libraryFee.toLocaleString()}</div>
+                                <div className="col-4 text-end">Rs.{profile.feeInfo.libraryFee.toLocaleString()}</div>
                               </div>
                             )}
                             {profile.feeInfo.sportsFee > 0 && (
                               <div className="row mb-1">
                                 <div className="col-8">Sports Fee:</div>
-                                <div className="col-4 text-end">₹{profile.feeInfo.sportsFee.toLocaleString()}</div>
+                                <div className="col-4 text-end">Rs.{profile.feeInfo.sportsFee.toLocaleString()}</div>
                               </div>
                             )}
                             {profile.feeInfo.otherFees > 0 && (
                               <div className="row mb-1">
                                 <div className="col-8">Other Fees:</div>
-                                <div className="col-4 text-end">₹{profile.feeInfo.otherFees.toLocaleString()}</div>
+                                <div className="col-4 text-end">Rs.{profile.feeInfo.otherFees.toLocaleString()}</div>
                               </div>
                             )}
                             {profile.feeInfo.dueDate && (
