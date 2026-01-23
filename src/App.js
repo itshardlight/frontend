@@ -15,6 +15,10 @@ import StudentRegistration from "./pages/StudentRegistration";
 import ResultsPage from "./pages/ResultsPage";
 import FeePage from "./pages/FeePage";
 import FeeDepartmentDashboard from "./pages/FeeDepartmentDashboard";
+import StudentResults from "./pages/StudentResults";
+import StudentAttendance from "./pages/StudentAttendance";
+import StudentFees from "./pages/StudentFees";
+import StudentAchievements from "./pages/StudentAchievements";
 
 const GOOGLE_CLIENT_ID = "778363983589-j716s0a5ddtapkpbqu758t00elk6hd3g.apps.googleusercontent.com";
 
@@ -31,6 +35,10 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/student-profile" element={<StudentProfile />} />
         <Route path="/student-profile/:id" element={<AdminStudentProfile />} />
+        <Route path="/student-results" element={<StudentResults />} />
+        <Route path="/student-attendance" element={<StudentAttendance />} />
+        <Route path="/student-fees" element={<StudentFees />} />
+        <Route path="/student-achievements" element={<StudentAchievements />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/student-registration" element={<StudentRegistration />} />

@@ -278,7 +278,7 @@ const Dashboard = () => {
               </div>
               <h5>My Profile</h5>
               <p className="text-muted">View and edit personal details</p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-profile")}>View Profile</button>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate("/profile")}>View Profile</button>
             </div>
           </div>
         </div>
@@ -290,7 +290,7 @@ const Dashboard = () => {
               </div>
               <h5>Attendance</h5>
               <p className="text-muted">Check attendance record</p>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/attendance")}>View Attendance</button>
+              <button className="btn btn-success btn-sm" onClick={() => navigate("/student-attendance")}>View Attendance</button>
             </div>
           </div>
         </div>
@@ -302,7 +302,7 @@ const Dashboard = () => {
               </div>
               <h5>Achievements</h5>
               <p className="text-muted">View and add achievements</p>
-              <button className="btn btn-warning btn-sm" onClick={() => navigate("/student-profile")}>Manage Achievements</button>
+              <button className="btn btn-warning btn-sm" onClick={() => navigate("/student-achievements")}>Manage Achievements</button>
             </div>
           </div>
         </div>
@@ -314,7 +314,19 @@ const Dashboard = () => {
               </div>
               <h5>My Results</h5>
               <p className="text-muted">View exam results and grades</p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-profile")}>View Results</button>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-results")}>View Results</button>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card shadow-sm h-100 dashboard-card">
+            <div className="card-body text-center">
+              <div className="mb-3">
+                <i className="bi bi-cash-stack icon-success" style={{ fontSize: "3rem" }}></i>
+              </div>
+              <h5>My Fees</h5>
+              <p className="text-muted">View fee details and payment history</p>
+              <button className="btn btn-success btn-sm" onClick={() => navigate("/student-fees")}>View Fees</button>
             </div>
           </div>
         </div>
