@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FeeManagement from '../components/FeeManagement';
+import { FeeManagement } from '../../components/shared';
 
 const FeePage = () => {
   const navigate = useNavigate();

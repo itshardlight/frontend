@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ResultsManagement from '../components/ResultsManagement';
+import { ResultsManagement } from '../../components/teacher';
 
 const ResultsPage = () => {
   const navigate = useNavigate();

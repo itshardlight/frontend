@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { studentService } from "../services/studentService";
+import { studentService } from "../../services/studentService";
 
 const StudentRegistration = () => {
   const navigate = useNavigate();

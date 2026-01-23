@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import AchievementSection from '../components/AchievementSection';
-import AdminAttendanceCard from '../components/AdminAttendanceCard';
-import ResultsSection from '../components/ResultsSection';
-import FeeInformationCard from '../components/FeeInformationCard';
+import { AchievementSection } from '../../components/student';
+import { AdminAttendanceCard } from '../../components/admin';
+import { ResultsSection, FeeInformationCard } from '../../components/shared';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminStudentProfile = () => {

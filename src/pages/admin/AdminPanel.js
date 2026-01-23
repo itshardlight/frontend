@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { studentService } from "../services/studentService";
+import { studentService } from "../../services/studentService";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const AdminPanel = () => {

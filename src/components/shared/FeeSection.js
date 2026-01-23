@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import profileService from '../services/profileService';
+import profileService from '../../services/profileService';
 
 const FeeSection = ({ profile, currentUser, editing, editData, setEditData }) => {
   const [addingPayment, setAddingPayment] = useState(false);

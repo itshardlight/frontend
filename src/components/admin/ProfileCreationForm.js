@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import profileService from '../services/profileService';
+import profileService from '../../services/profileService';
 import './ProfileCreationForm.css';
 
 const ProfileCreationForm = ({ onSuccess, onCancel }) => {

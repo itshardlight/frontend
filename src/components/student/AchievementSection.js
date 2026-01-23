@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import profileService from '../services/profileService';
+import profileService from '../../services/profileService';
 
 const AchievementSection = ({ profile, currentUser, onUpdate }) => {
   const [addingAchievement, setAddingAchievement] = useState(false);

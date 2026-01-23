@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import profileService from '../services/profileService';
-import AchievementSection from './AchievementSection';
+import profileService from '../../services/profileService';
+import { AchievementSection } from '../student';
 import FeeSection from './FeeSection';
 import AcademicSection from './AcademicSection';
 import './ProfileCard.css';

@@ -1,24 +1,34 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import Login from "./pages/login";
-import Register from "./pages/Register";
-import VerifyOTP from "./pages/VerifyOTP";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import { 
+  Login, 
+  Register, 
+  VerifyOTP, 
+  ForgotPassword, 
+  ResetPassword 
+} from "./pages/auth";
+import { 
+  AdminPanel, 
+  AdminStudentProfile, 
+  StudentRegistration 
+} from "./pages/admin";
+import { 
+  StudentResults, 
+  StudentAttendance, 
+  StudentFees, 
+  StudentAchievements, 
+  StudentProfile 
+} from "./pages/student";
+import { 
+  Attendance, 
+  ResultsPage 
+} from "./pages/teacher";
+import { 
+  FeeDepartmentDashboard, 
+  FeePage 
+} from "./pages/fee-department";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import StudentProfile from "./pages/StudentProfile";
-import AdminPanel from "./pages/AdminPanel";
-import AdminStudentProfile from "./pages/AdminStudentProfile";
-import Attendance from "./pages/Attendance";
-import StudentRegistration from "./pages/StudentRegistration";
-import ResultsPage from "./pages/ResultsPage";
-import FeePage from "./pages/FeePage";
-import FeeDepartmentDashboard from "./pages/FeeDepartmentDashboard";
-import StudentResults from "./pages/StudentResults";
-import StudentAttendance from "./pages/StudentAttendance";
-import StudentFees from "./pages/StudentFees";
-import StudentAchievements from "./pages/StudentAchievements";
 
 const GOOGLE_CLIENT_ID = "778363983589-j716s0a5ddtapkpbqu758t00elk6hd3g.apps.googleusercontent.com";
 
@@ -33,6 +43,28 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
+        
+        {/* Student Routes */}
+        <Route path="/student/profile" element={<StudentProfile />} />
+        <Route path="/student/results" element={<StudentResults />} />
+        <Route path="/student/attendance" element={<StudentAttendance />} />
+        <Route path="/student/fees" element={<StudentFees />} />
+        <Route path="/student/achievements" element={<StudentAchievements />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/panel" element={<AdminPanel />} />
+        <Route path="/admin/student-profile/:id" element={<AdminStudentProfile />} />
+        <Route path="/admin/student-registration" element={<StudentRegistration />} />
+        
+        {/* Teacher Routes */}
+        <Route path="/teacher/attendance" element={<Attendance />} />
+        <Route path="/teacher/results" element={<ResultsPage />} />
+        
+        {/* Fee Department Routes */}
+        <Route path="/fee-department/dashboard" element={<FeeDepartmentDashboard />} />
+        <Route path="/fee-department/fees" element={<FeePage />} />
+        
+        {/* Legacy Routes for Backward Compatibility */}
         <Route path="/student-profile" element={<StudentProfile />} />
         <Route path="/student-profile/:id" element={<AdminStudentProfile />} />
         <Route path="/student-results" element={<StudentResults />} />
@@ -45,6 +77,7 @@ function App() {
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/fees" element={<FeePage />} />
         <Route path="/fee-department" element={<FeeDepartmentDashboard />} />
+        
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </GoogleOAuthProvider>

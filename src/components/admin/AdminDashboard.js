@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ResultsManagement from './ResultsManagement';
-import FeeManagement from './FeeManagement';
+import { ResultsManagement } from '../teacher';
+import { FeeManagement } from '../shared';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import ResultsManagement from "../components/ResultsManagement";
+import { ResultsManagement } from "../components/teacher";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Dashboard = () => {
@@ -290,7 +290,7 @@ const Dashboard = () => {
               </div>
               <h5>Attendance</h5>
               <p className="text-muted">Check attendance record</p>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/student-attendance")}>View Attendance</button>
+              <button className="btn btn-success btn-sm" onClick={() => navigate("/student/attendance")}>View Attendance</button>
             </div>
           </div>
         </div>
@@ -302,7 +302,7 @@ const Dashboard = () => {
               </div>
               <h5>Achievements</h5>
               <p className="text-muted">View and add achievements</p>
-              <button className="btn btn-warning btn-sm" onClick={() => navigate("/student-achievements")}>Manage Achievements</button>
+              <button className="btn btn-warning btn-sm" onClick={() => navigate("/student/achievements")}>Manage Achievements</button>
             </div>
           </div>
         </div>
@@ -314,7 +314,7 @@ const Dashboard = () => {
               </div>
               <h5>My Results</h5>
               <p className="text-muted">View exam results and grades</p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-results")}>View Results</button>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student/results")}>View Results</button>
             </div>
           </div>
         </div>
@@ -326,7 +326,7 @@ const Dashboard = () => {
               </div>
               <h5>My Fees</h5>
               <p className="text-muted">View fee details and payment history</p>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/student-fees")}>View Fees</button>
+              <button className="btn btn-success btn-sm" onClick={() => navigate("/student/fees")}>View Fees</button>
             </div>
           </div>
         </div>
@@ -438,7 +438,7 @@ const Dashboard = () => {
               <div className="mb-2">
                 <span className="badge bg-primary">{dashboardStats.totalStudents} Students</span>
               </div>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student-registration")}>View Students</button>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate("/admin/student-registration")}>View Students</button>
             </div>
           </div>
         </div>
@@ -453,7 +453,7 @@ const Dashboard = () => {
               <div className="mb-2">
                 <span className="badge bg-success">Daily Tracking</span>
               </div>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/attendance")}>Take Attendance</button>
+              <button className="btn btn-success btn-sm" onClick={() => navigate("/teacher/attendance")}>Take Attendance</button>
             </div>
           </div>
         </div>
@@ -471,7 +471,7 @@ const Dashboard = () => {
               <button 
                 className="btn btn-sm"
                 style={{ backgroundColor: "#6f42c1", color: "white" }}
-                onClick={() => navigate("/results")}
+                onClick={() => navigate("/teacher/results")}
               >
                 Manage Results
               </button>
@@ -493,7 +493,7 @@ const Dashboard = () => {
                 </div>
                 <button 
                   className="btn btn-success btn-sm"
-                  onClick={() => navigate("/fee-department")}
+                  onClick={() => navigate("/fee-department/dashboard")}
                 >
                   Manage Fees
                 </button>
@@ -687,7 +687,7 @@ const Dashboard = () => {
               </ul>
               <button 
                 className="btn btn-success btn-sm w-100 mt-2"
-                onClick={() => navigate("/fee-department")}
+                onClick={() => navigate("/fee-department/dashboard")}
               >
                 Open Fee Management
               </button>
@@ -791,7 +791,7 @@ const Dashboard = () => {
               {user.role === "admin" && (
                 <button 
                   className="btn btn-outline-warning btn-sm me-2" 
-                  onClick={() => navigate("/admin")}
+                  onClick={() => navigate("/admin/panel")}
                 >
                   Admin Panel
                 </button>
@@ -831,7 +831,7 @@ const Dashboard = () => {
             {user.role === "admin" && (
               <button 
                 className="btn btn-outline-warning btn-sm me-2" 
-                onClick={() => navigate("/admin")}
+                onClick={() => navigate("/admin/panel")}
               >
                 Admin Panel
               </button>

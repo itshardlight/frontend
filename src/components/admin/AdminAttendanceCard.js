@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import adminAttendanceService from '../services/adminAttendanceService';
+import adminAttendanceService from '../../services/adminAttendanceService';
 
 const AdminAttendanceCard = ({ studentId }) => {
   const [attendanceData, setAttendanceData] = useState(null);

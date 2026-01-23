@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import profileService from '../services/profileService';
-import AchievementSection from '../components/AchievementSection';
-import ResultsSection from '../components/ResultsSection';
-import TokenDebugger from '../components/TokenDebugger';
-import QuickLogin from '../components/QuickLogin';
+import profileService from '../../services/profileService';
+import { AchievementSection } from '../../components/student';
+import { ResultsSection, QuickLogin } from '../../components/shared';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const StudentProfile = () => {
