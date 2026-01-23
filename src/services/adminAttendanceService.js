@@ -13,31 +13,14 @@ class AdminAttendanceService {
   // Get attendance data for a specific student (admin/teacher access)
   async getStudentAttendance(studentId, filters = {}) {
     try {
-      // First, get student details to find their class and section
-      const studentResponse = await fetch(`${API_BASE_URL}/students/${studentId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!studentResponse.ok) {
-        throw new Error('Failed to fetch student details');
-      }
-
-      const studentData = await studentResponse.json();
-      const student = studentData.data;
-
-      // Now get attendance data for this student's class
       const queryParams = new URLSearchParams();
       
-      // Set default date range (last 30 days)
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
-      
-      queryParams.append('startDate', filters.startDate || startDate.toISOString().split('T')[0]);
-      queryParams.append('endDate', filters.endDate || endDate.toISOString().split('T')[0]);
+      // Set default date range (last 30 days) if not provided
+      if (filters.startDate) queryParams.append('startDate', filters.startDate);
+      if (filters.endDate) queryParams.append('endDate', filters.endDate);
+      if (filters.subject) queryParams.append('subject', filters.subject);
 
-      const url = `${API_BASE_URL}/attendance/class/${student.class}/${student.section}?${queryParams.toString()}`;
+      const url = `${API_BASE_URL}/attendance/student/${studentId}?${queryParams.toString()}`;
       
       const response = await fetch(url, {
         method: 'GET',
@@ -50,62 +33,7 @@ class AdminAttendanceService {
         throw new Error(data.message || 'Failed to fetch attendance data');
       }
 
-      // Filter records for this specific student and calculate summary
-      const studentRecords = data.data.history?.filter(record => 
-        record.rollNumber === student.rollNumber
-      ) || [];
-
-      // Calculate subject-wise summary
-      const subjectSummary = {};
-      studentRecords.forEach(record => {
-        if (!subjectSummary[record.subject]) {
-          subjectSummary[record.subject] = {
-            present: 0,
-            absent: 0,
-            late: 0,
-            total: 0
-          };
-        }
-        
-        subjectSummary[record.subject].total++;
-        if (record.status === 'present') {
-          subjectSummary[record.subject].present++;
-        } else if (record.status === 'absent') {
-          subjectSummary[record.subject].absent++;
-        } else if (record.status === 'late') {
-          subjectSummary[record.subject].late++;
-        }
-      });
-
-      // Calculate overall summary
-      const totalRecords = studentRecords.length;
-      const presentCount = studentRecords.filter(r => r.status === 'present').length;
-      const absentCount = studentRecords.filter(r => r.status === 'absent').length;
-      const lateCount = studentRecords.filter(r => r.status === 'late').length;
-      const overallPercentage = totalRecords > 0 ? Math.round((presentCount / totalRecords) * 100) : 0;
-
-      return {
-        student: {
-          name: `${student.firstName} ${student.lastName}`,
-          rollNumber: student.rollNumber,
-          class: student.class,
-          section: student.section
-        },
-        summary: {
-          present: presentCount,
-          absent: absentCount,
-          late: lateCount,
-          total: totalRecords,
-          percentage: overallPercentage
-        },
-        subjectSummary: Object.keys(subjectSummary).map(subject => ({
-          subject,
-          ...subjectSummary[subject],
-          percentage: subjectSummary[subject].total > 0 ? 
-            Math.round((subjectSummary[subject].present / subjectSummary[subject].total) * 100) : 0
-        })),
-        records: studentRecords.slice(0, 10) // Last 10 records
-      };
+      return data.data;
 
     } catch (error) {
       console.error('Error fetching student attendance:', error);
@@ -131,6 +59,60 @@ class AdminAttendanceService {
         hasData: false,
         error: error.message
       };
+    }
+  }
+
+  // Mark attendance for multiple students
+  async markAttendance(attendanceData) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/attendance/mark-attendance`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(attendanceData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to mark attendance');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      throw error;
+    }
+  }
+
+  // Get class attendance for a specific date
+  async getClassAttendance(classInfo, filters = {}) {
+    try {
+      const { class: studentClass, section } = classInfo;
+      const queryParams = new URLSearchParams();
+      
+      if (filters.date) queryParams.append('date', filters.date);
+      if (filters.subject) queryParams.append('subject', filters.subject);
+      if (filters.period) queryParams.append('period', filters.period);
+      if (filters.startDate) queryParams.append('startDate', filters.startDate);
+      if (filters.endDate) queryParams.append('endDate', filters.endDate);
+
+      const url = `${API_BASE_URL}/attendance/class/${studentClass}/${section}?${queryParams.toString()}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch class attendance');
+      }
+
+      return data.data;
+    } catch (error) {
+      console.error('Error fetching class attendance:', error);
+      throw error;
     }
   }
 

@@ -48,14 +48,14 @@ const Attendance = () => {
   }, [selectedDate, selectedSubject, selectedPeriod, students]);
 
   const loadExistingAttendance = async () => {
-    if (selectedClass === "all" || students.length === 0) return;
+    if (selectedClass === "all" || selectedSection === "all" || students.length === 0) return;
     
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?date=${selectedDate}&subject=${selectedSubject}&period=${selectedPeriod}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection}?date=${selectedDate}&subject=${selectedSubject}&period=${selectedPeriod}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -90,8 +90,8 @@ const Attendance = () => {
   };
 
   const loadAttendanceHistory = async () => {
-    if (selectedClass === "all") {
-      setError("Please select a specific class to view history");
+    if (selectedClass === "all" || selectedSection === "all") {
+      setError("Please select a specific class and section to view history");
       return;
     }
 
@@ -105,7 +105,7 @@ const Attendance = () => {
       startDate.setDate(startDate.getDate() - 30);
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection === "all" ? "A" : selectedSection}?startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection}?startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -210,8 +210,8 @@ const Attendance = () => {
       return;
     }
 
-    if (selectedClass === "all") {
-      setError("Please select a specific class to mark attendance");
+    if (selectedClass === "all" || selectedSection === "all") {
+      setError("Please select a specific class and section to mark attendance");
       return;
     }
 
@@ -254,7 +254,7 @@ const Attendance = () => {
         },
         body: JSON.stringify({
           class: selectedClass,
-          section: selectedSection === "all" ? "A" : selectedSection,
+          section: selectedSection,
           date: selectedDate,
           subject: selectedSubject,
           period: selectedPeriod,
@@ -467,7 +467,7 @@ const Attendance = () => {
                 onChange={(e) => setSelectedSection(e.target.value)}
                 disabled={selectedClass === "all"}
               >
-                <option value="all">All Sections</option>
+                <option value="all">Select Section</option>
                 <option value="A">Section A</option>
                 <option value="B">Section B</option>
                 <option value="C">Section C</option>
@@ -534,7 +534,7 @@ const Attendance = () => {
                 </span>
               )}
             </h5>
-            {selectedClass !== "all" && (
+            {selectedClass !== "all" && selectedSection !== "all" && (
               <div className="d-flex gap-2">
                 <button 
                   className="btn btn-outline-success btn-sm"
@@ -565,10 +565,10 @@ const Attendance = () => {
           </div>
         </div>
         <div className="card-body p-0">
-          {selectedClass === "all" ? (
+          {selectedClass === "all" || selectedSection === "all" ? (
             <div className="text-center py-5">
               <i className="bi bi-arrow-up-circle text-muted" style={{ fontSize: "3rem" }}></i>
-              <p className="text-muted mt-2 mb-0">Please select a class to view students</p>
+              <p className="text-muted mt-2 mb-0">Please select a class and section to view students</p>
             </div>
           ) : (
             <div className="table-responsive">
@@ -673,7 +673,7 @@ const Attendance = () => {
               Showing {filteredStudents.length} students
               {searchTerm && ` (filtered by "${searchTerm}")`}
             </span>
-            {selectedClass !== "all" && filteredStudents.length > 0 && (
+            {selectedClass !== "all" && selectedSection !== "all" && filteredStudents.length > 0 && (
               <button 
                 className="btn btn-primary"
                 onClick={handleSaveAttendance}
