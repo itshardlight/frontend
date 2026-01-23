@@ -29,18 +29,42 @@ const StudentResults = () => {
   const fetchResults = async (token, filterParams = {}) => {
     try {
       setLoading(true);
+      setError(""); // Clear previous errors
+      
+      console.log("Fetching results with token:", token ? "Token exists" : "No token");
+      console.log("Filter params:", filterParams);
+      
       const params = new URLSearchParams(filterParams);
       const response = await axios.get(
         `http://localhost:5000/api/results/my-results?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
+      console.log("API Response:", response.data);
+      
       if (response.data.success) {
         setResults(response.data.results || []);
+        console.log("Results set:", response.data.results?.length || 0, "items");
+      } else {
+        setError(response.data.message || "Failed to fetch results");
       }
     } catch (err) {
       console.error("Error fetching results:", err);
-      setError("Failed to fetch results");
+      console.error("Error response:", err.response?.data);
+      
+      if (err.response?.status === 401) {
+        setError("Authentication failed. Please login again.");
+        // Redirect to login
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else if (err.response?.status === 403) {
+        setError("Access denied. Student role required.");
+      } else if (err.response?.status === 404) {
+        setError("Student record not found. Please contact administration.");
+      } else {
+        setError(err.response?.data?.message || "Failed to fetch results");
+      }
     } finally {
       setLoading(false);
     }
