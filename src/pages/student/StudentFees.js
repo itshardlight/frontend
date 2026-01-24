@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import EsewaPaymentForm from "../../components/payment/EsewaPaymentForm";
 
 const StudentFees = () => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,6 +60,41 @@ const StudentFees = () => {
     } else {
       return <span className="badge bg-secondary">No Fee Set</span>;
     }
+  };
+
+  const handlePayNow = (amount = null) => {
+    const amountToPay = amount || (profile?.feeInfo?.pendingAmount || 0);
+    
+    // Ensure we have a valid user ID
+    const userId = user._id || user.id;
+    if (!userId) {
+      setError('User ID not found. Please login again.');
+      return;
+    }
+    
+    console.log('Payment initiated:', {
+      user: user,
+      userId: userId,
+      amount: amountToPay,
+      profile: profile
+    });
+    
+    setPaymentAmount(amountToPay);
+    setShowPaymentForm(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentForm(false);
+    // Refresh profile data to show updated payment status
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchProfile(token);
+    }
+  };
+
+  const handlePaymentError = (error) => {
+    console.error('Payment error:', error);
+    setError(`Payment failed: ${error.message}`);
   };
 
   if (!user) return null;
@@ -284,6 +322,115 @@ const StudentFees = () => {
                 </div>
               </div>
             </div>
+
+            {/* Payment Section */}
+            {profile.feeInfo.pendingAmount > 0 ? (
+              <div className="card shadow-sm mb-4 border-primary">
+                <div className="card-header bg-primary text-white">
+                  <h5 className="mb-0">
+                    <i className="bi bi-credit-card me-2"></i>
+                    Make Payment
+                  </h5>
+                </div>
+                <div className="card-body">
+                  {!showPaymentForm ? (
+                    <div className="row align-items-center">
+                      <div className="col-md-8">
+                        <h6 className="text-danger mb-2">
+                          Outstanding Amount: Rs.{profile.feeInfo.pendingAmount.toLocaleString()}
+                        </h6>
+                        <p className="text-muted mb-0">
+                          Pay your fees securely using eSewa. You can pay the full amount or make a partial payment.
+                        </p>
+                        {profile.feeInfo.dueDate && new Date(profile.feeInfo.dueDate) < new Date() && (
+                          <div className="alert alert-warning mt-2 mb-0">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Overdue:</strong> Payment was due on {new Date(profile.feeInfo.dueDate).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="col-md-4 text-end">
+                        <div className="d-grid gap-2">
+                          <button 
+                            className="btn btn-success btn-lg"
+                            onClick={() => handlePayNow()}
+                          >
+                            <i className="bi bi-credit-card me-2"></i>
+                            Pay Full Amount
+                          </button>
+                          <div className="input-group">
+                            <input 
+                              type="number" 
+                              className="form-control" 
+                              placeholder="Custom amount"
+                              min="1"
+                              max={profile.feeInfo.pendingAmount}
+                              id="customAmount"
+                            />
+                            <button 
+                              className="btn btn-outline-primary"
+                              onClick={() => {
+                                const customAmount = document.getElementById('customAmount').value;
+                                if (customAmount && customAmount > 0) {
+                                  handlePayNow(parseFloat(customAmount));
+                                }
+                              }}
+                            >
+                              Pay Custom
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h6 className="mb-0">Payment Amount: Rs.{paymentAmount.toLocaleString()}</h6>
+                        <button 
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => setShowPaymentForm(false)}
+                        >
+                          <i className="bi bi-arrow-left me-1"></i>
+                          Back
+                        </button>
+                      </div>
+                      <EsewaPaymentForm
+                        studentId={user._id || user.id}
+                        feeType="tuition"
+                        amount={paymentAmount}
+                        description={`Fee Payment - ${profile.firstName && profile.lastName ? `${profile.firstName} ${profile.lastName}` : user.fullName || user.username}`}
+                        successUrl={`${window.location.origin}/payment/success`}
+                        failureUrl={`${window.location.origin}/payment/failure`}
+                        onPaymentSuccess={handlePaymentSuccess}
+                        onPaymentError={handlePaymentError}
+                        isProduction={false} // Set to true for production
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : profile.feeInfo.totalFee > 0 && (
+              <div className="card shadow-sm mb-4 border-success">
+                <div className="card-header bg-success text-white">
+                  <h5 className="mb-0">
+                    <i className="bi bi-check-circle me-2"></i>
+                    Payment Status
+                  </h5>
+                </div>
+                <div className="card-body text-center">
+                  <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '3rem' }}></i>
+                  <h4 className="text-success mt-2">All Fees Paid!</h4>
+                  <p className="text-muted">
+                    Congratulations! You have successfully paid all your fees for this term.
+                  </p>
+                  {profile.feeInfo.lastPaymentDate && (
+                    <small className="text-muted">
+                      Last payment made on: {new Date(profile.feeInfo.lastPaymentDate).toLocaleDateString()}
+                    </small>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Payment History */}
             {profile.feeInfo.feeHistory && profile.feeInfo.feeHistory.length > 0 && (
