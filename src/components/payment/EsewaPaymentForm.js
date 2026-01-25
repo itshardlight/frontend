@@ -1,40 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import EsewaPaymentButton from './EsewaPaymentButton';
 import axios from 'axios';
+import crypto from 'crypto-js';
 
 /**
- * EsewaPaymentForm Component
- * A complete payment form that handles secret key retrieval from backend
+ * Simple eSewa Payment Form - Matches eSewa's exact format
  */
 const EsewaPaymentForm = ({
-  // Payment details
   studentId,
   feeType,
   amount,
   taxAmount = 0,
   description = 'Fee Payment',
-  
-  // URLs
   successUrl = `${window.location.origin}/payment/success`,
   failureUrl = `${window.location.origin}/payment/failure`,
-  
-  // Configuration
-  isProduction = false,
-  
-  // Callbacks
-  onPaymentSuccess,
-  onPaymentFailure,
-  onPaymentError
+  isProduction = false
 }) => {
-  const [secretKey, setSecretKey] = useState(null);
-  const [transactionUuid, setTransactionUuid] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3;
+  const [paymentData, setPaymentData] = useState(null);
 
-  // Calculate total amount
+  // Calculate total amount (keep as simple numbers, not paisa)
   const totalAmount = amount + taxAmount;
+
+  /**
+   * Generate eSewa signature
+   */
+  const generateSignature = (totalAmount, transactionUuid, productCode, secretKey) => {
+    const message = `total_amount=${totalAmount},transaction_uuid=${transactionUuid},product_code=${productCode}`;
+    const hash = crypto.HmacSHA256(message, secretKey);
+    return crypto.enc.Base64.stringify(hash);
+  };
 
   /**
    * Initialize payment data from backend
@@ -44,32 +39,20 @@ const EsewaPaymentForm = ({
       try {
         setLoading(true);
         
-        // Get authentication token
         const token = localStorage.getItem('token');
         if (!token) {
-          throw new Error('Authentication token not found. Please login again.');
+          throw new Error('Please login to make payment');
         }
 
-        // Validate required parameters
-        if (!studentId) {
-          throw new Error('Student ID is required for payment initialization');
-        }
-        
-        if (!amount || amount <= 0) {
-          throw new Error('Valid payment amount is required');
+        if (!studentId || !amount || amount <= 0) {
+          throw new Error('Invalid payment parameters');
         }
 
-        console.log('Initializing payment with:', {
-          studentId,
-          feeType,
-          amount,
-          taxAmount,
-          description
-        });
+        console.log('Initializing payment:', { studentId, feeType, amount, taxAmount });
         
-        // Call your backend API to get payment configuration
+        // Get payment configuration from backend
         const response = await axios.post('http://localhost:5000/api/payment/esewa/initialize', {
-          studentId: String(studentId), // Ensure studentId is a string
+          studentId: String(studentId),
           feeType,
           amount: Number(amount),
           taxAmount: Number(taxAmount || 0),
@@ -81,119 +64,56 @@ const EsewaPaymentForm = ({
           }
         });
 
-        console.log('Payment initialization response:', response.data);
-
-        const { secretKey, transactionUuid } = response.data;
+        const { secretKey, transactionUuid, productCode } = response.data;
         
-        setSecretKey(secretKey);
-        setTransactionUuid(transactionUuid);
+        // Generate signature
+        const signature = generateSignature(totalAmount, transactionUuid, productCode, secretKey);
+        
+        // Prepare form data exactly like eSewa format
+        const formData = {
+          amount: amount.toString(),
+          tax_amount: taxAmount.toString(),
+          total_amount: totalAmount.toString(),
+          transaction_uuid: transactionUuid,
+          product_code: productCode,
+          product_service_charge: '0',
+          product_delivery_charge: '0',
+          success_url: successUrl,
+          failure_url: failureUrl,
+          signed_field_names: 'total_amount,transaction_uuid,product_code',
+          signature: signature
+        };
+
+        setPaymentData(formData);
         setError(null);
         
       } catch (err) {
-        console.error('Failed to initialize payment:', err);
-        
-        // More detailed error handling
-        if (err.response) {
-          // Server responded with error status
-          console.error('Server error response:', err.response.data);
-          const errorMessage = err.response.data?.message || 'Server error occurred';
-          setError(`Payment initialization failed: ${errorMessage}`);
-        } else if (err.request) {
-          // Request was made but no response received
-          console.error('No response received:', err.request);
-          setError('Unable to connect to payment server. Please check your internet connection and try again.');
-        } else {
-          // Something else happened
-          console.error('Request setup error:', err.message);
-          setError(`Payment initialization error: ${err.message}`);
-        }
-
-        // Auto-retry for specific errors
-        if (err.response?.data?.shouldRetry && retryCount < maxRetries) {
-          console.log(`Auto-retrying payment initialization (attempt ${retryCount + 1}/${maxRetries})`);
-          setRetryCount(prev => prev + 1);
-          setTimeout(() => {
-            // This will trigger useEffect again
-            setError(null);
-            setLoading(true);
-          }, 1000);
-          return;
-        }
+        console.error('Payment initialization failed:', err);
+        setError(err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
     };
 
     if (studentId && feeType && amount) {
-      console.log('Payment form parameters:', {
-        studentId,
-        feeType,
-        amount,
-        taxAmount,
-        description,
-        hasToken: !!localStorage.getItem('token')
-      });
       initializePayment();
     } else {
-      console.error('Missing required payment parameters:', { 
-        studentId: !!studentId, 
-        feeType: !!feeType, 
-        amount: !!amount,
-        actualValues: { studentId, feeType, amount }
-      });
-      setError('Missing required payment information. Please refresh the page and try again.');
+      setError('Missing required payment information');
       setLoading(false);
     }
-  }, [studentId, feeType, amount, taxAmount, description, retryCount]);
+  }, [studentId, feeType, amount, taxAmount, totalAmount, successUrl, failureUrl, description]);
 
   /**
-   * Handle payment start
+   * Handle retry
    */
-  const handlePaymentStart = () => {
-    console.log('Payment started for transaction:', transactionUuid);
-  };
-
-  /**
-   * Handle manual retry
-   */
-  const handleRetry = async () => {
+  const handleRetry = () => {
     setError(null);
     setLoading(true);
-    setSecretKey(null);
-    setTransactionUuid(null);
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (token && studentId) {
-        // Clean up old pending transactions first
-        console.log('Cleaning up old transactions before retry...');
-        await axios.delete(`http://localhost:5000/api/payment/cleanup/${studentId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        console.log('Cleanup completed, retrying payment initialization...');
-      }
-    } catch (cleanupError) {
-      console.warn('Cleanup failed, but continuing with retry:', cleanupError.message);
-    }
-    
-    // Force re-initialization after cleanup
-    setTimeout(() => {
-      // Trigger useEffect by updating a dependency
-      setRetryCount(prev => prev + 1);
-    }, 500);
+    setPaymentData(null);
+    // This will trigger useEffect to re-initialize
   };
 
-  /**
-   * Handle payment error
-   */
-  const handlePaymentError = (error) => {
-    console.error('Payment error:', error);
-    if (onPaymentError) {
-      onPaymentError(error);
-    }
-  };
-
-  // Show loading state
+  // Loading state
   if (loading) {
     return (
       <div className="text-center p-4">
@@ -205,28 +125,20 @@ const EsewaPaymentForm = ({
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="alert alert-danger" role="alert">
-        <h6>Payment Initialization Error</h6>
+        <h6>Payment Error</h6>
         <p>{error}</p>
-        <button 
-          className="btn btn-outline-danger btn-sm me-2"
-          onClick={handleRetry}
-        >
-          <i className="bi bi-arrow-clockwise me-1"></i>
-          Retry
-        </button>
-        <button 
-          className="btn btn-outline-secondary btn-sm"
-          onClick={() => window.location.reload()}
-        >
-          Refresh Page
+        <button className="btn btn-outline-danger btn-sm" onClick={handleRetry}>
+          Try Again
         </button>
       </div>
     );
   }
 
+  // Payment form - exactly like eSewa format
   return (
     <div className="esewa-payment-form">
       <div className="card">
@@ -238,60 +150,51 @@ const EsewaPaymentForm = ({
         </div>
         <div className="card-body">
           <div className="row mb-3">
-            <div className="col-sm-6">
-              <strong>Description:</strong>
-            </div>
-            <div className="col-sm-6">
-              {description}
-            </div>
+            <div className="col-sm-6"><strong>Description:</strong></div>
+            <div className="col-sm-6">{description}</div>
           </div>
           
           <div className="row mb-3">
-            <div className="col-sm-6">
-              <strong>Amount:</strong>
-            </div>
-            <div className="col-sm-6">
-              Rs. {amount.toFixed(2)}
-            </div>
+            <div className="col-sm-6"><strong>Amount:</strong></div>
+            <div className="col-sm-6">Rs. {amount.toFixed(2)}</div>
           </div>
           
           {taxAmount > 0 && (
             <div className="row mb-3">
-              <div className="col-sm-6">
-                <strong>Tax:</strong>
-              </div>
-              <div className="col-sm-6">
-                Rs. {taxAmount.toFixed(2)}
-              </div>
+              <div className="col-sm-6"><strong>Tax:</strong></div>
+              <div className="col-sm-6">Rs. {taxAmount.toFixed(2)}</div>
             </div>
           )}
           
           <div className="row mb-4">
-            <div className="col-sm-6">
-              <strong>Total Amount:</strong>
-            </div>
-            <div className="col-sm-6">
-              <strong>Rs. {totalAmount.toFixed(2)}</strong>
-            </div>
+            <div className="col-sm-6"><strong>Total Amount:</strong></div>
+            <div className="col-sm-6"><strong>Rs. {totalAmount.toFixed(2)}</strong></div>
           </div>
 
-          <div className="d-grid">
-            <EsewaPaymentButton
-              amount={amount}
-              taxAmount={taxAmount}
-              totalAmount={totalAmount}
-              transactionUuid={transactionUuid}
-              productCode={isProduction ? 'EPAY' : 'EPAYTEST'}
-              successUrl={successUrl}
-              failureUrl={failureUrl}
-              secretKey={secretKey}
-              isProduction={isProduction}
-              buttonText="Pay with eSewa"
-              buttonClassName="btn btn-success btn-lg"
-              onPaymentStart={handlePaymentStart}
-              onError={handlePaymentError}
-            />
-          </div>
+          {/* eSewa Payment Form - Exact Format */}
+          <form 
+            action={isProduction ? "https://epay.esewa.com.np/api/epay/main/v2/form" : "https://rc-epay.esewa.com.np/api/epay/main/v2/form"} 
+            method="POST"
+          >
+            <input type="hidden" name="amount" value={paymentData.amount} />
+            <input type="hidden" name="tax_amount" value={paymentData.tax_amount} />
+            <input type="hidden" name="total_amount" value={paymentData.total_amount} />
+            <input type="hidden" name="transaction_uuid" value={paymentData.transaction_uuid} />
+            <input type="hidden" name="product_code" value={paymentData.product_code} />
+            <input type="hidden" name="product_service_charge" value={paymentData.product_service_charge} />
+            <input type="hidden" name="product_delivery_charge" value={paymentData.product_delivery_charge} />
+            <input type="hidden" name="success_url" value={paymentData.success_url} />
+            <input type="hidden" name="failure_url" value={paymentData.failure_url} />
+            <input type="hidden" name="signed_field_names" value={paymentData.signed_field_names} />
+            <input type="hidden" name="signature" value={paymentData.signature} />
+            
+            <div className="d-grid">
+              <button type="submit" className="btn btn-success btn-lg">
+                <i className="bi bi-credit-card me-2"></i>
+                Pay with eSewa
+              </button>
+            </div>
+          </form>
           
           <div className="mt-3 text-center">
             <small className="text-muted">
