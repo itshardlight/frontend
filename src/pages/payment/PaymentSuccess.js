@@ -16,20 +16,63 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const verifyPayment = async () => {
       try {
-        // Get parameters from URL
-        const oid = searchParams.get('oid'); // Transaction UUID
-        const amt = searchParams.get('amt'); // Amount
-        const refId = searchParams.get('refId'); // eSewa reference ID
+        // Check if we have the new data format (base64 encoded)
+        const data = searchParams.get('data');
+        
+        let oid, amt, refId;
+        
+        if (data) {
+          // New format: decode base64 data
+          try {
+            const decodedData = JSON.parse(atob(data));
+            console.log('Decoded payment data:', decodedData);
+            
+            oid = decodedData.transaction_uuid;
+            amt = decodedData.total_amount;
+            refId = decodedData.transaction_code;
+            
+            // Show the decoded data for now
+            setPaymentDetails({
+              transactionUuid: oid,
+              amount: amt,
+              referenceId: refId,
+              status: decodedData.status,
+              createdAt: new Date().toISOString()
+            });
+            setVerificationStatus('success');
+            return;
+            
+          } catch (decodeError) {
+            console.error('Failed to decode payment data:', decodeError);
+            throw new Error('Invalid payment data format');
+          }
+        } else {
+          // Old format: get parameters from URL
+          oid = searchParams.get('oid'); // Transaction UUID
+          amt = searchParams.get('amt'); // Amount
+          refId = searchParams.get('refId'); // eSewa reference ID
+        }
 
         if (!oid || !amt || !refId) {
           throw new Error('Missing payment verification parameters');
         }
 
+        // Get authentication token
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication required. Please login again.');
+        }
+
         // Verify payment with your backend
-        const response = await axios.post('/api/payment/esewa/verify', {
+        const response = await axios.post('http://localhost:5000/api/payment/esewa/verify', {
           transactionUuid: oid,
           amount: amt,
           referenceId: refId
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
 
         if (response.data.success) {

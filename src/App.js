@@ -27,6 +27,10 @@ import {
   FeeDepartmentDashboard, 
   FeePage 
 } from "./pages/fee-department";
+import {
+  PaymentSuccess,
+  PaymentFailure
+} from "./pages/payment";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 
@@ -63,6 +67,10 @@ function App() {
         {/* Fee Department Routes */}
         <Route path="/fee-department/dashboard" element={<FeeDepartmentDashboard />} />
         <Route path="/fee-department/fees" element={<FeePage />} />
+        
+        {/* Payment Routes */}
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failure" element={<PaymentFailure />} />
         
         {/* Legacy Routes for Backward Compatibility */}
         <Route path="/student-profile" element={<StudentProfile />} />
