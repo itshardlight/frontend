@@ -377,53 +377,7 @@ const Dashboard = () => {
   // Teacher/Admin Dashboard Content
   const TeacherDashboard = () => (
     <div>
-      {/* Admin/Teacher Stats Row */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary bg-opacity-10 border-primary">
-            <div className="card-body text-center">
-              <i className="bi bi-people text-primary" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-primary">
-                {dashboardStats.loading ? '...' : dashboardStats.totalStudents}
-              </h4>
-              <small className="text-muted">Total Students</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-success bg-opacity-10 border-success">
-            <div className="card-body text-center">
-              <i className="bi bi-cash-stack text-success" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-success">
-                Rs.{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
-              </h4>
-              <small className="text-muted">Fee Collected</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning bg-opacity-10 border-warning">
-            <div className="card-body text-center">
-              <i className="bi bi-clock text-warning" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-warning">
-                Rs.{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
-              </h4>
-              <small className="text-muted">Pending Fees</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info bg-opacity-10 border-info">
-            <div className="card-body text-center">
-              <i className="bi bi-graph-up text-info" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-info">
-                {dashboardStats.loading ? '...' : Math.round((dashboardStats.totalFeeCollected / (dashboardStats.totalFeeCollected + dashboardStats.pendingFees)) * 100) || 0}%
-              </h4>
-              <small className="text-muted">Collection Rate</small>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
       {/* Admin/Teacher Action Cards */}
       <div className="row g-4">
@@ -517,45 +471,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent Activities */}
-        <div className="col-md-8">
-          <div className="card shadow-sm h-100">
-            <div className="card-header bg-light">
-              <h6 className="mb-0">
-                <i className="bi bi-activity me-2"></i>
-                System Activities
-              </h6>
-            </div>
-            <div className="card-body">
-              {dashboardStats.loading ? (
-                <div className="text-center">
-                  <div className="spinner-border spinner-border-sm" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              ) : dashboardStats.recentActivities.length > 0 ? (
-                <div className="list-group list-group-flush">
-                  {dashboardStats.recentActivities.map((activity, index) => (
-                    <div key={index} className="list-group-item border-0 px-0">
-                      <div className="d-flex align-items-center">
-                        <i className={`${activity.icon} text-${activity.type} me-3`}></i>
-                        <div className="flex-grow-1">
-                          <div className="fw-bold">{activity.text}</div>
-                          <small className="text-muted">{activity.time}</small>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-muted">
-                  <i className="bi bi-info-circle me-2"></i>
-                  No recent activities
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      
       </div>
     </div>
   );
@@ -605,53 +521,7 @@ const Dashboard = () => {
   // Fee Department Dashboard Content
   const FeeDepartmentDashboard = () => (
     <>
-      {/* Quick Stats */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card shadow-sm border-success">
-            <div className="card-body text-center">
-              <h6 className="text-muted small">Total Collected</h6>
-              <h3 className="text-success mb-0">
-                Rs.{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
-              </h3>
-              <small className="text-muted">This Year</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-warning">
-            <div className="card-body text-center">
-              <h6 className="text-muted small">Pending Fees</h6>
-              <h3 className="text-warning mb-0">
-                Rs.{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
-              </h3>
-              <small className="text-muted">Due Amount</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-danger">
-            <div className="card-body text-center">
-              <h6 className="text-muted small">Total Students</h6>
-              <h3 className="text-danger mb-0">
-                {dashboardStats.loading ? '...' : dashboardStats.totalStudents}
-              </h3>
-              <small className="text-muted">Registered</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-primary">
-            <div className="card-body text-center">
-              <h6 className="text-muted small">Collection Rate</h6>
-              <h3 className="text-primary mb-0">
-                {dashboardStats.loading ? '...' : Math.round((dashboardStats.totalFeeCollected / (dashboardStats.totalFeeCollected + dashboardStats.pendingFees)) * 100) || 0}%
-              </h3>
-              <small className="text-muted">Success Rate</small>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
       {/* Main Features */}
       <div className="row g-4">

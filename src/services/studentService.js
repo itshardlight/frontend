@@ -123,6 +123,18 @@ export const studentService = {
     });
 
     return handleResponse(response);
+  },
+
+  // Get student counts by class and section (public)
+  getClassSectionCounts: async () => {
+    const response = await fetch(`${API_BASE_URL}/students/counts/class-section`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return handleResponse(response);
   }
 };
 

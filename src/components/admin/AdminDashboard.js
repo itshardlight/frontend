@@ -19,45 +19,7 @@ const AdminDashboard = () => {
         console.log('Rendering default dashboard');
         return (
           <>
-            {/* Quick Stats */}
-            <div className="row g-3 mb-4">
-              <div className="col-md-3">
-                <div className="card shadow-sm border-primary">
-                  <div className="card-body text-center">
-                    <i className="bi bi-people-fill icon-primary" style={{ fontSize: "2rem" }}></i>
-                    <h3 className="mt-2 mb-0">0</h3>
-                    <small className="text-muted">Total Students</small>
-                  </div>
-                </div>
-              </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-success">
-            <div className="card-body text-center">
-              <i className="bi bi-person-badge icon-accent" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">0</h3>
-              <small className="text-muted">Total Teachers</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-warning">
-            <div className="card-body text-center">
-              <i className="bi bi-door-open" style={{ fontSize: "2rem", color: "#f59e0b" }}></i>
-              <h3 className="mt-2 mb-0">0</h3>
-              <small className="text-muted">Total Classes</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-info">
-            <div className="card-body text-center">
-              <i className="bi bi-person-plus icon-secondary" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">0</h3>
-              <small className="text-muted">New Admissions</small>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Main Features */}
       <div className="row g-4">
