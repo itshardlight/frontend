@@ -9,13 +9,11 @@ const StudentRegistration = () => {
     totalStudents: 0,
     activeStudents: 0,
     newThisMonth: 0,
-    totalClasses: 10
+    totalClasses: 8
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [classSectionCounts, setClassSectionCounts] = useState({});
-  const [availableSections, setAvailableSections] = useState([]);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,6 +23,9 @@ const StudentRegistration = () => {
     email: "",
     phone: "",
     address: "",
+    city: "",
+    state: "",
+    zipCode: "",
     class: "",
     section: "",
     rollNumber: "",
@@ -40,7 +41,6 @@ const StudentRegistration = () => {
   // Load stats on component mount
   useEffect(() => {
     loadStats();
-    loadClassSectionCounts();
   }, []);
 
   const loadStats = async () => {
@@ -50,69 +50,6 @@ const StudentRegistration = () => {
     } catch (err) {
       console.error("Failed to load stats:", err);
     }
-  };
-
-  const loadClassSectionCounts = async () => {
-    try {
-      const response = await studentService.getClassSectionCounts();
-      setClassSectionCounts(response.data);
-    } catch (err) {
-      console.error("Failed to load class-section counts:", err);
-    }
-  };
-
-  // Update available sections when class changes
-  useEffect(() => {
-    if (formData.class) {
-      updateAvailableSections(formData.class);
-    } else {
-      setAvailableSections([]);
-    }
-  }, [formData.class, classSectionCounts]);
-
-  const updateAvailableSections = (selectedClass) => {
-    const sections = ['A', 'B', 'C'];
-    const availableSections = [];
-    
-    sections.forEach(section => {
-      const currentCount = classSectionCounts[selectedClass]?.[section] || 0;
-      
-      // Always show section A
-      if (section === 'A') {
-        availableSections.push({
-          value: section,
-          label: `Section ${section} (${currentCount}/25)`,
-          count: currentCount,
-          available: currentCount < 25
-        });
-      }
-      // Show section B only if section A has students or if section B already has students
-      else if (section === 'B') {
-        const sectionACount = classSectionCounts[selectedClass]?.['A'] || 0;
-        if (sectionACount > 0 || currentCount > 0) {
-          availableSections.push({
-            value: section,
-            label: `Section ${section} (${currentCount}/25)`,
-            count: currentCount,
-            available: currentCount < 25
-          });
-        }
-      }
-      // Show section C only if section B has students or if section C already has students
-      else if (section === 'C') {
-        const sectionBCount = classSectionCounts[selectedClass]?.['B'] || 0;
-        if (sectionBCount > 0 || currentCount > 0) {
-          availableSections.push({
-            value: section,
-            label: `Section ${section} (${currentCount}/25)`,
-            count: currentCount,
-            available: currentCount < 25
-          });
-        }
-      }
-    });
-    
-    setAvailableSections(availableSections);
   };
 
   const handleChange = async (e) => {
@@ -166,6 +103,9 @@ const StudentRegistration = () => {
       email: "",
       phone: "",
       address: "",
+      city: "",
+      state: "",
+      zipCode: "",
       class: "",
       section: "",
       rollNumber: "",
@@ -192,9 +132,8 @@ const StudentRegistration = () => {
       // Reset form
       resetForm();
 
-      // Reload stats and counts
+      // Reload stats
       loadStats();
-      loadClassSectionCounts();
       
     } catch (err) {
       setError(`Failed to register student: ` + err.message);
@@ -409,6 +348,39 @@ const StudentRegistration = () => {
                   required
                 ></textarea>
               </div>
+              <div className="col-md-4">
+                <label className="form-label">City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  className="form-control"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">State *</label>
+                <input
+                  type="text"
+                  name="state"
+                  className="form-control"
+                  value={formData.state}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Zip Code *</label>
+                <input
+                  type="text"
+                  name="zipCode"
+                  className="form-control"
+                  value={formData.zipCode}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
             {/* Academic Information */}
@@ -426,16 +398,10 @@ const StudentRegistration = () => {
                   required
                 >
                   <option value="">Select Class</option>
-                  <option value="1">Class 1</option>
-                  <option value="2">Class 2</option>
-                  <option value="3">Class 3</option>
-                  <option value="4">Class 4</option>
-                  <option value="5">Class 5</option>
-                  <option value="6">Class 6</option>
-                  <option value="7">Class 7</option>
-                  <option value="8">Class 8</option>
                   <option value="9">Class 9</option>
                   <option value="10">Class 10</option>
+                  <option value="11">Class 11</option>
+                  <option value="12">Class 12</option>
                 </select>
               </div>
               <div className="col-md-4">
@@ -446,35 +412,12 @@ const StudentRegistration = () => {
                   value={formData.section}
                   onChange={handleChange}
                   required
-                  disabled={!formData.class}
                 >
                   <option value="">Select Section</option>
-                  {availableSections.map(section => (
-                    <option 
-                      key={section.value} 
-                      value={section.value}
-                      disabled={!section.available}
-                      style={{ 
-                        color: section.available ? 'inherit' : '#dc3545',
-                        fontWeight: section.available ? 'normal' : 'bold'
-                      }}
-                    >
-                      {section.label} {!section.available ? '(Full)' : ''}
-                    </option>
-                  ))}
+                  <option value="A">Section A</option>
+                  <option value="B">Section B</option>
+                  <option value="C">Section C</option>
                 </select>
-                {formData.class && availableSections.length === 0 && (
-                  <small className="text-muted">
-                    <i className="bi bi-info-circle me-1"></i>
-                    Section A will be available once you select this class
-                  </small>
-                )}
-                {formData.section && availableSections.find(s => s.value === formData.section && !s.available) && (
-                  <small className="text-danger">
-                    <i className="bi bi-exclamation-triangle me-1"></i>
-                    This section is full (25/25 students)
-                  </small>
-                )}
               </div>
               <div className="col-md-4">
                 <label className="form-label">Roll Number *</label>
