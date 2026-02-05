@@ -160,45 +160,7 @@ const StudentRegistration = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card shadow-sm border-primary">
-            <div className="card-body text-center">
-              <i className="bi bi-people-fill text-primary" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.totalStudents}</h3>
-              <small className="text-muted">Total Students</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-success">
-            <div className="card-body text-center">
-              <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.activeStudents}</h3>
-              <small className="text-muted">Active Students</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-warning">
-            <div className="card-body text-center">
-              <i className="bi bi-person-plus-fill text-warning" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.newThisMonth}</h3>
-              <small className="text-muted">New This Month</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card shadow-sm border-info">
-            <div className="card-body text-center">
-              <i className="bi bi-door-open text-info" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.totalClasses}</h3>
-              <small className="text-muted">Total Classes</small>
-            </div>
-          </div>
-        </div>
-      </div>
+     
 
       {/* Global Success/Error Messages */}
       {success && (
