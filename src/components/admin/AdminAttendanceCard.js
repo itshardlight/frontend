@@ -35,7 +35,7 @@ const AdminAttendanceCard = ({ studentId }) => {
 
   if (loading) {
     return (
-      <div className="card shadow-sm">
+      <div className="card">
         <div className="card-header bg-info text-white">
           <h6 className="mb-0">
             <i className="bi bi-calendar-check me-2"></i>
@@ -43,9 +43,7 @@ const AdminAttendanceCard = ({ studentId }) => {
           </h6>
         </div>
         <div className="card-body text-center">
-          <div className="spinner-border spinner-border-sm text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <div className="spinner-border spinner-border-sm text-primary"></div>
           <p className="mt-2 mb-0 text-muted small">Loading attendance...</p>
         </div>
       </div>
@@ -54,7 +52,7 @@ const AdminAttendanceCard = ({ studentId }) => {
 
   if (error || !attendanceData) {
     return (
-      <div className="card shadow-sm">
+      <div className="card">
         <div className="card-header bg-info text-white">
           <h6 className="mb-0">
             <i className="bi bi-calendar-check me-2"></i>
@@ -62,7 +60,7 @@ const AdminAttendanceCard = ({ studentId }) => {
           </h6>
         </div>
         <div className="card-body">
-          <div className="alert alert-warning alert-sm mb-0" role="alert">
+          <div className="alert alert-warning mb-0">
             <i className="bi bi-exclamation-triangle me-2"></i>
             <small>{error || 'No attendance data available'}</small>
           </div>
@@ -75,7 +73,7 @@ const AdminAttendanceCard = ({ studentId }) => {
 
   if (!hasData) {
     return (
-      <div className="card shadow-sm">
+      <div className="card">
         <div className="card-header bg-info text-white">
           <h6 className="mb-0">
             <i className="bi bi-calendar-check me-2"></i>
@@ -83,7 +81,7 @@ const AdminAttendanceCard = ({ studentId }) => {
           </h6>
         </div>
         <div className="card-body">
-          <div className="alert alert-info alert-sm mb-0" role="alert">
+          <div className="alert alert-info mb-0">
             <i className="bi bi-info-circle me-2"></i>
             <small>No attendance records found for the last 30 days</small>
           </div>
@@ -93,7 +91,7 @@ const AdminAttendanceCard = ({ studentId }) => {
   }
 
   return (
-    <div className="card shadow-sm">
+    <div className="card">
       <div className="card-header bg-info text-white">
         <h6 className="mb-0">
           <i className="bi bi-calendar-check me-2"></i>
@@ -132,44 +130,8 @@ const AdminAttendanceCard = ({ studentId }) => {
           </div>
         </div>
 
-        {/* Subject-wise Summary */}
-        {subjectSummary && subjectSummary.length > 0 && (
-          <div>
-            <h6 className="text-muted mb-2">
-              <i className="bi bi-book me-1"></i>
-              Subject-wise
-            </h6>
-            <div className="row g-1">
-              {subjectSummary.slice(0, 4).map((subject, index) => (
-                <div key={index} className="col-6">
-                  <div className="d-flex justify-content-between align-items-center p-1 border rounded">
-                    <div>
-                      <small className="fw-bold">{subject.subject}</small>
-                      <br />
-                      <small className="text-muted">
-                        {subject.present}/{subject.total}
-                      </small>
-                    </div>
-                    <span className={`badge bg-${getPercentageColor(subject.percentage)} badge-sm`}>
-                      {subject.percentage}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {subjectSummary.length > 4 && (
-              <div className="text-center mt-2">
-                <small className="text-muted">
-                  +{subjectSummary.length - 4} more subjects
-                </small>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Total Records Info */}
-        <div className="mt-3 pt-2 border-top">
+        <div className="pt-2 border-top">
           <small className="text-muted">
             <i className="bi bi-calendar3 me-1"></i>
             Total records: {summary.total} classes
