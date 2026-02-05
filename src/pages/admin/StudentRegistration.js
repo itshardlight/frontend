@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { studentService } from "../../services/studentService";
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("register");
+  const [students, setStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
+  const [studentsError, setStudentsError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterClass, setFilterClass] = useState("");
+  const [filterSection, setFilterSection] = useState("");
   const [stats, setStats] = useState({
     totalStudents: 0,
     activeStudents: 0,
@@ -41,7 +49,10 @@ const StudentRegistration = () => {
   // Load stats on component mount
   useEffect(() => {
     loadStats();
-  }, []);
+    if (activeTab === "manage") {
+      fetchStudents();
+    }
+  }, [activeTab]);
 
   const loadStats = async () => {
     try {
@@ -49,6 +60,47 @@ const StudentRegistration = () => {
       setStats(response.data);
     } catch (err) {
       console.error("Failed to load stats:", err);
+    }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get("http://localhost:5000/api/students", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        setStudents(response.data.data);
+        // Update stats with actual data
+        setStats(prev => ({
+          ...prev,
+          totalStudents: response.data.data.length,
+          activeStudents: response.data.data.filter(s => s.status === 'active').length
+        }));
+      }
+    } catch (err) {
+      setStudentsError("Failed to load students");
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  const handleDeleteStudent = async (studentId) => {
+    if (!window.confirm("Are you sure you want to delete this student? This will also delete their user account.")) {
+      return;
+    }
+
+    try {
+      await studentService.deleteStudent(studentId);
+      setSuccess("Student deleted successfully!");
+      fetchStudents();
+      loadStats();
+    } catch (err) {
+      setStudentsError(err.message || "Failed to delete student");
     }
   };
 
@@ -134,6 +186,7 @@ const StudentRegistration = () => {
 
       // Reload stats
       loadStats();
+      fetchStudents(); // Refresh student list if on manage tab
       
     } catch (err) {
       setError(`Failed to register student: ` + err.message);
@@ -142,25 +195,66 @@ const StudentRegistration = () => {
     }
   };
 
+  // Get unique classes and sections for filters
+  const uniqueClasses = [...new Set(students.map(s => s.class))].sort();
+  const uniqueSections = [...new Set(students.map(s => s.section))].sort();
+
+  // Filter students based on search and filters
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = searchTerm === "" || 
+      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesClass = filterClass === "" || student.class === filterClass;
+    const matchesSection = filterSection === "" || student.section === filterSection;
+
+    return matchesSearch && matchesClass && matchesSection;
+  });
+
   return (
     <div className="container-fluid py-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="mb-1">
-            <i className="bi bi-person-plus me-2 text-primary"></i>
-            Student Registration
+            <i className="bi bi-people me-2 text-primary"></i>
+            My Students
           </h2>
-          <p className="text-muted mb-0">Register new student records</p>
+          <p className="text-muted mb-0">Register new students and manage existing records</p>
         </div>
         <div className="d-flex gap-2 align-items-center">
+          <div className="badge bg-primary fs-6">
+            {stats.totalStudents} Total Students
+          </div>
           <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
             <i className="bi bi-arrow-left me-2"></i>Back
           </button>
         </div>
       </div>
 
-     
+      {/* Tab Navigation */}
+      <ul className="nav nav-tabs mb-4">
+        <li className="nav-item">
+          <button 
+            className={`nav-link ${activeTab === "register" ? "active" : ""}`}
+            onClick={() => setActiveTab("register")}
+          >
+            <i className="bi bi-person-plus me-2"></i>
+            Register New Student
+          </button>
+        </li>
+        <li className="nav-item">
+          <button 
+            className={`nav-link ${activeTab === "manage" ? "active" : ""}`}
+            onClick={() => setActiveTab("manage")}
+          >
+            <i className="bi bi-people me-2"></i>
+            Manage Students ({stats.totalStudents})
+          </button>
+        </li>
+      </ul>
 
       {/* Global Success/Error Messages */}
       {success && (
@@ -177,13 +271,21 @@ const StudentRegistration = () => {
           <button type="button" className="btn-close" onClick={() => setError("")}></button>
         </div>
       )}
-
-      {/* Registration Form */}
-      <div className="card shadow-sm">
-        <div className="card-header bg-white">
-          <h5 className="mb-0">New Student Registration Form</h5>
+      {studentsError && (
+        <div className="alert alert-danger alert-dismissible fade show" role="alert">
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          {studentsError}
+          <button type="button" className="btn-close" onClick={() => setStudentsError("")}></button>
         </div>
-        <div className="card-body">
+      )}
+
+      {/* Register Tab Content */}
+      {activeTab === "register" && (
+        <div className="card shadow-sm">
+          <div className="card-header bg-white">
+            <h5 className="mb-0">New Student Registration Form</h5>
+          </div>
+          <div className="card-body">
           <form onSubmit={handleSubmit}>
             {/* Personal Information */}
             <h6 className="text-primary mb-3">
@@ -548,6 +650,221 @@ const StudentRegistration = () => {
           </form>
         </div>
       </div>
+      )}
+
+      {/* Manage Students Tab Content */}
+      {activeTab === "manage" && (
+        <>
+          {/* Search and Filter Section */}
+          <div className="card shadow-sm mb-4">
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label small">Search Students</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by name, roll number, or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label small">Filter by Class</label>
+                  <select
+                    className="form-select"
+                    value={filterClass}
+                    onChange={(e) => setFilterClass(e.target.value)}
+                  >
+                    <option value="">All Classes</option>
+                    {uniqueClasses.map(cls => (
+                      <option key={cls} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label small">Filter by Section</label>
+                  <select
+                    className="form-select"
+                    value={filterSection}
+                    onChange={(e) => setFilterSection(e.target.value)}
+                  >
+                    <option value="">All Sections</option>
+                    {uniqueSections.map(section => (
+                      <option key={section} value={section}>{section}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 className="mb-0">
+                {filteredStudents.length} Student{filteredStudents.length !== 1 ? 's' : ''} Found
+              </h5>
+            </div>
+            <div className="d-flex gap-2">
+              <button 
+                className="btn btn-success btn-sm"
+                onClick={() => setActiveTab("register")}
+              >
+                <i className="bi bi-plus-circle me-2"></i>
+                Add New Student
+              </button>
+              <button 
+                className="btn btn-outline-primary btn-sm"
+                onClick={fetchStudents}
+                disabled={studentsLoading}
+              >
+                {studentsLoading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Refresh
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Students Table */}
+          <div className="card shadow-sm">
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Roll Number</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Class</th>
+                      <th>Section</th>
+                      <th>Phone</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studentsLoading ? (
+                      <tr>
+                        <td colSpan="8" className="text-center py-4">
+                          <div className="spinner-border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="text-center py-4">
+                          <div className="text-muted">
+                            <i className="bi bi-search fa-2x mb-2"></i>
+                            <p>No students found</p>
+                            {searchTerm || filterClass || filterSection ? (
+                              <button 
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => {
+                                  setSearchTerm("");
+                                  setFilterClass("");
+                                  setFilterSection("");
+                                }}
+                              >
+                                Clear Filters
+                              </button>
+                            ) : (
+                              <button 
+                                className="btn btn-sm btn-primary"
+                                onClick={() => setActiveTab("register")}
+                              >
+                                Register First Student
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredStudents.map((student) => (
+                        <tr key={student._id}>
+                          <td><strong>{student.rollNumber}</strong></td>
+                          <td>{student.firstName} {student.lastName}</td>
+                          <td>{student.email}</td>
+                          <td>{student.class}</td>
+                          <td>{student.section}</td>
+                          <td>{student.phone}</td>
+                          <td>
+                            <span className={`badge ${student.status === 'active' ? 'bg-success' : 'bg-warning'}`}>
+                              {student.status}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="d-flex gap-2">
+                              <button
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={() => navigate(`/student-profile/${student._id}`)}
+                              >
+                                <i className="bi bi-eye me-1"></i>
+                                View
+                              </button>
+                              <button
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => handleDeleteStudent(student._id)}
+                              >
+                                <i className="bi bi-trash me-1"></i>
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Student Statistics */}
+          <div className="mt-4">
+            <div className="card shadow-sm">
+              <div className="card-body">
+                <h5>Student Statistics</h5>
+                <div className="row mt-3">
+                  <div className="col-md-3">
+                    <div className="text-center">
+                      <h3 className="text-primary">{stats.totalStudents}</h3>
+                      <p className="text-muted small">Total Students</p>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="text-center">
+                      <h3 className="text-success">{stats.activeStudents}</h3>
+                      <p className="text-muted small">Active Students</p>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="text-center">
+                      <h3 className="text-warning">{stats.totalStudents - stats.activeStudents}</h3>
+                      <p className="text-muted small">Inactive Students</p>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="text-center">
+                      <h3 className="text-info">{uniqueClasses.length}</h3>
+                      <p className="text-muted small">Classes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   );
