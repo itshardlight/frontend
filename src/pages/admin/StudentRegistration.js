@@ -829,40 +829,7 @@ const StudentRegistration = () => {
             </div>
           </div>
 
-          {/* Student Statistics */}
-          <div className="mt-4">
-            <div className="card shadow-sm">
-              <div className="card-body">
-                <h5>Student Statistics</h5>
-                <div className="row mt-3">
-                  <div className="col-md-3">
-                    <div className="text-center">
-                      <h3 className="text-primary">{stats.totalStudents}</h3>
-                      <p className="text-muted small">Total Students</p>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="text-center">
-                      <h3 className="text-success">{stats.activeStudents}</h3>
-                      <p className="text-muted small">Active Students</p>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="text-center">
-                      <h3 className="text-warning">{stats.totalStudents - stats.activeStudents}</h3>
-                      <p className="text-muted small">Inactive Students</p>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="text-center">
-                      <h3 className="text-info">{uniqueClasses.length}</h3>
-                      <p className="text-muted small">Classes</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          
         </>
       )}
 
