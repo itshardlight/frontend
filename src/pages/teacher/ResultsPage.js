@@ -8,6 +8,8 @@ const ResultsPage = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = userRole || user.role;
     
     if (!token) {
       navigate('/login');
@@ -15,7 +17,7 @@ const ResultsPage = () => {
     }
 
     // Check if user has permission to access results
-    if (!['admin', 'teacher'].includes(userRole)) {
+    if (!['admin', 'teacher'].includes(role)) {
       navigate('/dashboard');
       return;
     }

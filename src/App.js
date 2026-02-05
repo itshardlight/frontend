@@ -59,6 +59,7 @@ function App() {
         <Route path="/admin/panel" element={<AdminPanel />} />
         <Route path="/admin/student-profile/:id" element={<AdminStudentProfile />} />
         <Route path="/admin/student-registration" element={<StudentRegistration />} />
+        <Route path="/admin/results" element={<ResultsPage />} />
         
         {/* Teacher Routes */}
         <Route path="/teacher/attendance" element={<Attendance />} />

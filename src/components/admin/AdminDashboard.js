@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ResultsManagement } from '../teacher';
 import { FeeManagement } from '../shared';
 
 const AdminDashboard = () => {
@@ -9,9 +8,6 @@ const AdminDashboard = () => {
   const renderComponent = () => {
     console.log('Current activeComponent:', activeComponent);
     switch (activeComponent) {
-      case 'results':
-        console.log('Rendering ResultsManagement component');
-        return <ResultsManagement />;
       case 'fees':
         console.log('Rendering FeeManagement component');
         return <FeeManagement />;
@@ -142,10 +138,7 @@ const AdminDashboard = () => {
               </ul>
               <button 
                 className="btn btn-danger btn-sm w-100 mt-2"
-                onClick={() => {
-                  console.log('Manage Results clicked - switching to results');
-                  setActiveComponent('results');
-                }}
+                onClick={() => navigate("/admin/results")}
               >
                 Manage Results
               </button>

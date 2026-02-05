@@ -31,6 +31,7 @@ const Login = () => {
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userRole", response.data.user.role);
         navigate("/dashboard");
       }
     } catch (err) {
@@ -49,6 +50,7 @@ const Login = () => {
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userRole", response.data.user.role);
         navigate("/dashboard");
       }
     } catch (err) {
