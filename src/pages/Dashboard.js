@@ -221,8 +221,32 @@ const Dashboard = () => {
 
   // Student Dashboard Content
   const StudentDashboard = () => (
-    <div>
-      {/* Student Stats Row */}
+    <>
+      {/* Profile Button */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm border-0" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+            <div className="card-body d-flex justify-content-between align-items-center py-3">
+              <div className="text-white">
+                <h5 className="mb-1">
+                  <i className="bi bi-person-circle me-2"></i>
+                  My Profile
+                </h5>
+                <p className="mb-0 small opacity-75">View and manage your complete profile information</p>
+              </div>
+              <button 
+                className="btn btn-light btn-lg"
+                onClick={() => navigate('/student/profile')}
+              >
+                <i className="bi bi-arrow-right-circle me-2"></i>
+                View Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
       <div className="row g-3 mb-4">
         <div className="col-md-3">
           <div className="card bg-primary bg-opacity-10 border-primary">
@@ -371,7 +395,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 
   // Teacher/Admin Dashboard Content
@@ -447,7 +471,7 @@ const Dashboard = () => {
                 </div>
                 <button 
                   className="btn btn-success btn-sm"
-                  onClick={() => navigate("/fee-department/dashboard")}
+                  onClick={() => navigate("/fee-department/fees")}
                 >
                   Manage Fees
                 </button>
@@ -557,7 +581,7 @@ const Dashboard = () => {
               </ul>
               <button 
                 className="btn btn-success btn-sm w-100 mt-2"
-                onClick={() => navigate("/fee-department/dashboard")}
+                onClick={() => navigate("/fee-department/fees")}
               >
                 Open Fee Management
               </button>

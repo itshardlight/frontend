@@ -24,7 +24,6 @@ import {
   ResultsPage 
 } from "./pages/teacher";
 import { 
-  FeeDepartmentDashboard, 
   FeePage 
 } from "./pages/fee-department";
 import {
@@ -66,7 +65,6 @@ function App() {
         <Route path="/teacher/results" element={<ResultsPage />} />
         
         {/* Fee Department Routes */}
-        <Route path="/fee-department/dashboard" element={<FeeDepartmentDashboard />} />
         <Route path="/fee-department/fees" element={<FeePage />} />
         
         {/* Payment Routes */}
@@ -85,7 +83,6 @@ function App() {
         <Route path="/student-registration" element={<StudentRegistration />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/fees" element={<FeePage />} />
-        <Route path="/fee-department" element={<FeeDepartmentDashboard />} />
         
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

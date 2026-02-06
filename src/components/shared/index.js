@@ -8,4 +8,3 @@ export { default as FeeManagement } from './FeeManagement';
 export { default as FeeSection } from './FeeSection';
 export { default as AcademicSection } from './AcademicSection';
 export { default as ResultsSection } from './ResultsSection';
-export { default as ParentDashboard } from './ParentDashboard';
