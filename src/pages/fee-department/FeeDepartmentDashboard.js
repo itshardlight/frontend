@@ -424,7 +424,7 @@ const FeeDepartmentDashboard = () => {
                         <div className="card bg-info bg-opacity-10 border-info">
                           <div className="card-body text-center">
                             <i className="bi bi-currency-rupee text-info" style={{ fontSize: '2rem' }}></i>
-                            <h4 className="mt-2 mb-0 text-info">₹{stats.totalFeeAmount.toLocaleString()}</h4>
+                            <h4 className="mt-2 mb-0 text-info">Rs{stats.totalFeeAmount.toLocaleString()}</h4>
                             <small className="text-muted">Total Fee Amount</small>
                           </div>
                         </div>
@@ -433,7 +433,7 @@ const FeeDepartmentDashboard = () => {
                         <div className="card bg-success bg-opacity-10 border-success">
                           <div className="card-body text-center">
                             <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '2rem' }}></i>
-                            <h4 className="mt-2 mb-0 text-success">₹{stats.totalPaidAmount.toLocaleString()}</h4>
+                            <h4 className="mt-2 mb-0 text-success">Rs{stats.totalPaidAmount.toLocaleString()}</h4>
                             <small className="text-muted">Collected Amount</small>
                           </div>
                         </div>
@@ -442,7 +442,7 @@ const FeeDepartmentDashboard = () => {
                         <div className="card bg-warning bg-opacity-10 border-warning">
                           <div className="card-body text-center">
                             <i className="bi bi-clock-fill text-warning" style={{ fontSize: '2rem' }}></i>
-                            <h4 className="mt-2 mb-0 text-warning">₹{stats.totalPendingAmount.toLocaleString()}</h4>
+                            <h4 className="mt-2 mb-0 text-warning">Rs{stats.totalPendingAmount.toLocaleString()}</h4>
                             <small className="text-muted">Pending Amount</small>
                           </div>
                         </div>
@@ -521,9 +521,9 @@ const FeeDepartmentDashboard = () => {
                               </td>
                               <td>{student.academic?.currentGrade}-{student.academic?.section}</td>
                               <td>{student.academic?.rollNumber}</td>
-                              <td>₹{(feeInfo.totalFee || 0).toLocaleString()}</td>
-                              <td className="text-success">₹{(feeInfo.paidAmount || 0).toLocaleString()}</td>
-                              <td className="text-danger">₹{pending.toLocaleString()}</td>
+                              <td>Rs{(feeInfo.totalFee || 0).toLocaleString()}</td>
+                              <td className="text-success">Rs{(feeInfo.paidAmount || 0).toLocaleString()}</td>
+                              <td className="text-danger">Rs{pending.toLocaleString()}</td>
                               <td>
                                 {pending <= 0 && feeInfo.totalFee > 0 ? (
                                   <span className="badge bg-success">Paid</span>
@@ -684,13 +684,13 @@ const FeeDepartmentDashboard = () => {
                             </p>
                             
                             <div className="mb-2">
-                              <strong>Total Fee:</strong> ₹{(selectedStudent.feeInfo?.totalFee || 0).toLocaleString()}
+                              <strong>Total Fee:</strong> Rs{(selectedStudent.feeInfo?.totalFee || 0).toLocaleString()}
                             </div>
                             <div className="mb-2">
-                              <strong>Paid Amount:</strong> ₹{(selectedStudent.feeInfo?.paidAmount || 0).toLocaleString()}
+                              <strong>Paid Amount:</strong> Rs{(selectedStudent.feeInfo?.paidAmount || 0).toLocaleString()}
                             </div>
                             <div className="mb-2">
-                              <strong>Pending Amount:</strong> ₹{((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0)).toLocaleString()}
+                              <strong>Pending Amount:</strong> Rs {((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0)).toLocaleString()}
                             </div>
                           </div>
                         </div>
@@ -864,25 +864,25 @@ const FeeDepartmentDashboard = () => {
                             </p>
                             
                             <div className="mb-2">
-                              <strong>Current Total Fee:</strong> ₹{(selectedStudent.feeInfo?.totalFee || 0).toLocaleString()}
+                              <strong>Current Total Fee:</strong> Rs{(selectedStudent.feeInfo?.totalFee || 0).toLocaleString()}
                             </div>
                             {selectedStudent.feeInfo?.tuitionFee > 0 && (
-                              <div className="mb-1">Tuition: ₹{selectedStudent.feeInfo.tuitionFee.toLocaleString()}</div>
+                              <div className="mb-1">Tuition: Rs{selectedStudent.feeInfo.tuitionFee.toLocaleString()}</div>
                             )}
                             {selectedStudent.feeInfo?.admissionFee > 0 && (
-                              <div className="mb-1">Admission: ₹{selectedStudent.feeInfo.admissionFee.toLocaleString()}</div>
+                              <div className="mb-1">Admission: Rs{selectedStudent.feeInfo.admissionFee.toLocaleString()}</div>
                             )}
                             {selectedStudent.feeInfo?.examFee > 0 && (
-                              <div className="mb-1">Exam: ₹{selectedStudent.feeInfo.examFee.toLocaleString()}</div>
+                              <div className="mb-1">Exam: Rs{selectedStudent.feeInfo.examFee.toLocaleString()}</div>
                             )}
                             {selectedStudent.feeInfo?.libraryFee > 0 && (
-                              <div className="mb-1">Library: ₹{selectedStudent.feeInfo.libraryFee.toLocaleString()}</div>
+                              <div className="mb-1">Library: Rs{selectedStudent.feeInfo.libraryFee.toLocaleString()}</div>
                             )}
                             {selectedStudent.feeInfo?.sportsFee > 0 && (
-                              <div className="mb-1">Sports: ₹{selectedStudent.feeInfo.sportsFee.toLocaleString()}</div>
+                              <div className="mb-1">Sports: Rs{selectedStudent.feeInfo.sportsFee.toLocaleString()}</div>
                             )}
                             {selectedStudent.feeInfo?.otherFees > 0 && (
-                              <div className="mb-1">Other: ₹{selectedStudent.feeInfo.otherFees.toLocaleString()}</div>
+                              <div className="mb-1">Other: Rs{selectedStudent.feeInfo.otherFees.toLocaleString()}</div>
                             )}
                           </div>
                         </div>
