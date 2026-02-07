@@ -213,7 +213,6 @@ const Dashboard = () => {
       case "admin": return "badge-admin";
       case "teacher": return "badge-teacher";
       case "student": return "badge-student";
-      case "parent": return "badge-parent";
       case "fee_department": return "badge-fee-department";
       default: return "bg-secondary";
     }
@@ -222,75 +221,9 @@ const Dashboard = () => {
   // Student Dashboard Content
   const StudentDashboard = () => (
     <>
-      {/* Profile Button */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="card shadow-sm border-0" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-            <div className="card-body d-flex justify-content-between align-items-center py-3">
-              <div className="text-white">
-                <h5 className="mb-1">
-                  <i className="bi bi-person-circle me-2"></i>
-                  My Profile
-                </h5>
-                <p className="mb-0 small opacity-75">View and manage your complete profile information</p>
-              </div>
-              <button 
-                className="btn btn-light btn-lg"
-                onClick={() => navigate('/student/profile')}
-              >
-                <i className="bi bi-arrow-right-circle me-2"></i>
-                View Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+   
 
-      {/* Quick Stats */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary bg-opacity-10 border-primary">
-            <div className="card-body text-center">
-              <i className="bi bi-cash-stack text-primary" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-primary">
-                Rs.{dashboardStats.loading ? '...' : dashboardStats.totalFeeCollected.toLocaleString()}
-              </h4>
-              <small className="text-muted">Fee Paid</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning bg-opacity-10 border-warning">
-            <div className="card-body text-center">
-              <i className="bi bi-clock text-warning" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-warning">
-                Rs.{dashboardStats.loading ? '...' : dashboardStats.pendingFees.toLocaleString()}
-              </h4>
-              <small className="text-muted">Fee Pending</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-success bg-opacity-10 border-success">
-            <div className="card-body text-center">
-              <i className="bi bi-trophy text-success" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-success">
-                {dashboardStats.loading ? '...' : dashboardStats.recentActivities.filter(a => a.icon === 'bi-trophy').length}
-              </h4>
-              <small className="text-muted">Achievements</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info bg-opacity-10 border-info">
-            <div className="card-body text-center">
-              <i className="bi bi-calendar-check text-info" style={{ fontSize: '2rem' }}></i>
-              <h4 className="mt-2 mb-0 text-info">85%</h4>
-              <small className="text-muted">Attendance</small>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
       {/* Student Action Cards */}
       <div className="row g-4">
@@ -302,7 +235,7 @@ const Dashboard = () => {
               </div>
               <h5>My Profile</h5>
               <p className="text-muted">View and edit personal details</p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/profile")}>View Profile</button>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student/profile")}>View Profile</button>
             </div>
           </div>
         </div>
@@ -315,18 +248,6 @@ const Dashboard = () => {
               <h5>Attendance</h5>
               <p className="text-muted">Check attendance record</p>
               <button className="btn btn-success btn-sm" onClick={() => navigate("/student/attendance")}>View Attendance</button>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100 dashboard-card">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-trophy icon-secondary" style={{ fontSize: "3rem" }}></i>
-              </div>
-              <h5>Achievements</h5>
-              <p className="text-muted">View and add achievements</p>
-              <button className="btn btn-warning btn-sm" onClick={() => navigate("/student/achievements")}>Manage Achievements</button>
             </div>
           </div>
         </div>
@@ -355,45 +276,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent Activities */}
-        <div className="col-md-8">
-          <div className="card shadow-sm h-100">
-            <div className="card-header bg-light">
-              <h6 className="mb-0">
-                <i className="bi bi-clock-history me-2"></i>
-                Recent Activities
-              </h6>
-            </div>
-            <div className="card-body">
-              {dashboardStats.loading ? (
-                <div className="text-center">
-                  <div className="spinner-border spinner-border-sm" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              ) : dashboardStats.recentActivities.length > 0 ? (
-                <div className="list-group list-group-flush">
-                  {dashboardStats.recentActivities.map((activity, index) => (
-                    <div key={index} className="list-group-item border-0 px-0">
-                      <div className="d-flex align-items-center">
-                        <i className={`${activity.icon} text-${activity.type} me-3`}></i>
-                        <div className="flex-grow-1">
-                          <div className="fw-bold">{activity.text}</div>
-                          <small className="text-muted">{activity.time}</small>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-muted">
-                  <i className="bi bi-info-circle me-2"></i>
-                  No recent activities
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+       
       </div>
     </>
   );
@@ -500,47 +383,7 @@ const Dashboard = () => {
     </div>
   );
 
-  // Parent Dashboard Content
-  const ParentDashboard = () => (
-    <div className="row g-4">
-      <div className="col-md-4">
-        <div className="card shadow-sm h-100">
-          <div className="card-body text-center">
-            <div className="mb-3">
-              <i className="bi bi-person-badge" style={{ fontSize: "3rem", color: "#0d6efd" }}></i>
-            </div>
-            <h5>My Children</h5>
-            <p className="text-muted">View children's profiles</p>
-            <button className="btn btn-primary btn-sm">View Children</button>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-4">
-        <div className="card shadow-sm h-100">
-          <div className="card-body text-center">
-            <div className="mb-3">
-              <i className="bi bi-graph-up" style={{ fontSize: "3rem", color: "#198754" }}></i>
-            </div>
-            <h5>Academic Results</h5>
-            <p className="text-muted">View children's exam results</p>
-            <button className="btn btn-success btn-sm">View Results</button>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-4">
-        <div className="card shadow-sm h-100">
-          <div className="card-body text-center">
-            <div className="mb-3">
-              <i className="bi bi-cash-coin" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
-            </div>
-            <h5>Fee Payment</h5>
-            <p className="text-muted">View and pay fees</p>
-            <button className="btn btn-danger btn-sm">View Fees</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+
 
   // Fee Department Dashboard Content
   const FeeDepartmentDashboard = () => (
@@ -782,7 +625,6 @@ const Dashboard = () => {
         {/* Role-specific Dashboard */}
         {user.role === "student" && <StudentDashboard />}
         {(user.role === "teacher" || user.role === "admin") && <TeacherDashboard />}
-        {user.role === "parent" && <ParentDashboard />}
         {user.role === "fee_department" && <FeeDepartmentDashboard />}
       </div>
     </div>

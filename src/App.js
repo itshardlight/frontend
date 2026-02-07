@@ -16,7 +16,6 @@ import {
   StudentResults, 
   StudentAttendance, 
   StudentFees, 
-  StudentAchievements, 
   StudentProfile 
 } from "./pages/student";
 import { 
@@ -52,7 +51,6 @@ function App() {
         <Route path="/student/results" element={<StudentResults />} />
         <Route path="/student/attendance" element={<StudentAttendance />} />
         <Route path="/student/fees" element={<StudentFees />} />
-        <Route path="/student/achievements" element={<StudentAchievements />} />
         
         {/* Admin Routes */}
         <Route path="/admin/panel" element={<AdminPanel />} />
@@ -77,7 +75,6 @@ function App() {
         <Route path="/student-results" element={<StudentResults />} />
         <Route path="/student-attendance" element={<StudentAttendance />} />
         <Route path="/student-fees" element={<StudentFees />} />
-        <Route path="/student-achievements" element={<StudentAchievements />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/student-registration" element={<StudentRegistration />} />
