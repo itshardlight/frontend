@@ -31,17 +31,6 @@ const PaymentSuccess = () => {
             amt = decodedData.total_amount;
             refId = decodedData.transaction_code;
             
-            // Show the decoded data for now
-            setPaymentDetails({
-              transactionUuid: oid,
-              amount: amt,
-              referenceId: refId,
-              status: decodedData.status,
-              createdAt: new Date().toISOString()
-            });
-            setVerificationStatus('success');
-            return;
-            
           } catch (decodeError) {
             console.error('Failed to decode payment data:', decodeError);
             throw new Error('Invalid payment data format');
@@ -57,13 +46,15 @@ const PaymentSuccess = () => {
           throw new Error('Missing payment verification parameters');
         }
 
+        console.log('Verifying payment with backend:', { oid, amt, refId });
+
         // Get authentication token
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('Authentication required. Please login again.');
         }
 
-        // Verify payment with your backend
+        // ALWAYS verify payment with backend to update profile
         const response = await axios.post('http://localhost:5000/api/payment/esewa/verify', {
           transactionUuid: oid,
           amount: amt,
@@ -78,13 +69,14 @@ const PaymentSuccess = () => {
         if (response.data.success) {
           setPaymentDetails(response.data.payment);
           setVerificationStatus('success');
+          console.log('Payment verified and profile updated successfully');
         } else {
           throw new Error(response.data.message || 'Payment verification failed');
         }
 
       } catch (err) {
         console.error('Payment verification error:', err);
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
         setVerificationStatus('failed');
       }
     };
@@ -93,8 +85,8 @@ const PaymentSuccess = () => {
   }, [searchParams]);
 
   const handleContinue = () => {
-    // Navigate back to dashboard or appropriate page
-    navigate('/dashboard');
+    // Navigate back to fees page to see updated payment info
+    navigate('/student/fees');
   };
 
   if (verificationStatus === 'verifying') {
@@ -184,10 +176,11 @@ const PaymentSuccess = () => {
               
               <div className="mt-4">
                 <button 
-                  className="btn btn-primary"
+                  className="btn btn-primary btn-lg"
                   onClick={handleContinue}
                 >
-                  Continue to Dashboard
+                  <i className="bi bi-arrow-right me-2"></i>
+                  View Updated Fee Details
                 </button>
               </div>
             </div>
