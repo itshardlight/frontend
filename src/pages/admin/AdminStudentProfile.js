@@ -376,24 +376,7 @@ const AdminStudentProfile = () => {
                       </div>
                     )}
                   </div>
-                  <div className="col-md-6">
-                    {editing ? (
-                      <>
-                        <label className="form-label fw-bold mb-1">Religion:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editData.religion || ''}
-                          onChange={(e) => handleInputChange('religion', e.target.value)}
-                        />
-                      </>
-                    ) : (
-                      <div className="d-flex align-items-center">
-                        <span className="fw-bold me-2">Religion:</span>
-                        <span>{student.religion || 'Not specified'}</span>
-                      </div>
-                    )}
-                  </div>
+               
                 </div>
               </div>
             </div>
@@ -611,74 +594,23 @@ const AdminStudentProfile = () => {
 </div>
 
 
-            {/* Fee Information */}
-            <FeeInformationCard studentId={id} />
+         
 
-            {/* Parent/Guardian Information */}
-            <div className="card shadow-sm mb-4">
-              <div className="card-header bg-warning text-dark">
-                <h5 className="mb-0">
-                  <i className="bi bi-people me-2"></i>
-                  Parent/Guardian Information
-                </h5>
-              </div>
-              <div className="card-body">
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    {editing ? (
-                      <>
-                        <label className="form-label fw-bold mb-1">Father's Name:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editData.fatherName || ''}
-                          onChange={(e) => handleInputChange('fatherName', e.target.value)}
-                        />
-                      </>
-                    ) : (
-                      <div className="d-flex align-items-center">
-                        <span className="fw-bold me-2">Father's Name:</span>
-                        <span>{student.fatherName || 'Not provided'}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-md-6">
-                    {editing ? (
-                      <>
-                        <label className="form-label fw-bold mb-1">Mother's Name:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editData.motherName || ''}
-                          onChange={(e) => handleInputChange('motherName', e.target.value)}
-                        />
-                      </>
-                    ) : (
-                      <div className="d-flex align-items-center">
-                        <span className="fw-bold me-2">Mother's Name:</span>
-                        <span>{student.motherName || 'Not provided'}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-md-6">
-                    {editing ? (
-                      <>
-                        <label className="form-label fw-bold mb-1">Guardian's Name:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editData.guardianName || ''}
-                          onChange={(e) => handleInputChange('guardianName', e.target.value)}
-                        />
-                      </>
-                    ) : (
-                      <div className="d-flex align-items-center">
-                        <span className="fw-bold me-2">Guardian's Name:</span>
-                        <span>{student.guardianName || 'Not provided'}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-md-6">
+            {/* Additional Information */}
+            {(student.emergencyContact || student.medicalInfo || student.notes) && (
+              <div className="card shadow-sm mb-4">
+                <div className="card-header bg-danger text-white">
+                  <h5 className="mb-0">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    Additional Information
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <div className="row g-3">
+                    {student.emergencyContact && (
+                      
+                      <div className="col-12">
+                         <div className="col-md-6">
                     {editing ? (
                       <>
                         <label className="form-label fw-bold mb-1">Parent Email:</label>
@@ -714,23 +646,6 @@ const AdminStudentProfile = () => {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Information */}
-            {(student.emergencyContact || student.medicalInfo || student.notes) && (
-              <div className="card shadow-sm mb-4">
-                <div className="card-header bg-danger text-white">
-                  <h5 className="mb-0">
-                    <i className="bi bi-exclamation-triangle me-2"></i>
-                    Additional Information
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <div className="row g-3">
-                    {student.emergencyContact && (
-                      <div className="col-12">
                         {editing ? (
                           <>
                             <label className="form-label fw-bold mb-1">Emergency Contact:</label>
@@ -794,6 +709,9 @@ const AdminStudentProfile = () => {
               </div>
             )}
 
+
+   {/* Fee Information */}
+            <FeeInformationCard studentId={id} />
             {/* Student Achievements */}
             <div className="card shadow-sm mb-4">
               <div className="card-header bg-success text-white">
