@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -12,9 +12,18 @@ const PaymentSuccess = () => {
   const [verificationStatus, setVerificationStatus] = useState('verifying');
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [error, setError] = useState(null);
+  const hasVerified = useRef(false); // Prevent duplicate calls
 
   useEffect(() => {
     const verifyPayment = async () => {
+      // Prevent duplicate verification calls (React StrictMode runs effects twice)
+      if (hasVerified.current) {
+        console.log('⚠️  Verification already completed, skipping duplicate call');
+        return;
+      }
+
+      hasVerified.current = true;
+
       try {
         // Check if we have the new data format (base64 encoded)
         const data = searchParams.get('data');
@@ -78,6 +87,7 @@ const PaymentSuccess = () => {
         console.error('Payment verification error:', err);
         setError(err.response?.data?.message || err.message);
         setVerificationStatus('failed');
+        hasVerified.current = false; // Reset on error to allow retry
       }
     };
 
