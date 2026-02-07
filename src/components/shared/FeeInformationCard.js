@@ -315,25 +315,7 @@ const FeeInformationCard = ({ studentId }) => {
               </div>
             )}
 
-            {/* Quick Actions */}
-            <div className="col-12">
-              <div className="d-flex gap-2 justify-content-end">
-                <button 
-                  className="btn btn-outline-primary btn-sm"
-                  onClick={handleManageFees}
-                >
-                  <i className="bi bi-cash-stack me-1"></i>
-                  Open Fee Management
-                </button>
-                <button 
-                  className="btn btn-outline-success btn-sm"
-                  onClick={fetchFeeInfo}
-                >
-                  <i className="bi bi-arrow-clockwise me-1"></i>
-                  Refresh
-                </button>
-              </div>
-            </div>
+         
           </div>
         ) : (
           <div className="text-center text-muted">

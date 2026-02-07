@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AchievementSection } from '../../components/student';
@@ -281,87 +281,117 @@ const AdminStudentProfile = () => {
               <div className="card-body">
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">First Name:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.firstName || ''}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">First Name:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.firstName || ''}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.firstName}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">First Name:</span>
+                        <span>{student.firstName}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Last Name:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.lastName || ''}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Last Name:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.lastName || ''}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.lastName}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Last Name:</span>
+                        <span>{student.lastName}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Date of Birth:</label>
                     {editing ? (
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={editData.dateOfBirth ? new Date(editData.dateOfBirth).toISOString().split('T')[0] : ''}
-                        onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Date of Birth:</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={editData.dateOfBirth ? new Date(editData.dateOfBirth).toISOString().split('T')[0] : ''}
+                          onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">
-                        {student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'Not specified'}
-                      </p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Date of Birth:</span>
+                        <span>
+                          {student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'Not specified'}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Gender:</label>
                     {editing ? (
-                      <select
-                        className="form-select"
-                        value={editData.gender || ''}
-                        onChange={(e) => handleInputChange('gender', e.target.value)}
-                      >
-                        <option value="">Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
+                      <>
+                        <label className="form-label fw-bold mb-1">Gender:</label>
+                        <select
+                          className="form-select"
+                          value={editData.gender || ''}
+                          onChange={(e) => handleInputChange('gender', e.target.value)}
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </>
                     ) : (
-                      <p className="mb-0 text-capitalize">{student.gender || 'Not specified'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Gender:</span>
+                        <span className="text-capitalize">{student.gender || 'Not specified'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Blood Group:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.bloodGroup || ''}
-                        onChange={(e) => handleInputChange('bloodGroup', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Blood Group:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.bloodGroup || ''}
+                          onChange={(e) => handleInputChange('bloodGroup', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.bloodGroup || 'Not specified'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Blood Group:</span>
+                        <span>{student.bloodGroup || 'Not specified'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Religion:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.religion || ''}
-                        onChange={(e) => handleInputChange('religion', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Religion:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.religion || ''}
+                          onChange={(e) => handleInputChange('religion', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.religion || 'Not specified'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Religion:</span>
+                        <span>{student.religion || 'Not specified'}</span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -379,42 +409,57 @@ const AdminStudentProfile = () => {
               <div className="card-body">
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Email:</label>
                     {editing ? (
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={editData.email || ''}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Email:</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          value={editData.email || ''}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.email}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Email:</span>
+                        <span>{student.email}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Phone:</label>
                     {editing ? (
-                      <input
-                        type="tel"
-                        className="form-control"
-                        value={editData.phone || ''}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Phone:</label>
+                        <input
+                          type="tel"
+                          className="form-control"
+                          value={editData.phone || ''}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.phone || 'Not provided'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Phone:</span>
+                        <span>{student.phone || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-12">
-                    <label className="form-label fw-bold">Address:</label>
                     {editing ? (
-                      <textarea
-                        className="form-control"
-                        rows="2"
-                        value={editData.address || ''}
-                        onChange={(e) => handleInputChange('address', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Address:</label>
+                        <textarea
+                          className="form-control"
+                          rows="2"
+                          value={editData.address || ''}
+                          onChange={(e) => handleInputChange('address', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.address || 'Not provided'}</p>
+                      <div className="d-flex align-items-start">
+                        <span className="fw-bold me-2">Address:</span>
+                        <span>{student.address || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -580,68 +625,93 @@ const AdminStudentProfile = () => {
               <div className="card-body">
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Father's Name:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.fatherName || ''}
-                        onChange={(e) => handleInputChange('fatherName', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Father's Name:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.fatherName || ''}
+                          onChange={(e) => handleInputChange('fatherName', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.fatherName || 'Not provided'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Father's Name:</span>
+                        <span>{student.fatherName || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Mother's Name:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.motherName || ''}
-                        onChange={(e) => handleInputChange('motherName', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Mother's Name:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.motherName || ''}
+                          onChange={(e) => handleInputChange('motherName', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.motherName || 'Not provided'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Mother's Name:</span>
+                        <span>{student.motherName || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Guardian's Name:</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editData.guardianName || ''}
-                        onChange={(e) => handleInputChange('guardianName', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Guardian's Name:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editData.guardianName || ''}
+                          onChange={(e) => handleInputChange('guardianName', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.guardianName || 'Not provided'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Guardian's Name:</span>
+                        <span>{student.guardianName || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Parent Email:</label>
                     {editing ? (
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={editData.parentEmail || ''}
-                        onChange={(e) => handleInputChange('parentEmail', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Parent Email:</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          value={editData.parentEmail || ''}
+                          onChange={(e) => handleInputChange('parentEmail', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.parentEmail || 'Not provided'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Parent Email:</span>
+                        <span>{student.parentEmail || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">Parent Phone:</label>
                     {editing ? (
-                      <input
-                        type="tel"
-                        className="form-control"
-                        value={editData.parentPhone || ''}
-                        onChange={(e) => handleInputChange('parentPhone', e.target.value)}
-                      />
+                      <>
+                        <label className="form-label fw-bold mb-1">Parent Phone:</label>
+                        <input
+                          type="tel"
+                          className="form-control"
+                          value={editData.parentPhone || ''}
+                          onChange={(e) => handleInputChange('parentPhone', e.target.value)}
+                        />
+                      </>
                     ) : (
-                      <p className="mb-0">{student.parentPhone || 'Not provided'}</p>
+                      <div className="d-flex align-items-center">
+                        <span className="fw-bold me-2">Parent Phone:</span>
+                        <span>{student.parentPhone || 'Not provided'}</span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -661,46 +731,61 @@ const AdminStudentProfile = () => {
                   <div className="row g-3">
                     {student.emergencyContact && (
                       <div className="col-12">
-                        <label className="form-label fw-bold">Emergency Contact:</label>
                         {editing ? (
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={editData.emergencyContact || ''}
-                            onChange={(e) => handleInputChange('emergencyContact', e.target.value)}
-                          />
+                          <>
+                            <label className="form-label fw-bold mb-1">Emergency Contact:</label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={editData.emergencyContact || ''}
+                              onChange={(e) => handleInputChange('emergencyContact', e.target.value)}
+                            />
+                          </>
                         ) : (
-                          <p className="mb-0">{student.emergencyContact}</p>
+                          <div className="d-flex align-items-center">
+                            <span className="fw-bold me-2">Emergency Contact:</span>
+                            <span>{student.emergencyContact}</span>
+                          </div>
                         )}
                       </div>
                     )}
                     {student.medicalInfo && (
                       <div className="col-12">
-                        <label className="form-label fw-bold">Medical Information:</label>
                         {editing ? (
-                          <textarea
-                            className="form-control"
-                            rows="2"
-                            value={editData.medicalInfo || ''}
-                            onChange={(e) => handleInputChange('medicalInfo', e.target.value)}
-                          />
+                          <>
+                            <label className="form-label fw-bold mb-1">Medical Information:</label>
+                            <textarea
+                              className="form-control"
+                              rows="2"
+                              value={editData.medicalInfo || ''}
+                              onChange={(e) => handleInputChange('medicalInfo', e.target.value)}
+                            />
+                          </>
                         ) : (
-                          <p className="mb-0">{student.medicalInfo}</p>
+                          <div className="d-flex align-items-start">
+                            <span className="fw-bold me-2">Medical Information:</span>
+                            <span>{student.medicalInfo}</span>
+                          </div>
                         )}
                       </div>
                     )}
                     {student.notes && (
                       <div className="col-12">
-                        <label className="form-label fw-bold">Notes:</label>
                         {editing ? (
-                          <textarea
-                            className="form-control"
-                            rows="3"
-                            value={editData.notes || ''}
-                            onChange={(e) => handleInputChange('notes', e.target.value)}
-                          />
+                          <>
+                            <label className="form-label fw-bold mb-1">Notes:</label>
+                            <textarea
+                              className="form-control"
+                              rows="3"
+                              value={editData.notes || ''}
+                              onChange={(e) => handleInputChange('notes', e.target.value)}
+                            />
+                          </>
                         ) : (
-                          <p className="mb-0">{student.notes}</p>
+                          <div className="d-flex align-items-start">
+                            <span className="fw-bold me-2">Notes:</span>
+                            <span>{student.notes}</span>
+                          </div>
                         )}
                       </div>
                     )}
