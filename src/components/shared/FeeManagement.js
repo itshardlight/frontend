@@ -66,7 +66,7 @@ const FeeManagement = () => {
   // Filter students based on all filter criteria
   const filteredStudents = useMemo(() => {
     return students.filter(student => {
-      const matchesClass = !filters.class || student.academic?.class === filters.class;
+      const matchesClass = !filters.class || student.academic?.currentGrade === filters.class;
       const matchesSection = !filters.section || student.academic?.section === filters.section;
       const matchesAcademicYear = !filters.academicYear || student.academic?.academicYear === filters.academicYear;
       
@@ -104,10 +104,11 @@ const FeeManagement = () => {
       
       // Enhanced search
       const matchesSearch = !filters.search || 
-        (student.basicInfo?.firstName?.toLowerCase().includes(filters.search.toLowerCase()) ||
-         student.basicInfo?.lastName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        (student.firstName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         student.lastName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         student.fullName?.toLowerCase().includes(filters.search.toLowerCase()) ||
          student.academic?.rollNumber?.toString().includes(filters.search) ||
-         student.basicInfo?.email?.toLowerCase().includes(filters.search.toLowerCase()) ||
+         student.email?.toLowerCase().includes(filters.search.toLowerCase()) ||
          student.parentInfo?.fatherName?.toLowerCase().includes(filters.search.toLowerCase()));
 
       return matchesClass && matchesSection && matchesAcademicYear && 
@@ -583,7 +584,528 @@ const FeeManagement = () => {
                 </div>
               )}
 
-              {/* Student Fees Tab - will continue in next part */}
+              {/* Students Tab */}
+              {activeTab === 'students' && (
+                <div>
+                  {loading ? (
+                    <div className="text-center py-5">
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <p className="mt-2">Loading students...</p>
+                    </div>
+                  ) : filteredStudents.length > 0 ? (
+                    <div className="table-responsive">
+                      <table className="table table-hover table-striped">
+                        <thead className="table-dark">
+                          <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Email</th>
+                            <th>Total Fee</th>
+                            <th>Paid</th>
+                            <th>Pending</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredStudents.map((student) => {
+                            const feeInfo = student.feeInfo || {};
+                            const totalFee = feeInfo.totalFee || 0;
+                            const paidAmount = feeInfo.paidAmount || 0;
+                            const pendingAmount = totalFee - paidAmount;
+                            
+                            let statusBadge = 'secondary';
+                            let statusText = 'No Fee Set';
+                            
+                            if (totalFee > 0) {
+                              if (pendingAmount <= 0) {
+                                statusBadge = 'success';
+                                statusText = 'Paid';
+                              } else if (paidAmount > 0) {
+                                statusBadge = 'warning';
+                                statusText = 'Partial';
+                              } else {
+                                statusBadge = 'danger';
+                                statusText = 'Pending';
+                              }
+                            }
+                            
+                            return (
+                              <tr key={student._id}>
+                                <td>{student.academic?.rollNumber || 'N/A'}</td>
+                                <td>
+                                  <strong>{student.fullName || `${student.firstName} ${student.lastName}`}</strong>
+                                </td>
+                                <td>
+                                  <span className="badge bg-info">
+                                    {student.academic?.currentGrade}-{student.academic?.section}
+                                  </span>
+                                </td>
+                                <td>{student.email}</td>
+                                <td>₹{totalFee.toLocaleString()}</td>
+                                <td className="text-success">₹{paidAmount.toLocaleString()}</td>
+                                <td className="text-danger">₹{pendingAmount.toLocaleString()}</td>
+                                <td>
+                                  <span className={`badge bg-${statusBadge}`}>{statusText}</span>
+                                </td>
+                                <td>
+                                  <div className="btn-group btn-group-sm">
+                                    <button
+                                      className="btn btn-primary"
+                                      onClick={() => {
+                                        setSelectedStudent(student);
+                                        setActiveTab('payments');
+                                      }}
+                                      title="Add Payment"
+                                    >
+                                      <i className="bi bi-credit-card"></i>
+                                    </button>
+                                    <button
+                                      className="btn btn-secondary"
+                                      onClick={() => {
+                                        setSelectedStudent(student);
+                                        setFeeStructureForm({
+                                          totalFee: feeInfo.totalFee || '',
+                                          tuitionFee: feeInfo.tuitionFee || '',
+                                          admissionFee: feeInfo.admissionFee || '',
+                                          examFee: feeInfo.examFee || '',
+                                          libraryFee: feeInfo.libraryFee || '',
+                                          sportsFee: feeInfo.sportsFee || '',
+                                          otherFees: feeInfo.otherFees || '',
+                                          dueDate: feeInfo.dueDate ? new Date(feeInfo.dueDate).toISOString().split('T')[0] : ''
+                                        });
+                                        setActiveTab('structure');
+                                      }}
+                                      title="Edit Fee Structure"
+                                    >
+                                      <i className="bi bi-gear"></i>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted py-5">
+                      <i className="bi bi-people" style={{ fontSize: '4rem' }}></i>
+                      <h4 className="mt-3">No Students Found</h4>
+                      <p>Try adjusting your filters or add students to the system.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Add Payment Tab */}
+              {activeTab === 'payments' && (
+                <div>
+                  <div className="card">
+                    <div className="card-header bg-primary text-white">
+                      <h5 className="mb-0">
+                        <i className="bi bi-credit-card me-2"></i>
+                        Add Payment
+                      </h5>
+                    </div>
+                    <div className="card-body">
+                      {selectedStudent ? (
+                        <div>
+                          {/* Selected Student Info */}
+                          <div className="alert alert-info">
+                            <h6>Selected Student:</h6>
+                            <p className="mb-0">
+                              <strong>{selectedStudent.fullName || `${selectedStudent.firstName} ${selectedStudent.lastName}`}</strong>
+                              <br />
+                              Roll Number: {selectedStudent.academic?.rollNumber}
+                              <br />
+                              Class: {selectedStudent.academic?.currentGrade}-{selectedStudent.academic?.section}
+                              <br />
+                              Pending Amount: ₹{((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0)).toLocaleString()}
+                            </p>
+                            <button
+                              className="btn btn-sm btn-outline-secondary mt-2"
+                              onClick={() => setSelectedStudent(null)}
+                            >
+                              Change Student
+                            </button>
+                          </div>
+
+                          {/* Payment Form */}
+                          <form onSubmit={handleAddPayment}>
+                            <div className="row g-3">
+                              <div className="col-md-6">
+                                <label className="form-label">Payment Amount *</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={paymentForm.amount}
+                                    onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                                    required
+                                    min="1"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Payment Method *</label>
+                                <select
+                                  className="form-select"
+                                  value={paymentForm.paymentMethod}
+                                  onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
+                                  required
+                                >
+                                  {paymentMethods.map(method => (
+                                    <option key={method.value} value={method.value}>{method.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Receipt Number</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={paymentForm.receiptNumber}
+                                  onChange={(e) => setPaymentForm({ ...paymentForm, receiptNumber: e.target.value })}
+                                  placeholder="Auto-generated if empty"
+                                />
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Payment Date *</label>
+                                <input
+                                  type="date"
+                                  className="form-control"
+                                  value={paymentForm.paymentDate}
+                                  onChange={(e) => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })}
+                                  required
+                                />
+                              </div>
+                              <div className="col-12">
+                                <label className="form-label">Description</label>
+                                <textarea
+                                  className="form-control"
+                                  rows="3"
+                                  value={paymentForm.description}
+                                  onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })}
+                                  placeholder="Optional payment notes..."
+                                ></textarea>
+                              </div>
+                              <div className="col-12">
+                                <button type="submit" className="btn btn-success" disabled={loading}>
+                                  {loading ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-2"></span>
+                                      Processing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="bi bi-check-circle me-2"></i>
+                                      Add Payment
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary ms-2"
+                                  onClick={() => setActiveTab('students')}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      ) : (
+                        <div className="text-center text-muted py-5">
+                          <i className="bi bi-person-plus" style={{ fontSize: '4rem' }}></i>
+                          <h4 className="mt-3">No Student Selected</h4>
+                          <p>Please select a student from the Student Fees tab to add a payment.</p>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => setActiveTab('students')}
+                          >
+                            Go to Student Fees
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Fee Structure Tab */}
+              {activeTab === 'structure' && (
+                <div>
+                  <div className="card">
+                    <div className="card-header bg-secondary text-white">
+                      <h5 className="mb-0">
+                        <i className="bi bi-gear me-2"></i>
+                        Update Fee Structure
+                      </h5>
+                    </div>
+                    <div className="card-body">
+                      {selectedStudent ? (
+                        <div>
+                          {/* Selected Student Info */}
+                          <div className="alert alert-info">
+                            <h6>Selected Student:</h6>
+                            <p className="mb-0">
+                              <strong>{selectedStudent.fullName || `${selectedStudent.firstName} ${selectedStudent.lastName}`}</strong>
+                              <br />
+                              Roll Number: {selectedStudent.academic?.rollNumber}
+                              <br />
+                              Class: {selectedStudent.academic?.currentGrade}-{selectedStudent.academic?.section}
+                            </p>
+                            <button
+                              className="btn btn-sm btn-outline-secondary mt-2"
+                              onClick={() => setSelectedStudent(null)}
+                            >
+                              Change Student
+                            </button>
+                          </div>
+
+                          {/* Fee Structure Form */}
+                          <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleUpdateFeeStructure(selectedStudent._id);
+                          }}>
+                            <div className="row g-3">
+                              <div className="col-md-6">
+                                <label className="form-label">Tuition Fee</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.tuitionFee}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, tuitionFee: e.target.value })}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Admission Fee</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.admissionFee}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, admissionFee: e.target.value })}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Exam Fee</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.examFee}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, examFee: e.target.value })}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Library Fee</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.libraryFee}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, libraryFee: e.target.value })}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Sports Fee</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.sportsFee}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, sportsFee: e.target.value })}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Other Fees</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.otherFees}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, otherFees: e.target.value })}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Total Fee *</label>
+                                <div className="input-group">
+                                  <span className="input-group-text">₹</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={feeStructureForm.totalFee}
+                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, totalFee: e.target.value })}
+                                    required
+                                    min="1"
+                                    step="0.01"
+                                  />
+                                </div>
+                                <small className="text-muted">Enter the total fee amount</small>
+                              </div>
+                              <div className="col-md-6">
+                                <label className="form-label">Due Date</label>
+                                <input
+                                  type="date"
+                                  className="form-control"
+                                  value={feeStructureForm.dueDate}
+                                  onChange={(e) => setFeeStructureForm({ ...feeStructureForm, dueDate: e.target.value })}
+                                />
+                              </div>
+                              <div className="col-12">
+                                <button type="submit" className="btn btn-success" disabled={loading}>
+                                  {loading ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-2"></span>
+                                      Updating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="bi bi-check-circle me-2"></i>
+                                      Update Fee Structure
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary ms-2"
+                                  onClick={() => setActiveTab('students')}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      ) : (
+                        <div className="text-center text-muted py-5">
+                          <i className="bi bi-gear" style={{ fontSize: '4rem' }}></i>
+                          <h4 className="mt-3">No Student Selected</h4>
+                          <p>Please select a student from the Student Fees tab to update fee structure.</p>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => setActiveTab('students')}
+                          >
+                            Go to Student Fees
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Reports Tab */}
+              {activeTab === 'reports' && (
+                <div>
+                  <div className="card">
+                    <div className="card-header bg-info text-white">
+                      <h5 className="mb-0">
+                        <i className="bi bi-file-earmark-text me-2"></i>
+                        Fee Collection Reports
+                      </h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row g-4">
+                        {/* Summary Report */}
+                        <div className="col-12">
+                          <h6>Collection Summary</h6>
+                          <table className="table table-bordered">
+                            <tbody>
+                              <tr>
+                                <td><strong>Total Students</strong></td>
+                                <td>{stats.totalStudents}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>Total Fee Amount</strong></td>
+                                <td>₹{stats.totalFeeAmount.toLocaleString()}</td>
+                              </tr>
+                              <tr className="table-success">
+                                <td><strong>Total Collected</strong></td>
+                                <td>₹{stats.totalPaidAmount.toLocaleString()}</td>
+                              </tr>
+                              <tr className="table-warning">
+                                <td><strong>Total Pending</strong></td>
+                                <td>₹{stats.totalPendingAmount.toLocaleString()}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>Collection Rate</strong></td>
+                                <td>
+                                  <span className={`badge ${stats.collectionRate >= 80 ? 'bg-success' : stats.collectionRate >= 60 ? 'bg-warning' : 'bg-danger'}`}>
+                                    {stats.collectionRate}%
+                                  </span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><strong>Fully Paid Students</strong></td>
+                                <td>{stats.fullyPaidStudents}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>Pending Payment Students</strong></td>
+                                <td>{stats.pendingStudents}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Export Options */}
+                        <div className="col-12">
+                          <h6>Export Reports</h6>
+                          <div className="d-flex gap-2">
+                            <button className="btn btn-outline-primary" onClick={() => window.print()}>
+                              <i className="bi bi-printer me-2"></i>
+                              Print Report
+                            </button>
+                            <button className="btn btn-outline-success" disabled>
+                              <i className="bi bi-file-excel me-2"></i>
+                              Export to Excel
+                            </button>
+                            <button className="btn btn-outline-danger" disabled>
+                              <i className="bi bi-file-pdf me-2"></i>
+                              Export to PDF
+                            </button>
+                          </div>
+                          <small className="text-muted d-block mt-2">
+                            Excel and PDF export features coming soon
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
