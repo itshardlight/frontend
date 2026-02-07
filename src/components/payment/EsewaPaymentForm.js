@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import crypto from 'crypto-js';
 
 /**
  * Simple eSewa Payment Form - Matches eSewa's exact format
@@ -21,15 +20,6 @@ const EsewaPaymentForm = ({
 
   // Calculate total amount (keep as simple numbers, not paisa)
   const totalAmount = amount + taxAmount;
-
-  /**
-   * Generate eSewa signature
-   */
-  const generateSignature = (totalAmount, transactionUuid, productCode, secretKey) => {
-    const message = `total_amount=${totalAmount},transaction_uuid=${transactionUuid},product_code=${productCode}`;
-    const hash = crypto.HmacSHA256(message, secretKey);
-    return crypto.enc.Base64.stringify(hash);
-  };
 
   /**
    * Initialize payment data from backend
@@ -64,10 +54,7 @@ const EsewaPaymentForm = ({
           }
         });
 
-        const { secretKey, transactionUuid, productCode } = response.data;
-        
-        // Generate signature
-        const signature = generateSignature(totalAmount, transactionUuid, productCode, secretKey);
+        const { transactionUuid, productCode } = response.data;
         
         // Prepare form data exactly like eSewa format
         const formData = {
@@ -81,7 +68,7 @@ const EsewaPaymentForm = ({
           success_url: successUrl,
           failure_url: failureUrl,
           signed_field_names: 'total_amount,transaction_uuid,product_code',
-          signature: signature
+          signature: response.data.signature // Get signature from backend
         };
 
         setPaymentData(formData);
