@@ -253,38 +253,7 @@ const ResultsSection = ({ studentId }) => {
               </div>
             ))}
 
-            {stats && (
-              <div className="col-12 mt-4">
-                <div className="card border-success">
-                  <div className="card-header bg-success text-white">
-                    <h6 className="mb-0">
-                      Summary {activeYear}
-                      {selectedClass !== 'all' ? ` • Class ${selectedClass}` : ''}
-                    </h6>
-                  </div>
-                  <div className="card-body">
-                    <div className="row text-center">
-                      <div className="col-md-3 col-6 mb-3">
-                        <h4 className="text-primary mb-1">{stats.avgPercentage}%</h4>
-                        <small className="text-muted">Average %</small>
-                      </div>
-                      <div className="col-md-3 col-6 mb-3">
-                        <h4 className="text-success mb-1">{stats.overallGrade}</h4>
-                        <small className="text-muted">Grade</small>
-                      </div>
-                      <div className="col-md-3 col-6 mb-3">
-                        <h4 className="text-info mb-1">{stats.totalExams}</h4>
-                        <small className="text-muted">Exams</small>
-                      </div>
-                      <div className="col-md-3 col-6 mb-3">
-                        <h4 className="text-warning mb-1">{stats.avgAttendance}%</h4>
-                        <small className="text-muted">Attendance</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+         
 
           </div>
         )}
