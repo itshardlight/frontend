@@ -33,7 +33,6 @@ const StudentRegistration = () => {
     address: "",
     city: "",
     state: "",
-    zipCode: "",
     class: "",
     section: "",
     rollNumber: "",
@@ -157,7 +156,6 @@ const StudentRegistration = () => {
       address: "",
       city: "",
       state: "",
-      zipCode: "",
       class: "",
       section: "",
       rollNumber: "",
@@ -412,7 +410,7 @@ const StudentRegistration = () => {
                   required
                 ></textarea>
               </div>
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label">City *</label>
                 <input
                   type="text"
@@ -423,24 +421,13 @@ const StudentRegistration = () => {
                   required
                 />
               </div>
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label">State *</label>
                 <input
                   type="text"
                   name="state"
                   className="form-control"
                   value={formData.state}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Zip Code *</label>
-                <input
-                  type="text"
-                  name="zipCode"
-                  className="form-control"
-                  value={formData.zipCode}
                   onChange={handleChange}
                   required
                 />

@@ -510,7 +510,7 @@ const FeeManagement = () => {
                       <div className="card bg-info bg-opacity-10 border-info">
                         <div className="card-body text-center">
                           <i className="bi bi-currency-rupee text-info" style={{ fontSize: '2rem' }}></i>
-                          <h4 className="mt-2 mb-0 text-info">₹{stats.totalFeeAmount.toLocaleString()}</h4>
+                          <h4 className="mt-2 mb-0 text-info">Rs{stats.totalFeeAmount.toLocaleString()}</h4>
                           <small className="text-muted">Total Fee Amount</small>
                         </div>
                       </div>
@@ -519,7 +519,7 @@ const FeeManagement = () => {
                       <div className="card bg-success bg-opacity-10 border-success">
                         <div className="card-body text-center">
                           <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '2rem' }}></i>
-                          <h4 className="mt-2 mb-0 text-success">₹{stats.totalPaidAmount.toLocaleString()}</h4>
+                          <h4 className="mt-2 mb-0 text-success">Rs{stats.totalPaidAmount.toLocaleString()}</h4>
                           <small className="text-muted">Collected Amount</small>
                         </div>
                       </div>
@@ -528,7 +528,7 @@ const FeeManagement = () => {
                       <div className="card bg-warning bg-opacity-10 border-warning">
                         <div className="card-body text-center">
                           <i className="bi bi-clock-fill text-warning" style={{ fontSize: '2rem' }}></i>
-                          <h4 className="mt-2 mb-0 text-warning">₹{stats.totalPendingAmount.toLocaleString()}</h4>
+                          <h4 className="mt-2 mb-0 text-warning">Rs{stats.totalPendingAmount.toLocaleString()}</h4>
                           <small className="text-muted">Pending Amount</small>
                         </div>
                       </div>
@@ -573,10 +573,10 @@ const FeeManagement = () => {
                       </div>
                       <div className="row mt-3 text-center">
                         <div className="col-md-6">
-                          <small className="text-muted">Collected: ₹{stats.totalPaidAmount.toLocaleString()}</small>
+                          <small className="text-muted">Collected: Rs{stats.totalPaidAmount.toLocaleString()}</small>
                         </div>
                         <div className="col-md-6">
-                          <small className="text-muted">Pending: ₹{stats.totalPendingAmount.toLocaleString()}</small>
+                          <small className="text-muted">Pending: Rs{stats.totalPendingAmount.toLocaleString()}</small>
                         </div>
                       </div>
                     </div>
@@ -645,9 +645,9 @@ const FeeManagement = () => {
                                   </span>
                                 </td>
                                 <td>{student.email}</td>
-                                <td>₹{totalFee.toLocaleString()}</td>
-                                <td className="text-success">₹{paidAmount.toLocaleString()}</td>
-                                <td className="text-danger">₹{pendingAmount.toLocaleString()}</td>
+                                <td>Rs{totalFee.toLocaleString()}</td>
+                                <td className="text-success">Rs{paidAmount.toLocaleString()}</td>
+                                <td className="text-danger">Rs{pendingAmount.toLocaleString()}</td>
                                 <td>
                                   <span className={`badge bg-${statusBadge}`}>{statusText}</span>
                                 </td>
@@ -724,7 +724,7 @@ const FeeManagement = () => {
                               <br />
                               Class: {selectedStudent.academic?.currentGrade}-{selectedStudent.academic?.section}
                               <br />
-                              Pending Amount: ₹{((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0)).toLocaleString()}
+                              Pending Amount: Rs{((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0)).toLocaleString()}
                             </p>
                             <button
                               className="btn btn-sm btn-outline-secondary mt-2"
@@ -740,7 +740,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Payment Amount *</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -878,7 +878,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Tuition Fee</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -892,7 +892,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Admission Fee</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -906,7 +906,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Exam Fee</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -920,7 +920,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Library Fee</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -934,7 +934,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Sports Fee</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -948,7 +948,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Other Fees</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -962,7 +962,7 @@ const FeeManagement = () => {
                               <div className="col-md-6">
                                 <label className="form-label">Total Fee *</label>
                                 <div className="input-group">
-                                  <span className="input-group-text">₹</span>
+                                  <span className="input-group-text">Rs</span>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -1050,15 +1050,15 @@ const FeeManagement = () => {
                               </tr>
                               <tr>
                                 <td><strong>Total Fee Amount</strong></td>
-                                <td>₹{stats.totalFeeAmount.toLocaleString()}</td>
+                                <td>Rs{stats.totalFeeAmount.toLocaleString()}</td>
                               </tr>
                               <tr className="table-success">
                                 <td><strong>Total Collected</strong></td>
-                                <td>₹{stats.totalPaidAmount.toLocaleString()}</td>
+                                <td>Rs{stats.totalPaidAmount.toLocaleString()}</td>
                               </tr>
                               <tr className="table-warning">
                                 <td><strong>Total Pending</strong></td>
-                                <td>₹{stats.totalPendingAmount.toLocaleString()}</td>
+                                <td>Rs{stats.totalPendingAmount.toLocaleString()}</td>
                               </tr>
                               <tr>
                                 <td><strong>Collection Rate</strong></td>

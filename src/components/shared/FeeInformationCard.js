@@ -150,28 +150,28 @@ const FeeInformationCard = ({ studentId }) => {
               <div className="card bg-light">
                 <div className="card-body">
                   <h6 className="card-title text-primary">
-                    <i className="bi bi-currency-rupee me-1"></i>
+                   
                     Fee Summary
                   </h6>
                   
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="fw-bold">Total Fee:</span>
                     <span className="badge bg-info fs-6">
-                      ₹{(feeInfo.totalFee || 0).toLocaleString()}
+                      Rs {(feeInfo.totalFee || 0).toLocaleString()}
                     </span>
                   </div>
                   
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="fw-bold">Paid Amount:</span>
                     <span className="badge bg-success fs-6">
-                      ₹{(feeInfo.paidAmount || 0).toLocaleString()}
+                      Rs {(feeInfo.paidAmount || 0).toLocaleString()}
                     </span>
                   </div>
                   
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <span className="fw-bold">Pending Amount:</span>
                     <span className="badge bg-danger fs-6">
-                      ₹{(feeInfo.pendingAmount || 0).toLocaleString()}
+                      Rs {(feeInfo.pendingAmount || 0).toLocaleString()}
                     </span>
                   </div>
                   
@@ -203,37 +203,37 @@ const FeeInformationCard = ({ studentId }) => {
                       {feeInfo.tuitionFee > 0 && (
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <span>Tuition Fee:</span>
-                          <span>₹{feeInfo.tuitionFee.toLocaleString()}</span>
+                          <span>Rs {feeInfo.tuitionFee.toLocaleString()}</span>
                         </div>
                       )}
                       {feeInfo.admissionFee > 0 && (
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <span>Admission Fee:</span>
-                          <span>₹{feeInfo.admissionFee.toLocaleString()}</span>
+                          <span>Rs {feeInfo.admissionFee.toLocaleString()}</span>
                         </div>
                       )}
                       {feeInfo.examFee > 0 && (
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <span>Exam Fee:</span>
-                          <span>₹{feeInfo.examFee.toLocaleString()}</span>
+                          <span>Rs {feeInfo.examFee.toLocaleString()}</span>
                         </div>
                       )}
                       {feeInfo.libraryFee > 0 && (
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <span>Library Fee:</span>
-                          <span>₹{feeInfo.libraryFee.toLocaleString()}</span>
+                          <span>Rs {feeInfo.libraryFee.toLocaleString()}</span>
                         </div>
                       )}
                       {feeInfo.sportsFee > 0 && (
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <span>Sports Fee:</span>
-                          <span>₹{feeInfo.sportsFee.toLocaleString()}</span>
+                          <span>Rs {feeInfo.sportsFee.toLocaleString()}</span>
                         </div>
                       )}
                       {feeInfo.otherFees > 0 && (
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <span>Other Fees:</span>
-                          <span>₹{feeInfo.otherFees.toLocaleString()}</span>
+                          <span>Rs {feeInfo.otherFees.toLocaleString()}</span>
                         </div>
                       )}
                       
@@ -286,7 +286,7 @@ const FeeInformationCard = ({ studentId }) => {
                               </td>
                               <td>
                                 <span className="badge bg-success">
-                                  ₹{payment.amount.toLocaleString()}
+                                  Rs {payment.amount.toLocaleString()}
                                 </span>
                               </td>
                               <td>

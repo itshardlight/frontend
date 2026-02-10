@@ -170,10 +170,6 @@ const ProfileCard = ({ profileId, currentUser }) => {
           <label>State:</label>
           <span>{profile.address?.state || 'Not provided'}</span>
         </div>
-        <div className="profile-field">
-          <label>ZIP Code:</label>
-          <span>{profile.address?.zipCode || 'Not provided'}</span>
-        </div>
       </div>
     </div>
   );

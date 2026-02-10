@@ -14,7 +14,6 @@ const ProfileCreationForm = ({ onSuccess, onCancel }) => {
       street: '',
       city: '',
       state: '',
-      zipCode: '',
       country: 'India'
     },
     academic: {
@@ -237,14 +236,6 @@ const ProfileCreationForm = ({ onSuccess, onCancel }) => {
                 type="text"
                 value={formData.address.state}
                 onChange={(e) => handleChange('address', 'state', e.target.value)}
-              />
-            </div>
-            <div className="form-field">
-              <label>ZIP Code</label>
-              <input
-                type="text"
-                value={formData.address.zipCode}
-                onChange={(e) => handleChange('address', 'zipCode', e.target.value)}
               />
             </div>
           </div>
