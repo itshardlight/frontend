@@ -78,11 +78,6 @@ const FeeInformationCard = ({ studentId }) => {
     }
   };
 
-  const handleManageFees = () => {
-    // Navigate to fee department dashboard with this student pre-selected
-    window.open('/fee-department', '_blank');
-  };
-
   if (loading) {
     return (
       <div className="card shadow-sm mb-4">
@@ -133,14 +128,7 @@ const FeeInformationCard = ({ studentId }) => {
           <i className="bi bi-cash-stack me-2"></i>
           Fee Information
         </h5>
-        <button 
-          className="btn btn-light btn-sm"
-          onClick={handleManageFees}
-          title="Manage fees in Fee Department"
-        >
-          <i className="bi bi-gear me-1"></i>
-          Manage
-        </button>
+       
       </div>
       <div className="card-body">
         {feeInfo ? (

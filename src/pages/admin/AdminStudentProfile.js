@@ -235,34 +235,84 @@ const AdminStudentProfile = () => {
             </div>
 
             {/* Quick Info Card */}
-            <div className="card shadow-sm mb-4">
-              <div className="card-header bg-secondary text-white">
-                <h6 className="mb-0">
-                  <i className="bi bi-info-circle me-2"></i>
-                  Quick Information
-                </h6>
-              </div>
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span className="text-muted">Roll Number:</span>
-                  <span className="badge bg-primary fs-6">{student.rollNumber}</span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span className="text-muted">Class:</span>
-                  <span className="badge bg-info fs-6">{student.class}</span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span className="text-muted">Section:</span>
-                  <span className="badge bg-warning text-dark fs-6">{student.section}</span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span className="text-muted">Admission Date:</span>
-                  <span className="fw-bold">
-                    {student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : 'N/A'}
-                  </span>
-                </div>
-              </div>
-            </div>
+<div className="card shadow-sm mb-4">
+  <div className="card-header bg-secondary text-white px-3 py-2">
+    <h6 className="mb-0">
+      <i className="bi bi-info-circle me-2"></i>
+      Quick Information
+    </h6>
+  </div>
+  <div className="card-body p-3">
+    {/* Basic Info Items */}
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <span className="text-muted">Roll Number:</span>
+      <span className="badge bg-primary fs-6">{student.rollNumber}</span>
+    </div>
+    
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <span className="text-muted">Class:</span>
+      <span className="badge bg-info fs-6">{student.class}</span>
+    </div>
+    
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <span className="text-muted">Section:</span>
+      <span className="badge bg-warning text-dark fs-6">{student.section}</span>
+    </div>
+    
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <span className="text-muted">Admission Date:</span>
+      <span className="fw-bold">
+        {student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : 'N/A'}
+      </span>
+    </div>
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <span className="text-muted">Status:</span>
+      {editing ? (
+        <select
+          className="form-select form-select-sm"
+          style={{width: 'auto', minWidth: '100px'}}
+          value={editData.status || 'active'}
+          onChange={(e) => handleInputChange('status', e.target.value)}
+        >
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          
+        </select>
+      ) : (
+        <span
+          className={`badge fs-6 ${
+            student.status === 'active' ? 'bg-success' : 
+    
+            'bg-warning'
+          }`}
+        >
+          {student.status}
+        </span>
+      )}
+    </div>
+
+    {/* Previous School (optional) */}
+    {student.previousSchool && (
+      <div className="d-flex justify-content-between align-items-center">
+        <span className="text-muted">Previous School:</span>
+        {editing ? (
+          <input
+            type="text"
+            className="form-control form-control-sm"
+            style={{width: 'auto', minWidth: '150px'}}
+            value={editData.previousSchool || ''}
+            onChange={(e) => handleInputChange('previousSchool', e.target.value)}
+          />
+        ) : (
+          <span className="badge bg-secondary fs-6">
+            {student.previousSchool}
+          </span>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
 
             {/* Attendance Summary Card */}
             <AdminAttendanceCard studentId={id} />
@@ -448,153 +498,6 @@ const AdminStudentProfile = () => {
                 </div>
               </div>
             </div>
-
-           {/* Academic Information */}
-<div className="card shadow-sm mb-4">
-  <div className="card-header bg-info text-white">
-    <h5 className="mb-0">
-      <i className="bi bi-mortarboard me-2"></i>
-      Academic Information
-    </h5>
-  </div>
-
-  <div className="card-body">
-    <div className="row g-3">
-      {/* Roll Number */}
-      <div className="col-12">
-        <div className="d-flex align-items-center">
-          <label className="form-label fw-bold mb-0 me-2">Roll Number:</label>
-          {editing ? (
-            <input
-              type="text"
-              className="form-control w-auto"
-              value={editData.rollNumber || ''}
-              onChange={(e) => handleInputChange('rollNumber', e.target.value)}
-            />
-          ) : (
-            <span className="badge bg-primary fs-6">
-              {student.rollNumber}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Class */}
-      <div className="col-12">
-        <div className="d-flex align-items-center">
-          <label className="form-label fw-bold mb-0 me-2">Class:</label>
-          {editing ? (
-            <input
-              type="text"
-              className="form-control w-auto"
-              value={editData.class || ''}
-              onChange={(e) => handleInputChange('class', e.target.value)}
-            />
-          ) : (
-            <span className="badge bg-info fs-6">
-              {student.class}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Section */}
-      <div className="col-12">
-        <div className="d-flex align-items-center">
-          <label className="form-label fw-bold mb-0 me-2">Section:</label>
-          {editing ? (
-            <input
-              type="text"
-              className="form-control w-auto"
-              value={editData.section || ''}
-              onChange={(e) => handleInputChange('section', e.target.value)}
-            />
-          ) : (
-            <span className="badge bg-warning text-dark fs-6">
-              {student.section}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Admission Date */}
-      <div className="col-12">
-        <div className="d-flex align-items-center">
-          <label className="form-label fw-bold mb-0 me-2">Admission Date:</label>
-          {editing ? (
-            <input
-              type="date"
-              className="form-control w-auto"
-              value={
-                editData.admissionDate
-                  ? new Date(editData.admissionDate).toISOString().split('T')[0]
-                  : ''
-              }
-              onChange={(e) => handleInputChange('admissionDate', e.target.value)}
-            />
-          ) : (
-            <span className="badge bg-secondary fs-6">
-              {student.admissionDate
-                ? new Date(student.admissionDate).toLocaleDateString()
-                : 'Not specified'}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Status */}
-      <div className="col-12">
-        <div className="d-flex align-items-center">
-          <label className="form-label fw-bold mb-0 me-2">Status:</label>
-          {editing ? (
-            <select
-              className="form-select w-auto"
-              value={editData.status || 'active'}
-              onChange={(e) => handleInputChange('status', e.target.value)}
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          ) : (
-            <span
-              className={`badge fs-6 ${
-                student.status === 'active' ? 'bg-success' : 'bg-warning'
-              }`}
-            >
-              {student.status}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Previous School (optional) */}
-      {student.previousSchool && (
-        <div className="col-12">
-          <div className="d-flex align-items-center">
-            <label className="form-label fw-bold mb-0 me-2">Previous School:</label>
-            {editing ? (
-              <input
-                type="text"
-                className="form-control w-auto"
-                value={editData.previousSchool || ''}
-                onChange={(e) =>
-                  handleInputChange('previousSchool', e.target.value)
-                }
-              />
-            ) : (
-              <span className="badge bg-secondary fs-6">
-                {student.previousSchool}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
-
-         
 
             {/* Additional Information */}
             {(student.emergencyContact || student.medicalInfo || student.notes) && (
