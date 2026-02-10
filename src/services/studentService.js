@@ -19,6 +19,10 @@ const handleResponse = async (response) => {
   const data = await response.json();
   
   if (!response.ok) {
+    // Handle validation errors with detailed messages
+    if (data.errors && Array.isArray(data.errors)) {
+      throw new Error(data.errors.join(', '));
+    }
     throw new Error(data.message || 'Something went wrong');
   }
   
