@@ -8,14 +8,14 @@ const AcademicSection = ({ profile, currentUser, editing, editData, setEditData 
   const canView = ['admin', 'teacher', 'student', 'parent'].includes(currentUser.role);
   const canEdit = ['admin', 'teacher'].includes(currentUser.role);
 
-  if (!canView || !profile.academic) return null;
-
   // Fetch student results
   useEffect(() => {
     if (profile._id) {
       fetchStudentResults();
     }
   }, [profile._id, selectedAcademicYear]);
+
+  if (!canView || !profile.academic) return null;
 
   const fetchStudentResults = async () => {
     try {
