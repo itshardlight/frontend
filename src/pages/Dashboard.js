@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ResultsManagement } from "../components/teacher";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/Dashboard.css";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [activeComponent, setActiveComponent] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState({
     totalStudents: 0,
     totalTeachers: 0,
@@ -205,7 +207,21 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const navigateTo = (path) => {
+    navigate(path);
+    closeSidebar();
   };
 
   const getRoleBadgeClass = (role) => {
@@ -220,165 +236,129 @@ const Dashboard = () => {
 
   // Student Dashboard Content
   const StudentDashboard = () => (
-    <>
-   
-
-    
-
-      {/* Student Action Cards */}
-      <div className="row g-4">
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100 dashboard-card">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-person-badge icon-primary" style={{ fontSize: "3rem" }}></i>
-              </div>
-              <h5>My Profile</h5>
-              <p className="text-muted">View and edit personal details</p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student/profile")}>View Profile</button>
-            </div>
+    <div className="dashboard-content">
+      <div className="stats-grid">
+        <div className="stat-card stat-card-primary">
+          <div className="stat-icon">
+            <i className="bi bi-cash-stack"></i>
+          </div>
+          <div className="stat-info">
+            <h3>Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</h3>
+            <p>Fees Paid</p>
           </div>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100 dashboard-card">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-calendar-check icon-accent" style={{ fontSize: "3rem" }}></i>
-              </div>
-              <h5>Attendance</h5>
-              <p className="text-muted">Check attendance record</p>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/student/attendance")}>View Attendance</button>
-            </div>
+        <div className="stat-card stat-card-warning">
+          <div className="stat-icon">
+            <i className="bi bi-exclamation-circle"></i>
+          </div>
+          <div className="stat-info">
+            <h3>Rs.{dashboardStats.pendingFees.toLocaleString()}</h3>
+            <p>Pending Fees</p>
           </div>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100 dashboard-card">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-graph-up icon-primary" style={{ fontSize: "3rem" }}></i>
-              </div>
-              <h5>My Results</h5>
-              <p className="text-muted">View exam results and grades</p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/student/results")}>View Results</button>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100 dashboard-card">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-cash-stack icon-success" style={{ fontSize: "3rem" }}></i>
-              </div>
-              <h5>My Fees</h5>
-              <p className="text-muted">View fee details and payment history</p>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/student/fees")}>View Fees</button>
-            </div>
-          </div>
-        </div>
-
-       
       </div>
-    </>
+
+      <div className="action-cards-grid">
+        <div className="action-card" onClick={() => navigateTo("/student/profile")}>
+          <div className="action-icon action-icon-primary">
+            <i className="bi bi-person-badge"></i>
+          </div>
+          <h5>My Profile</h5>
+          <p>View and edit personal details</p>
+        </div>
+        <div className="action-card" onClick={() => navigateTo("/student/attendance")}>
+          <div className="action-icon action-icon-success">
+            <i className="bi bi-calendar-check"></i>
+          </div>
+          <h5>Attendance</h5>
+          <p>Check attendance record</p>
+        </div>
+        <div className="action-card" onClick={() => navigateTo("/student/results")}>
+          <div className="action-icon action-icon-info">
+            <i className="bi bi-graph-up"></i>
+          </div>
+          <h5>My Results</h5>
+          <p>View exam results and grades</p>
+        </div>
+        <div className="action-card" onClick={() => navigateTo("/student/fees")}>
+          <div className="action-icon action-icon-warning">
+            <i className="bi bi-cash-stack"></i>
+          </div>
+          <h5>My Fees</h5>
+          <p>View fee details and payment history</p>
+        </div>
+      </div>
+    </div>
   );
 
   // Teacher/Admin Dashboard Content
   const TeacherDashboard = () => (
-    <div>
-    
+    <div className="dashboard-content">
+      <div className="stats-grid">
+        <div className="stat-card stat-card-primary">
+          <div className="stat-icon">
+            <i className="bi bi-people"></i>
+          </div>
+          <div className="stat-info">
+            <h3>{dashboardStats.totalStudents}</h3>
+            <p>Total Students</p>
+          </div>
+        </div>
+        <div className="stat-card stat-card-success">
+          <div className="stat-icon">
+            <i className="bi bi-cash-stack"></i>
+          </div>
+          <div className="stat-info">
+            <h3>Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</h3>
+            <p>Fees Collected</p>
+          </div>
+        </div>
+        <div className="stat-card stat-card-warning">
+          <div className="stat-icon">
+            <i className="bi bi-exclamation-triangle"></i>
+          </div>
+          <div className="stat-info">
+            <h3>Rs.{dashboardStats.pendingFees.toLocaleString()}</h3>
+            <p>Pending Fees</p>
+          </div>
+        </div>
+      </div>
 
-      {/* Admin/Teacher Action Cards */}
-      <div className="row g-4">
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-people" style={{ fontSize: "3rem", color: "#0d6efd" }}></i>
-              </div>
-              <h5>My Students</h5>
-              <p className="text-muted">Manage student records</p>
-              <div className="mb-2">
-                <span className="badge bg-primary">{dashboardStats.totalStudents} Students</span>
-              </div>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate("/admin/student-registration")}>View Students</button>
-            </div>
+      <div className="action-cards-grid">
+        <div className="action-card" onClick={() => navigateTo("/admin/student-registration")}>
+          <div className="action-icon action-icon-primary">
+            <i className="bi bi-people"></i>
           </div>
+          <h5>My Students</h5>
+          <p>Manage student records</p>
+          <span className="badge bg-primary">{dashboardStats.totalStudents} Students</span>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-clipboard-check" style={{ fontSize: "3rem", color: "#198754" }}></i>
-              </div>
-              <h5>Attendance</h5>
-              <p className="text-muted">Mark student attendance</p>
-              <div className="mb-2">
-                <span className="badge bg-success">Daily Tracking</span>
-              </div>
-              <button className="btn btn-success btn-sm" onClick={() => navigate("/teacher/attendance")}>Take Attendance</button>
-            </div>
+        <div className="action-card" onClick={() => navigateTo("/teacher/attendance")}>
+          <div className="action-icon action-icon-success">
+            <i className="bi bi-clipboard-check"></i>
           </div>
+          <h5>Attendance</h5>
+          <p>Mark student attendance</p>
+          <span className="badge bg-success">Daily Tracking</span>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-journal-text" style={{ fontSize: "3rem", color: "#6f42c1" }}></i>
-              </div>
-              <h5>Results Management</h5>
-              <p className="text-muted">Upload and manage exam results</p>
-              <div className="mb-2">
-                <span className="badge bg-secondary">Exam Results</span>
-              </div>
-              <button 
-                className="btn btn-sm"
-                style={{ backgroundColor: "#6f42c1", color: "white" }}
-                onClick={() => navigate("/teacher/results")}
-              >
-                Manage Results
-              </button>
-            </div>
+        <div className="action-card" onClick={() => navigateTo("/teacher/results")}>
+          <div className="action-icon action-icon-info">
+            <i className="bi bi-journal-text"></i>
           </div>
+          <h5>Results Management</h5>
+          <p>Upload and manage exam results</p>
+          <span className="badge bg-secondary">Exam Results</span>
         </div>
-        {/* Fee Management - Only for Admin users */}
         {user.role === "admin" && (
-          <div className="col-md-4">
-            <div className="card shadow-sm h-100">
-              <div className="card-body text-center">
-                <div className="mb-3">
-                  <i className="bi bi-cash-stack" style={{ fontSize: "3rem", color: "#198754" }}></i>
-                </div>
-                <h5>Fee Management</h5>
-                <p className="text-muted">Manage student fees and payments</p>
-                <div className="mb-2">
-                  <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()} Collected</span>
-                </div>
-                <button 
-                  className="btn btn-success btn-sm"
-                  onClick={() => navigate("/fee-department/fees")}
-                >
-                  Manage Fees
-                </button>
-              </div>
+          <div className="action-card" onClick={() => navigateTo("/fee-department/fees")}>
+            <div className="action-icon action-icon-warning">
+              <i className="bi bi-cash-stack"></i>
             </div>
+            <h5>Fee Management</h5>
+            <p>Manage student fees and payments</p>
+            <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</span>
           </div>
         )}
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="bi bi-journal-text" style={{ fontSize: "3rem", color: "#dc3545" }}></i>
-              </div>
-              <h5>Assignments</h5>
-              <p className="text-muted">Create and grade assignments</p>
-              <div className="mb-2">
-                <span className="badge bg-secondary">Coming Soon</span>
-              </div>
-              <button className="btn btn-danger btn-sm" style={{ color: "white" }}>Manage Assignments</button>
-            </div>
-          </div>
-        </div>
-
-      
       </div>
     </div>
   );
@@ -387,245 +367,215 @@ const Dashboard = () => {
 
   // Fee Department Dashboard Content
   const FeeDepartmentDashboard = () => (
-    <>
-    
-
-      {/* Main Features */}
-      <div className="row g-4">
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-search me-2 text-primary"></i>
-                Student Fee Overview
-              </h5>
-              <ul className="list-unstyled mt-3 small">
-                <li>✓ Search by name/class/roll</li>
-                <li>✓ View fee status</li>
-                <li>✓ Fee history</li>
-              </ul>
-              <button className="btn btn-primary btn-sm w-100 mt-2">Search Students</button>
-            </div>
+    <div className="dashboard-content">
+      <div className="stats-grid">
+        <div className="stat-card stat-card-success">
+          <div className="stat-icon">
+            <i className="bi bi-cash-stack"></i>
+          </div>
+          <div className="stat-info">
+            <h3>Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</h3>
+            <p>Total Collected</p>
           </div>
         </div>
-
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-cash-stack me-2 text-success"></i>
-                Fee Management System
-              </h5>
-              <ul className="list-unstyled mt-3 small">
-                <li>✓ Complete fee management</li>
-                <li>✓ Payment processing</li>
-                <li>✓ Student fee tracking</li>
-                <li>✓ Reports & analytics</li>
-              </ul>
-              <button 
-                className="btn btn-success btn-sm w-100 mt-2"
-                onClick={() => navigate("/fee-department/fees")}
-              >
-                Open Fee Management
-              </button>
-            </div>
+        <div className="stat-card stat-card-warning">
+          <div className="stat-icon">
+            <i className="bi bi-exclamation-triangle"></i>
+          </div>
+          <div className="stat-info">
+            <h3>Rs.{dashboardStats.pendingFees.toLocaleString()}</h3>
+            <p>Pending Fees</p>
           </div>
         </div>
-
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-gear me-2 text-warning"></i>
-                Fee Structure
-              </h5>
-              <ul className="list-unstyled mt-3 small">
-                <li>✓ Set fee categories</li>
-                <li>✓ Class-wise fees</li>
-                <li>✓ Discounts & scholarships</li>
-                <li>✓ Late payment fines</li>
-              </ul>
-              <button className="btn btn-warning btn-sm w-100 mt-2">Manage Structure</button>
-            </div>
+        <div className="stat-card stat-card-primary">
+          <div className="stat-icon">
+            <i className="bi bi-people"></i>
           </div>
-        </div>
-
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-clipboard-data me-2 text-info"></i>
-                Payment Tracking
-              </h5>
-              <ul className="list-unstyled mt-3 small">
-                <li>✓ Daily collection report</li>
-                <li>✓ Pending fee list</li>
-                <li>✓ Overdue students</li>
-                <li>✓ Partial payments</li>
-              </ul>
-              <button className="btn btn-info btn-sm w-100 mt-2">View Tracking</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-graph-up-arrow me-2 text-danger"></i>
-                Reports & Analytics
-              </h5>
-              <ul className="list-unstyled mt-3 small">
-                <li>✓ Monthly revenue</li>
-                <li>✓ Collection graphs</li>
-                <li>✓ Export PDF/Excel</li>
-                <li>✓ Payment trends</li>
-              </ul>
-              <button className="btn btn-danger btn-sm w-100 mt-2">View Reports</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-bell me-2 text-secondary"></i>
-                Notifications
-              </h5>
-              <ul className="list-unstyled mt-3 small">
-                <li>✓ Payment reminders</li>
-                <li>✓ SMS notifications</li>
-                <li>✓ Due alerts</li>
-                <li>✓ Auto reminders</li>
-              </ul>
-              <button className="btn btn-secondary btn-sm w-100 mt-2">Manage Alerts</button>
-            </div>
+          <div className="stat-info">
+            <h3>{dashboardStats.totalStudents}</h3>
+            <p>Total Students</p>
           </div>
         </div>
       </div>
-    </>
+
+      <div className="action-cards-grid">
+        <div className="action-card" onClick={() => navigateTo("/fee-department/fees")}>
+          <div className="action-icon action-icon-success">
+            <i className="bi bi-cash-stack"></i>
+          </div>
+          <h5>Fee Management System</h5>
+          <p>Complete fee management & payment processing</p>
+        </div>
+        <div className="action-card">
+          <div className="action-icon action-icon-primary">
+            <i className="bi bi-search"></i>
+          </div>
+          <h5>Student Fee Overview</h5>
+          <p>Search by name/class/roll & view fee status</p>
+        </div>
+        <div className="action-card">
+          <div className="action-icon action-icon-warning">
+            <i className="bi bi-gear"></i>
+          </div>
+          <h5>Fee Structure</h5>
+          <p>Set fee categories & manage discounts</p>
+        </div>
+        <div className="action-card">
+          <div className="action-icon action-icon-info">
+            <i className="bi bi-clipboard-data"></i>
+          </div>
+          <h5>Payment Tracking</h5>
+          <p>Daily collection & pending fee reports</p>
+        </div>
+        <div className="action-card">
+          <div className="action-icon action-icon-danger">
+            <i className="bi bi-graph-up-arrow"></i>
+          </div>
+          <h5>Reports & Analytics</h5>
+          <p>Monthly revenue & collection graphs</p>
+        </div>
+        <div className="action-card">
+          <div className="action-icon action-icon-secondary">
+            <i className="bi bi-bell"></i>
+          </div>
+          <h5>Notifications</h5>
+          <p>Payment reminders & due alerts</p>
+        </div>
+      </div>
+    </div>
   );
 
   if (!user) return null;
 
-  // If showing results component, render it with back button
-  if (activeComponent === 'results') {
-    return (
-      <div className="min-vh-100 bg-light">
-        {/* Top Navigation */}
-        <nav className="navbar navbar-dark shadow-sm">
-          <div className="container-fluid px-4">
-            <span className="navbar-brand mb-0 h1">Student Management System</span>
-            <div className="d-flex align-items-center">
-              <button 
-                className="btn btn-outline-secondary btn-sm me-2"
-                onClick={() => setActiveComponent('dashboard')}
-              >
-                <i className="bi bi-arrow-left me-2"></i>
-                Back to Dashboard
-              </button>
-              {user.role === "admin" && (
-                <button 
-                  className="btn btn-outline-warning btn-sm me-2" 
-                  onClick={() => navigate("/admin/panel")}
-                >
-                  Admin Panel
-                </button>
-              )}
-              <button 
-                className="btn btn-outline-info btn-sm me-2" 
-                onClick={() => navigate("/profile")}
-              >
-                <i className="bi bi-person-circle me-1"></i>
-                Profile
-              </button>
-              <button 
-                className="btn btn-outline-light btn-sm" 
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </nav>
+  // Sidebar Menu Items based on role
+  const getSidebarMenuItems = () => {
+    const commonItems = [
+      { icon: 'bi-speedometer2', label: 'Dashboard', path: '/dashboard' },
+      { icon: 'bi-person-circle', label: 'Profile', path: '/profile' }
+    ];
 
-        {/* Results Management Component */}
-        <div className="container py-5">
-          <ResultsManagement />
-        </div>
-      </div>
-    );
-  }
+    const roleSpecificItems = {
+      student: [
+        { icon: 'bi-person-badge', label: 'My Profile', path: '/student/profile' },
+        { icon: 'bi-calendar-check', label: 'Attendance', path: '/student/attendance' },
+        { icon: 'bi-graph-up', label: 'Results', path: '/student/results' },
+        { icon: 'bi-cash-stack', label: 'Fees', path: '/student/fees' }
+      ],
+      teacher: [
+        { icon: 'bi-people', label: 'Students', path: '/admin/student-registration' },
+        { icon: 'bi-clipboard-check', label: 'Attendance', path: '/teacher/attendance' },
+        { icon: 'bi-journal-text', label: 'Results', path: '/teacher/results' }
+      ],
+      admin: [
+        { icon: 'bi-gear', label: 'Admin Panel', path: '/admin/panel' },
+        { icon: 'bi-people', label: 'Students', path: '/admin/student-registration' },
+        { icon: 'bi-clipboard-check', label: 'Attendance', path: '/teacher/attendance' },
+        { icon: 'bi-journal-text', label: 'Results', path: '/teacher/results' },
+        { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' }
+      ],
+      fee_department: [
+        { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },
+        { icon: 'bi-graph-up-arrow', label: 'Reports', path: '/fee-department/fees' }
+      ]
+    };
+
+    return [...commonItems, ...(roleSpecificItems[user.role] || [])];
+  };
 
   return (
-    <div className="min-vh-100 bg-light">
-      {/* Top Navigation */}
-      <nav className="navbar navbar-dark shadow-sm">
-        <div className="container-fluid px-4">
-          <span className="navbar-brand mb-0 h1">Student Management System</span>
-          <div className="d-flex align-items-center">
-            {user.role === "admin" && (
-              <button 
-                className="btn btn-outline-warning btn-sm me-2" 
-                onClick={() => navigate("/admin/panel")}
-              >
-                Admin Panel
-              </button>
-            )}
-            <button 
-              className="btn btn-outline-info btn-sm me-2" 
-              onClick={() => navigate("/profile")}
-            >
-              <i className="bi bi-person-circle me-1"></i>
-              Profile
-            </button>
-            <button 
-              className="btn btn-outline-light btn-sm" 
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div className="dashboard-wrapper">
+      {/* Sidebar Overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar}></div>}
 
-      {/* Main Content */}
-      <div className="container py-5">
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="card shadow-sm">
-              <div className="card-body d-flex justify-content-between align-items-center">
-                <div>
-                  <h2 className="mb-2">Welcome, {user.username}!</h2>
-                  <p className="text-muted mb-0">
-                    Role: <span className={`badge ${getRoleBadgeClass(user.role)}`}>{user.role.toUpperCase()}</span>
-                    {dashboardStats.loading && (
-                      <span className="ms-2">
-                        <div className="spinner-border spinner-border-sm" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <button 
-                  className="btn btn-outline-primary btn-sm"
-                  onClick={() => fetchDashboardStats(user)}
-                  disabled={dashboardStats.loading}
-                >
-                  <i className="bi bi-arrow-clockwise me-1"></i>
-                  Refresh Data
-                </button>
+      {/* Sidebar */}
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h4>Menu</h4>
+          <button className="close-sidebar" onClick={closeSidebar}>
+            <i className="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <nav className="sidebar-nav">
+          {getSidebarMenuItems().map((item, index) => (
+            <button
+              key={index}
+              className="sidebar-item"
+              onClick={() => navigateTo(item.path)}
+            >
+              <i className={`bi ${item.icon}`}></i>
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <button className="sidebar-item sidebar-logout" onClick={handleLogout}>
+            <i className="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </button>
+        </nav>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="dashboard-main">
+        {/* Header */}
+        <header className="dashboard-header">
+          <div className="header-left">
+            <button className="hamburger-btn" onClick={toggleSidebar}>
+              <i className="bi bi-list"></i>
+            </button>
+            <h1 className="header-title">Student Management System</h1>
+          </div>
+          <div className="header-right">
+            <div className="user-info">
+              <div className="user-avatar">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="user-details">
+                <span className="user-name">{user.username}</span>
+                <span className={`user-role badge ${getRoleBadgeClass(user.role)}`}>
+                  {user.role.replace('_', ' ').toUpperCase()}
+                </span>
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Role-specific Dashboard */}
-        {user.role === "student" && <StudentDashboard />}
-        {(user.role === "teacher" || user.role === "admin") && <TeacherDashboard />}
-        {user.role === "fee_department" && <FeeDepartmentDashboard />}
+        {/* Body */}
+        <main className="dashboard-body">
+          <div className="welcome-section">
+            <div className="welcome-text">
+              <h2>Welcome back, {user.username}!</h2>
+              <p>Here's what's happening with your account today.</p>
+            </div>
+            <button 
+              className="refresh-btn"
+              onClick={() => fetchDashboardStats(user)}
+              disabled={dashboardStats.loading}
+            >
+              {dashboardStats.loading ? (
+                <span className="spinner-border spinner-border-sm me-2"></span>
+              ) : (
+                <i className="bi bi-arrow-clockwise me-2"></i>
+              )}
+              Refresh
+            </button>
+          </div>
+
+          {/* Role-specific Dashboard */}
+          {user.role === "student" && <StudentDashboard />}
+          {(user.role === "teacher" || user.role === "admin") && <TeacherDashboard />}
+          {user.role === "fee_department" && <FeeDepartmentDashboard />}
+        </main>
+
+        {/* Footer */}
+        <footer className="dashboard-footer">
+          <div className="footer-content">
+            <p>&copy; 2024 Student Management System. All rights reserved.</p>
+            <div className="footer-links">
+              <a href="#privacy">Privacy Policy</a>
+              <a href="#terms">Terms of Service</a>
+              <a href="#support">Support</a>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
