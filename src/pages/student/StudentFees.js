@@ -63,7 +63,20 @@ const StudentFees = () => {
   };
 
   const handlePayNow = (amount = null) => {
-    const amountToPay = amount || (profile?.feeInfo?.pendingAmount || 0);
+    const pendingAmount = profile?.feeInfo?.pendingAmount || 0;
+    
+    if (pendingAmount <= 0) {
+      setError('No pending amount to pay.');
+      return;
+    }
+    
+    let amountToPay = amount || pendingAmount;
+    
+    // Validate amount doesn't exceed pending
+    if (amountToPay > pendingAmount) {
+      setError(`Payment amount (Rs.${amountToPay}) cannot exceed pending amount (Rs.${pendingAmount})`);
+      return;
+    }
     
     // Ensure we have a valid user ID
     const userId = user._id || user.id;
@@ -76,6 +89,7 @@ const StudentFees = () => {
       user: user,
       userId: userId,
       amount: amountToPay,
+      pendingAmount: pendingAmount,
       profile: profile
     });
     
@@ -365,14 +379,30 @@ const StudentFees = () => {
                               placeholder="Custom amount"
                               min="1"
                               max={profile.feeInfo.pendingAmount}
+                              step="0.01"
                               id="customAmount"
+                              onInput={(e) => {
+                                const value = parseFloat(e.target.value);
+                                const maxAmount = profile.feeInfo.pendingAmount;
+                                if (value > maxAmount) {
+                                  e.target.value = maxAmount;
+                                }
+                              }}
                             />
                             <button 
                               className="btn btn-outline-primary"
                               onClick={() => {
-                                const customAmount = document.getElementById('customAmount').value;
+                                const customAmount = parseFloat(document.getElementById('customAmount').value);
+                                const maxAmount = profile.feeInfo.pendingAmount;
                                 if (customAmount && customAmount > 0) {
-                                  handlePayNow(parseFloat(customAmount));
+                                  if (customAmount > maxAmount) {
+                                    setError(`Amount cannot exceed pending amount of Rs.${maxAmount}`);
+                                  } else {
+                                    setError('');
+                                    handlePayNow(customAmount);
+                                  }
+                                } else {
+                                  setError('Please enter a valid amount');
                                 }
                               }}
                             >

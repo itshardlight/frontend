@@ -202,6 +202,57 @@ const StudentRegistration = () => {
     });
   };
 
+  const fillDummyData = async () => {
+    const dummyData = {
+      firstName: "John",
+      lastName: "Doe",
+      dateOfBirth: "2008-05-15",
+      gender: "male",
+      bloodGroup: "O+",
+      phone: "9876543210",
+      address: "123 Main Street, Apartment 4B",
+      city: "Kathmandu",
+      state: "Bagmati",
+      class: "10",
+      section: "A",
+      admissionDate: new Date().toISOString().split('T')[0],
+      fatherName: "Robert Doe",
+      fatherContact: "9876543211",
+      motherName: "Mary Doe",
+      motherContact: "9876543212",
+      guardianType: "Father",
+      guardianEmail: "robert.doe@example.com",
+      previousSchool: "ABC High School",
+      medicalConditions: "No known allergies"
+    };
+
+    // Generate roll number and email
+    try {
+      const rollResponse = await studentService.generateRollNumber(dummyData.class, dummyData.section);
+      const rollNumber = rollResponse.data.rollNumber;
+      
+      dummyData.rollNumber = rollNumber;
+      dummyData.email = `${dummyData.firstName.toLowerCase()}${rollNumber}@gmail.com`;
+      dummyData.guardianName = dummyData.fatherName;
+      dummyData.guardianContact = dummyData.fatherContact;
+      
+      setFormData(dummyData);
+      setSuccess("Dummy data filled successfully! You can now modify and submit.");
+    } catch (error) {
+      console.error('Error generating roll number for dummy data:', error);
+      // Fallback to client-side generation
+      const rollNumber = `${dummyData.class}${dummyData.section}${Math.floor(100 + Math.random() * 900)}`;
+      
+      dummyData.rollNumber = rollNumber;
+      dummyData.email = `${dummyData.firstName.toLowerCase()}${rollNumber}@gmail.com`;
+      dummyData.guardianName = dummyData.fatherName;
+      dummyData.guardianContact = dummyData.fatherContact;
+      
+      setFormData(dummyData);
+      setSuccess("Dummy data filled successfully! You can now modify and submit.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -841,6 +892,14 @@ const StudentRegistration = () => {
 
             {/* Form Actions */}
             <div className="form-actions">
+              <button 
+                type="button" 
+                className="btn btn-outline-info"
+                onClick={fillDummyData}
+                disabled={loading}
+              >
+                <i className="bi bi-lightning-charge me-2"></i>Fill Dummy Data
+              </button>
               <button 
                 type="button" 
                 className="btn btn-outline-secondary"

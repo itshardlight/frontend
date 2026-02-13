@@ -45,6 +45,30 @@ const FeeManagement = () => {
     dueDate: ''
   });
 
+  // Calculate total fee whenever individual fees change
+  const calculateTotalFee = (fees) => {
+    const tuition = parseFloat(fees.tuitionFee) || 0;
+    const admission = parseFloat(fees.admissionFee) || 0;
+    const exam = parseFloat(fees.examFee) || 0;
+    const library = parseFloat(fees.libraryFee) || 0;
+    const sports = parseFloat(fees.sportsFee) || 0;
+    const other = parseFloat(fees.otherFees) || 0;
+    
+    return tuition + admission + exam + library + sports + other;
+  };
+
+  // Handle fee structure form changes with auto-calculation
+  const handleFeeStructureChange = (field, value) => {
+    const updatedFees = { ...feeStructureForm, [field]: value };
+    
+    // Auto-calculate total if any individual fee changes
+    if (['tuitionFee', 'admissionFee', 'examFee', 'libraryFee', 'sportsFee', 'otherFees'].includes(field)) {
+      updatedFees.totalFee = calculateTotalFee(updatedFees).toString();
+    }
+    
+    setFeeStructureForm(updatedFees);
+  };
+
   // Constants for dropdowns
   const classes = ['', '9', '10', '11', '12'];
   const sections = ['', 'A', 'B', 'C'];
@@ -173,6 +197,28 @@ const FeeManagement = () => {
 
     if (!paymentForm.amount || parseFloat(paymentForm.amount) <= 0) {
       setError('Please enter a valid payment amount');
+      return;
+    }
+
+    const paymentAmount = parseFloat(paymentForm.amount);
+    const feeInfo = selectedStudent.feeInfo || {};
+    const totalFee = feeInfo.totalFee || 0;
+    const paidAmount = feeInfo.paidAmount || 0;
+    const pendingAmount = totalFee - paidAmount;
+
+    // Validate payment doesn't exceed pending amount
+    if (totalFee === 0) {
+      setError('No fee structure set for this student. Please set the fee structure first.');
+      return;
+    }
+
+    if (pendingAmount <= 0) {
+      setError('All fees have been paid for this student. No pending amount.');
+      return;
+    }
+
+    if (paymentAmount > pendingAmount) {
+      setError(`Payment amount (Rs.${paymentAmount}) cannot exceed pending amount (Rs.${pendingAmount})`);
       return;
     }
 
@@ -667,7 +713,7 @@ const FeeManagement = () => {
                                       className="btn btn-secondary"
                                       onClick={() => {
                                         setSelectedStudent(student);
-                                        setFeeStructureForm({
+                                        const fees = {
                                           totalFee: feeInfo.totalFee || '',
                                           tuitionFee: feeInfo.tuitionFee || '',
                                           admissionFee: feeInfo.admissionFee || '',
@@ -676,7 +722,8 @@ const FeeManagement = () => {
                                           sportsFee: feeInfo.sportsFee || '',
                                           otherFees: feeInfo.otherFees || '',
                                           dueDate: feeInfo.dueDate ? new Date(feeInfo.dueDate).toISOString().split('T')[0] : ''
-                                        });
+                                        };
+                                        setFeeStructureForm(fees);
                                         setActiveTab('structure');
                                       }}
                                       title="Edit Fee Structure"
@@ -748,9 +795,20 @@ const FeeManagement = () => {
                                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
                                     required
                                     min="1"
+                                    max={((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0))}
                                     step="0.01"
+                                    onInput={(e) => {
+                                      const value = parseFloat(e.target.value);
+                                      const maxAmount = (selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0);
+                                      if (value > maxAmount) {
+                                        e.target.value = maxAmount;
+                                      }
+                                    }}
                                   />
                                 </div>
+                                <small className="text-muted">
+                                  Max: Rs.{((selectedStudent.feeInfo?.totalFee || 0) - (selectedStudent.feeInfo?.paidAmount || 0)).toLocaleString()}
+                                </small>
                               </div>
                               <div className="col-md-6">
                                 <label className="form-label">Payment Method *</label>
@@ -883,7 +941,7 @@ const FeeManagement = () => {
                                     type="number"
                                     className="form-control"
                                     value={feeStructureForm.tuitionFee}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, tuitionFee: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('tuitionFee', e.target.value)}
                                     min="0"
                                     step="0.01"
                                   />
@@ -897,7 +955,7 @@ const FeeManagement = () => {
                                     type="number"
                                     className="form-control"
                                     value={feeStructureForm.admissionFee}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, admissionFee: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('admissionFee', e.target.value)}
                                     min="0"
                                     step="0.01"
                                   />
@@ -911,7 +969,7 @@ const FeeManagement = () => {
                                     type="number"
                                     className="form-control"
                                     value={feeStructureForm.examFee}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, examFee: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('examFee', e.target.value)}
                                     min="0"
                                     step="0.01"
                                   />
@@ -925,7 +983,7 @@ const FeeManagement = () => {
                                     type="number"
                                     className="form-control"
                                     value={feeStructureForm.libraryFee}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, libraryFee: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('libraryFee', e.target.value)}
                                     min="0"
                                     step="0.01"
                                   />
@@ -939,7 +997,7 @@ const FeeManagement = () => {
                                     type="number"
                                     className="form-control"
                                     value={feeStructureForm.sportsFee}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, sportsFee: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('sportsFee', e.target.value)}
                                     min="0"
                                     step="0.01"
                                   />
@@ -953,27 +1011,37 @@ const FeeManagement = () => {
                                     type="number"
                                     className="form-control"
                                     value={feeStructureForm.otherFees}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, otherFees: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('otherFees', e.target.value)}
                                     min="0"
                                     step="0.01"
                                   />
                                 </div>
                               </div>
                               <div className="col-md-6">
-                                <label className="form-label">Total Fee *</label>
+                                <label className="form-label">
+                                  Total Fee * 
+                                  <i className="bi bi-calculator ms-2 text-primary" title="Auto-calculated from individual fees"></i>
+                                </label>
                                 <div className="input-group">
-                                  <span className="input-group-text">Rs</span>
+                                  <span className="input-group-text bg-light">Rs</span>
                                   <input
                                     type="number"
-                                    className="form-control"
+                                    className="form-control bg-light fw-bold"
                                     value={feeStructureForm.totalFee}
-                                    onChange={(e) => setFeeStructureForm({ ...feeStructureForm, totalFee: e.target.value })}
+                                    onChange={(e) => handleFeeStructureChange('totalFee', e.target.value)}
                                     required
                                     min="1"
                                     step="0.01"
+                                    readOnly
                                   />
+                                  <span className="input-group-text bg-light">
+                                    <i className="bi bi-lock-fill text-secondary"></i>
+                                  </span>
                                 </div>
-                                <small className="text-muted">Enter the total fee amount</small>
+                                <small className="text-muted">
+                                  <i className="bi bi-info-circle me-1"></i>
+                                  Auto-calculated from individual fees above
+                                </small>
                               </div>
                               <div className="col-md-6">
                                 <label className="form-label">Due Date</label>
@@ -981,7 +1049,7 @@ const FeeManagement = () => {
                                   type="date"
                                   className="form-control"
                                   value={feeStructureForm.dueDate}
-                                  onChange={(e) => setFeeStructureForm({ ...feeStructureForm, dueDate: e.target.value })}
+                                  onChange={(e) => handleFeeStructureChange('dueDate', e.target.value)}
                                 />
                               </div>
                               <div className="col-12">
