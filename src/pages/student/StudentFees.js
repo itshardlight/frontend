@@ -132,6 +132,170 @@ const StudentFees = () => {
     navigate("/login");
   };
 
+  const handlePrintReceipt = (payment) => {
+    const printWindow = window.open('', '_blank');
+    const studentName = profile.firstName && profile.lastName 
+      ? `${profile.firstName} ${profile.lastName}`
+      : user.fullName || user.username;
+    
+    const receiptHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Payment Receipt - ${payment.receiptNumber}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .receipt-header {
+            text-align: center;
+            border-bottom: 2px solid #1E3A8A;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .receipt-header h1 {
+            color: #1E3A8A;
+            margin: 0 0 10px 0;
+          }
+          .receipt-info {
+            margin-bottom: 30px;
+          }
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .info-label {
+            font-weight: bold;
+            color: #374151;
+          }
+          .info-value {
+            color: #1f2937;
+          }
+          .amount-section {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: center;
+          }
+          .amount-section h2 {
+            color: #22C55E;
+            margin: 0;
+            font-size: 2rem;
+          }
+          .receipt-footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+          }
+          @media print {
+            body {
+              padding: 20px;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-header">
+          <h1>Payment Receipt</h1>
+          <p>Student Management System</p>
+        </div>
+        
+        <div class="receipt-info">
+          <div class="info-row">
+            <span class="info-label">Receipt Number:</span>
+            <span class="info-value">${payment.receiptNumber}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Student Name:</span>
+            <span class="info-value">${studentName}</span>
+          </div>
+          ${profile.academic ? `
+          <div class="info-row">
+            <span class="info-label">Class:</span>
+            <span class="info-value">${profile.academic.currentGrade}-${profile.academic.section}</span>
+          </div>
+          ${profile.academic.rollNumber ? `
+          <div class="info-row">
+            <span class="info-label">Roll Number:</span>
+            <span class="info-value">${profile.academic.rollNumber}</span>
+          </div>
+          ` : ''}
+          ` : ''}
+          <div class="info-row">
+            <span class="info-label">Payment Date:</span>
+            <span class="info-value">${new Date(payment.paymentDate).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Payment Method:</span>
+            <span class="info-value">${payment.paymentMethod.toUpperCase()}</span>
+          </div>
+          ${payment.description ? `
+          <div class="info-row">
+            <span class="info-label">Description:</span>
+            <span class="info-value">${payment.description}</span>
+          </div>
+          ` : ''}
+        </div>
+        
+        <div class="amount-section">
+          <p style="margin: 0 0 10px 0; color: #6b7280;">Amount Paid</p>
+          <h2>Rs. ${payment.amount.toLocaleString()}</h2>
+        </div>
+        
+        <div class="receipt-footer">
+          <p>This is a computer-generated receipt and does not require a signature.</p>
+          <p>Printed on: ${new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
+        </div>
+        
+        <div class="no-print" style="text-align: center; margin-top: 30px;">
+          <button onclick="window.print()" style="
+            background: #1E3A8A;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 10px;
+          ">Print Receipt</button>
+          <button onclick="window.close()" style="
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+          ">Close</button>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(receiptHTML);
+    printWindow.document.close();
+  };
+
   const getSidebarMenuItems = () => {
     return [
       { icon: 'bi-speedometer2', label: 'Dashboard', path: '/dashboard' },
@@ -540,6 +704,7 @@ const StudentFees = () => {
                           <th>Method</th>
                           <th>Receipt Number</th>
                           <th>Description</th>
+                          <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -558,6 +723,15 @@ const StudentFees = () => {
                               <code>{payment.receiptNumber}</code>
                             </td>
                             <td>{payment.description || '-'}</td>
+                            <td>
+                              <button 
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => handlePrintReceipt(payment)}
+                                title="Print Receipt"
+                              >
+                                <i className="bi bi-printer"></i> Print
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
