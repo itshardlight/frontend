@@ -10,11 +10,219 @@ const StudentResults = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [filters, setFilters] = useState({
     academicYear: "",
     examType: ""
   });
   const navigate = useNavigate();
+
+  // Add print styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        /* Hide everything except the modal content */
+        body * {
+          visibility: hidden;
+        }
+        
+        .modal-content, .modal-content * {
+          visibility: visible;
+        }
+        
+        .modal {
+          position: absolute;
+          left: 0;
+          top: 0;
+          margin: 0;
+          padding: 0;
+          min-height: 100vh;
+          width: 100%;
+          display: block !important;
+        }
+        
+        .modal-dialog {
+          max-width: 100%;
+          margin: 0;
+          padding: 15px;
+          width: 100%;
+        }
+        
+        .modal-content {
+          border: none;
+          box-shadow: none;
+          border-radius: 0;
+          width: 100%;
+          max-width: 100%;
+        }
+        
+        /* Hide modal backdrop, close button, and footer */
+        .modal-backdrop,
+        .no-print {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        
+        /* Adjust header for print */
+        .modal-header {
+          background: #1E3A8A !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          color: white !important;
+          padding: 15px 20px !important;
+          border-radius: 0 !important;
+        }
+        
+        .modal-body {
+          padding: 20px !important;
+        }
+        
+        /* Ensure colors print correctly */
+        .badge,
+        .card-header,
+        .bg-primary,
+        .bg-success,
+        .bg-danger,
+        .bg-warning,
+        .bg-info,
+        .bg-secondary,
+        .text-success,
+        .text-danger,
+        .text-primary,
+        .text-white {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        
+        /* Ensure gradient backgrounds print */
+        [style*="background: linear-gradient"],
+        [style*="background:linear-gradient"] {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        
+        /* Card styling for print */
+        .card {
+          page-break-inside: avoid;
+          border: 1px solid #ddd !important;
+          margin-bottom: 15px;
+        }
+        
+        .card-header {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          padding: 10px 15px !important;
+        }
+        
+        .card-body {
+          padding: 15px !important;
+        }
+        
+        /* Table styling for print */
+        table {
+          page-break-inside: auto;
+          width: 100%;
+          border-collapse: collapse;
+        }
+        
+        thead {
+          display: table-header-group;
+        }
+        
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+        
+        th, td {
+          padding: 8px !important;
+          border: 1px solid #ddd !important;
+        }
+        
+        th {
+          background-color: #f3f4f6 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        
+        /* Row styling */
+        .row {
+          display: flex;
+          flex-wrap: wrap;
+          margin: 0 -7.5px;
+        }
+        
+        .col-md-6, .col-md-3, .col-md-4 {
+          padding: 0 7.5px;
+          margin-bottom: 15px;
+        }
+        
+        .col-md-6 {
+          width: 50%;
+          flex: 0 0 50%;
+        }
+        
+        .col-md-3 {
+          width: 25%;
+          flex: 0 0 25%;
+        }
+        
+        .col-md-4 {
+          width: 33.333%;
+          flex: 0 0 33.333%;
+        }
+        
+        /* Ensure full content is visible */
+        .modal-dialog-scrollable .modal-body {
+          overflow: visible !important;
+          max-height: none !important;
+        }
+        
+        /* Page settings */
+        @page {
+          size: A4;
+          margin: 1cm;
+        }
+        
+        /* Prevent orphans and widows */
+        p, h1, h2, h3, h4, h5, h6 {
+          orphans: 3;
+          widows: 3;
+        }
+        
+        /* Headings should not be separated from content */
+        h1, h2, h3, h4, h5, h6 {
+          page-break-after: avoid;
+        }
+        
+        /* Ensure text is readable */
+        body {
+          font-size: 12pt;
+          line-height: 1.5;
+        }
+        
+        /* Small text adjustments */
+        .small, small {
+          font-size: 10pt !important;
+        }
+        
+        /* Badge adjustments for print */
+        .badge {
+          border: 1px solid #ddd;
+          padding: 4px 8px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -45,8 +253,24 @@ const StudentResults = () => {
       console.log("API Response:", response.data);
       
       if (response.data.success) {
-        setResults(response.data.results || []);
-        console.log("Results set:", response.data.results?.length || 0, "items");
+        const resultsData = response.data.results || [];
+        const studentInfo = response.data.student; // Get student info from API response
+        
+        // Enrich results with student name from API response
+        const enrichedResults = resultsData.map(result => ({
+          ...result,
+          studentName: studentInfo?.name || 
+                      (result.studentId?.firstName && result.studentId?.lastName
+                        ? `${result.studentId.firstName} ${result.studentId.lastName}`
+                        : result.studentName || user?.fullName || user?.username || 'N/A'),
+          studentRollNumber: studentInfo?.rollNumber || result.rollNumber,
+          studentClass: studentInfo?.class || result.studentClass || result.class,
+          studentSection: studentInfo?.section || result.studentSection || result.section
+        }));
+        
+        setResults(enrichedResults);
+        console.log("Results set:", enrichedResults.length, "items");
+        console.log("Student info:", studentInfo);
       } else {
         setError(response.data.message || "Failed to fetch results");
       }
@@ -98,6 +322,31 @@ const StudentResults = () => {
     if (percentage >= 75) return 'bg-primary';
     if (percentage >= 60) return 'bg-warning';
     return 'bg-danger';
+  };
+
+  const handleViewDetails = (result) => {
+    setSelectedResult(result);
+    setShowDetailModal(true);
+  };
+
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedResult(null);
+  };
+
+  const handlePrintReport = () => {
+    window.print();
+  };
+
+  const getSubjectGrade = (percentage) => {
+    if (percentage >= 90) return 'A+';
+    if (percentage >= 80) return 'A';
+    if (percentage >= 70) return 'B+';
+    if (percentage >= 60) return 'B';
+    if (percentage >= 50) return 'C+';
+    if (percentage >= 40) return 'C';
+    if (percentage >= 33) return 'D';
+    return 'F';
   };
 
   const toggleSidebar = () => {
@@ -336,41 +585,149 @@ const StudentResults = () => {
                   <table className="table table-hover">
                     <thead className="table-light">
                       <tr>
-                        <th>Date</th>
-                        <th>Exam Type</th>
+                        <th>Exam Details</th>
                         <th>Subject</th>
-                        <th>Marks Obtained</th>
-                        <th>Total Marks</th>
-                        <th>Percentage</th>
-                        <th>Grade</th>
-                        <th>Academic Year</th>
+                        <th>Subject Code</th>
+                        <th className="text-center">Marks Obtained</th>
+                        <th className="text-center">Total Marks</th>
+                        <th className="text-center">Percentage</th>
+                        <th className="text-center">Grade</th>
+                        <th className="text-center">Overall</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {results.map((result, index) => (
-                        <tr key={index}>
-                          <td>{new Date(result.examDate).toLocaleDateString()}</td>
-                          <td>
-                            <span className="badge bg-secondary" style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
-                              {result.examType}
-                            </span>
-                          </td>
-                          <td className="fw-bold">{result.subject}</td>
-                          <td className="text-center">{result.marksObtained}</td>
-                          <td className="text-center">{result.totalMarks}</td>
-                          <td>
-                            <span className={`badge ${getPercentageColor(result.percentage)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
-                              {result.percentage}%
-                            </span>
-                          </td>
-                          <td>
-                            <span className={`badge ${getGradeColor(result.grade)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
-                              {result.grade}
-                            </span>
-                          </td>
-                          <td>{result.academicYear}</td>
-                        </tr>
-                      ))}
+                      {results.map((result, index) => {
+                        // Check if result has subjects array
+                        if (result.subjects && result.subjects.length > 0) {
+                          // Display each subject as a separate row
+                          return result.subjects.map((subject, subIdx) => {
+                            const subjectPercentage = Math.round((subject.obtainedMarks / subject.maxMarks) * 100);
+                            const subjectGrade = getSubjectGrade(subjectPercentage);
+                            const isFirstRow = subIdx === 0;
+                            
+                            return (
+                              <tr key={`${index}-${subIdx}`}>
+                                {isFirstRow && (
+                                  <td rowSpan={result.subjects.length} style={{ verticalAlign: 'middle', borderRight: '2px solid #e5e7eb' }}>
+                                    <div>
+                                      <div className="fw-bold mb-1">{result.examName}</div>
+                                      <span className="badge bg-secondary mb-1" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '6px' }}>
+                                        {result.examType}
+                                      </span>
+                                      <div className="small text-muted mt-1">
+                                        {new Date(result.examDate).toLocaleDateString()}
+                                      </div>
+                                      <div className="small text-muted">
+                                        {result.academicYear}
+                                      </div>
+                                    </div>
+                                  </td>
+                                )}
+                                <td>
+                                  <strong>{subject.subjectName}</strong>
+                                </td>
+                                <td>
+                                  <span className="badge bg-info" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '6px' }}>
+                                    {subject.subjectCode}
+                                  </span>
+                                </td>
+                                <td className="text-center">
+                                  <strong className={subject.obtainedMarks >= subject.maxMarks * 0.33 ? 'text-success' : 'text-danger'}>
+                                    {subject.obtainedMarks}
+                                  </strong>
+                                </td>
+                                <td className="text-center">{subject.maxMarks}</td>
+                                <td className="text-center">
+                                  <span className={`badge ${getPercentageColor(subjectPercentage)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                                    {subjectPercentage}%
+                                  </span>
+                                </td>
+                                <td className="text-center">
+                                  <span className={`badge ${getGradeColor(subjectGrade)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                                    {subjectGrade}
+                                  </span>
+                                </td>
+                                {isFirstRow && (
+                                  <td rowSpan={result.subjects.length} className="text-center" style={{ verticalAlign: 'middle', borderLeft: '2px solid #e5e7eb' }}>
+                                    <div className="mb-2">
+                                      <div className="small text-muted">Total</div>
+                                      <strong>{result.totalObtainedMarks}/{result.totalMaxMarks}</strong>
+                                    </div>
+                                    <div className="mb-2">
+                                      <span className={`badge ${getPercentageColor(result.percentage)}`} style={{ fontSize: '0.9rem', padding: '6px 14px', borderRadius: '8px' }}>
+                                        {result.percentage}%
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className={`badge ${getGradeColor(result.overallGrade || result.grade)}`} style={{ fontSize: '0.9rem', padding: '6px 14px', borderRadius: '8px' }}>
+                                        {result.overallGrade || result.grade}
+                                      </span>
+                                    </div>
+                                  </td>
+                                )}
+                                {isFirstRow && (
+                                  <td rowSpan={result.subjects.length} style={{ verticalAlign: 'middle' }}>
+                                    <button
+                                      className="btn btn-sm btn-outline-primary"
+                                      onClick={() => handleViewDetails(result)}
+                                      style={{ borderRadius: '8px' }}
+                                    >
+                                      <i className="bi bi-eye me-1"></i>
+                                      Full Report
+                                    </button>
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          });
+                        } else {
+                          // Fallback for old format without subjects array
+                          return (
+                            <tr key={index}>
+                              <td>
+                                <div>
+                                  <div className="fw-bold mb-1">{result.examName || result.examType}</div>
+                                  <span className="badge bg-secondary mb-1" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '6px' }}>
+                                    {result.examType}
+                                  </span>
+                                  <div className="small text-muted mt-1">
+                                    {new Date(result.examDate).toLocaleDateString()}
+                                  </div>
+                                  <div className="small text-muted">
+                                    {result.academicYear}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="fw-bold">{result.subject || 'N/A'}</td>
+                              <td>-</td>
+                              <td className="text-center">{result.marksObtained || result.totalObtainedMarks}</td>
+                              <td className="text-center">{result.totalMarks || result.totalMaxMarks}</td>
+                              <td className="text-center">
+                                <span className={`badge ${getPercentageColor(result.percentage)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                                  {result.percentage}%
+                                </span>
+                              </td>
+                              <td className="text-center">
+                                <span className={`badge ${getGradeColor(result.grade || result.overallGrade)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                                  {result.grade || result.overallGrade}
+                                </span>
+                              </td>
+                              <td className="text-center">-</td>
+                              <td>
+                                <button
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={() => handleViewDetails(result)}
+                                  style={{ borderRadius: '8px' }}
+                                >
+                                  <i className="bi bi-eye me-1"></i>
+                                  View
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -383,6 +740,240 @@ const StudentResults = () => {
               )}
             </div>
           </div>
+
+          {/* Detail Modal */}
+          {showDetailModal && selectedResult && (
+            <>
+              <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
+              <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
+                <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                  <div className="modal-content" style={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+                    {/* Modal Header */}
+                    <div className="modal-header print-header" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #60A5FA 100%)', borderRadius: '20px 20px 0 0', padding: '20px 30px' }}>
+                      <div className="text-white">
+                        <h4 className="modal-title mb-1">
+                          <i className="bi bi-file-earmark-text me-2"></i>
+                          Detailed Result Report
+                        </h4>
+                        <p className="mb-0 small opacity-75">{selectedResult.examName || selectedResult.examType}</p>
+                      </div>
+                      <button type="button" className="btn-close btn-close-white no-print" onClick={closeDetailModal}></button>
+                    </div>
+
+                    {/* Modal Body */}
+                    <div className="modal-body" style={{ padding: '30px' }}>
+                      {/* Student & Exam Info */}
+                      <div className="row mb-4">
+                        <div className="col-md-6">
+                          <div className="card" style={{ borderRadius: '15px', border: '1px solid #e5e7eb' }}>
+                            <div className="card-body">
+                              <h6 className="text-muted mb-3">
+                                <i className="bi bi-person-badge me-2"></i>
+                                Student Information
+                              </h6>
+                              <div className="mb-2">
+                                <strong>Name:</strong> {
+                                  selectedResult.studentName || 
+                                  (selectedResult.studentId?.firstName && selectedResult.studentId?.lastName
+                                    ? `${selectedResult.studentId.firstName} ${selectedResult.studentId.lastName}`
+                                    : user?.fullName || user?.username || 'N/A')
+                                }
+                              </div>
+                              <div className="mb-2">
+                                <strong>Roll Number:</strong> {selectedResult.studentRollNumber || selectedResult.rollNumber || 'N/A'}
+                              </div>
+                              <div className="mb-2">
+                                <strong>Class:</strong> {selectedResult.studentClass || selectedResult.class}-{selectedResult.studentSection || selectedResult.section}
+                              </div>
+                              {selectedResult.attendance && (
+                                <div>
+                                  <strong>Attendance:</strong> {selectedResult.attendance}%
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="card" style={{ borderRadius: '15px', border: '1px solid #e5e7eb' }}>
+                            <div className="card-body">
+                              <h6 className="text-muted mb-3">
+                                <i className="bi bi-calendar-event me-2"></i>
+                                Exam Information
+                              </h6>
+                              <div className="mb-2">
+                                <strong>Exam Name:</strong> {selectedResult.examName}
+                              </div>
+                              <div className="mb-2">
+                                <strong>Exam Type:</strong> 
+                                <span className="badge bg-secondary ms-2" style={{ fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>
+                                  {selectedResult.examType}
+                                </span>
+                              </div>
+                              <div className="mb-2">
+                                <strong>Academic Year:</strong> {selectedResult.academicYear}
+                              </div>
+                              <div>
+                                <strong>Exam Date:</strong> {new Date(selectedResult.examDate).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Overall Performance */}
+                      <div className="card mb-4" style={{ borderRadius: '15px', border: '2px solid #1E3A8A' }}>
+                        <div className="card-header text-white" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #60A5FA 100%)', borderRadius: '13px 13px 0 0' }}>
+                          <h6 className="mb-0">
+                            <i className="bi bi-graph-up me-2"></i>
+                            Overall Performance
+                          </h6>
+                        </div>
+                        <div className="card-body" style={{ padding: '25px' }}>
+                          <div className="row text-center">
+                            <div className="col-md-3">
+                              <div className="p-3" style={{ background: '#f3f4f6', borderRadius: '12px' }}>
+                                <div className="text-muted small mb-1">Total Marks</div>
+                                <div className="h4 mb-0 text-primary">{selectedResult.totalObtainedMarks}/{selectedResult.totalMaxMarks}</div>
+                              </div>
+                            </div>
+                            <div className="col-md-3">
+                              <div className="p-3" style={{ background: '#f3f4f6', borderRadius: '12px' }}>
+                                <div className="text-muted small mb-1">Percentage</div>
+                                <div className="h4 mb-0 text-info">{selectedResult.percentage}%</div>
+                              </div>
+                            </div>
+                            <div className="col-md-3">
+                              <div className="p-3" style={{ background: '#f3f4f6', borderRadius: '12px' }}>
+                                <div className="text-muted small mb-1">Grade</div>
+                                <div className="h4 mb-0">
+                                  <span className={`badge ${getGradeColor(selectedResult.overallGrade || selectedResult.grade)}`} style={{ fontSize: '1.2rem', padding: '8px 16px' }}>
+                                    {selectedResult.overallGrade || selectedResult.grade}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-3">
+                              <div className="p-3" style={{ background: '#f3f4f6', borderRadius: '12px' }}>
+                                <div className="text-muted small mb-1">Result</div>
+                                <div className="h4 mb-0">
+                                  <span className={`badge ${selectedResult.result === 'pass' ? 'bg-success' : 'bg-danger'}`} style={{ fontSize: '1.2rem', padding: '8px 16px' }}>
+                                    {selectedResult.result?.toUpperCase()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Subject-wise Breakdown */}
+                      {selectedResult.subjects && selectedResult.subjects.length > 0 && (
+                        <div className="card mb-4" style={{ borderRadius: '15px', border: '1px solid #e5e7eb' }}>
+                          <div className="card-header" style={{ background: 'white', borderBottom: '1px solid #e5e7eb' }}>
+                            <h6 className="mb-0" style={{ color: '#1E3A8A', fontWeight: '600' }}>
+                              <i className="bi bi-book me-2"></i>
+                              Subject-wise Performance
+                            </h6>
+                          </div>
+                          <div className="card-body p-0">
+                            <div className="table-responsive">
+                              <table className="table table-hover mb-0">
+                                <thead className="table-light">
+                                  <tr>
+                                    <th style={{ padding: '15px' }}>Subject</th>
+                                    <th className="text-center">Subject Code</th>
+                                    <th className="text-center">Max Marks</th>
+                                    <th className="text-center">Obtained Marks</th>
+                                    <th className="text-center">Percentage</th>
+                                    <th className="text-center">Grade</th>
+                                    <th>Remarks</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {selectedResult.subjects.map((subject, idx) => {
+                                    const subjectPercentage = Math.round((subject.obtainedMarks / subject.maxMarks) * 100);
+                                    const subjectGrade = getSubjectGrade(subjectPercentage);
+                                    return (
+                                      <tr key={idx}>
+                                        <td style={{ padding: '15px' }}>
+                                          <strong>{subject.subjectName}</strong>
+                                        </td>
+                                        <td className="text-center">
+                                          <span className="badge bg-secondary" style={{ fontSize: '0.8rem' }}>
+                                            {subject.subjectCode}
+                                          </span>
+                                        </td>
+                                        <td className="text-center">{subject.maxMarks}</td>
+                                        <td className="text-center">
+                                          <strong className={subject.obtainedMarks >= subject.maxMarks * 0.33 ? 'text-success' : 'text-danger'}>
+                                            {subject.obtainedMarks}
+                                          </strong>
+                                        </td>
+                                        <td className="text-center">
+                                          <span className={`badge ${getPercentageColor(subjectPercentage)}`} style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
+                                            {subjectPercentage}%
+                                          </span>
+                                        </td>
+                                        <td className="text-center">
+                                          <span className={`badge ${getGradeColor(subjectGrade)}`} style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
+                                            {subjectGrade}
+                                          </span>
+                                        </td>
+                                        <td>
+                                          <small className="text-muted">{subject.remarks || '-'}</small>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Remarks */}
+                      {selectedResult.remarks && (
+                        <div className="card" style={{ borderRadius: '15px', border: '1px solid #e5e7eb' }}>
+                          <div className="card-header" style={{ background: 'white', borderBottom: '1px solid #e5e7eb' }}>
+                            <h6 className="mb-0" style={{ color: '#1E3A8A', fontWeight: '600' }}>
+                              <i className="bi bi-chat-left-text me-2"></i>
+                              Teacher's Remarks
+                            </h6>
+                          </div>
+                          <div className="card-body">
+                            <p className="mb-0">{selectedResult.remarks}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Modal Footer */}
+                    <div className="modal-footer no-print" style={{ borderTop: '1px solid #e5e7eb', padding: '20px 30px' }}>
+                      <button type="button" className="btn btn-secondary" onClick={closeDetailModal} style={{ borderRadius: '10px', padding: '10px 24px' }}>
+                        <i className="bi bi-x-circle me-2"></i>
+                        Close
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn btn-primary" 
+                        onClick={handlePrintReport}
+                        style={{ 
+                          background: 'linear-gradient(135deg, #1E3A8A 0%, #60A5FA 100%)',
+                          border: 'none',
+                          borderRadius: '10px',
+                          padding: '10px 24px'
+                        }}
+                      >
+                        <i className="bi bi-printer me-2"></i>
+                        Print Report
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </main>
 
         {/* Footer */}
