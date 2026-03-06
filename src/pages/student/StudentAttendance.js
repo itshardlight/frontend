@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../styles/Dashboard.css";
 
 const StudentAttendance = () => {
   const [user, setUser] = useState(null);
   const [attendanceData, setAttendanceData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dateRange, setDateRange] = useState({
     startDate: "",
     endDate: ""
@@ -106,130 +108,181 @@ const StudentAttendance = () => {
     });
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const navigateTo = (path) => {
+    navigate(path);
+    closeSidebar();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const getSidebarMenuItems = () => {
+    return [
+      { icon: 'bi-speedometer2', label: 'Dashboard', path: '/dashboard' },
+      { icon: 'bi-person-badge', label: 'My Profile', path: '/student/profile' },
+      { icon: 'bi-calendar-check', label: 'Attendance', path: '/student/attendance' },
+      { icon: 'bi-graph-up', label: 'Results', path: '/student/results' },
+      { icon: 'bi-cash-stack', label: 'Fees', path: '/student/fees' }
+    ];
+  };
+
   if (!user) return null;
 
   return (
-    <div className="min-vh-100 bg-light">
-      {/* Top Navigation */}
-      <nav className="navbar navbar-dark shadow-sm" style={{ backgroundColor: '#2c3e50' }}>
-        <div className="container-fluid px-4">
-          <span className="navbar-brand mb-0 h1">
-            <i className="bi bi-calendar-check me-2"></i>
-            My Attendance
-          </span>
-          <div className="d-flex align-items-center">
-            <button 
-              className="btn btn-outline-light btn-sm me-2"
-              onClick={() => navigate("/dashboard")}
-            >
-              <i className="bi bi-arrow-left me-2"></i>
-              Back to Dashboard
-            </button>
-            <button 
-              className="btn btn-outline-info btn-sm" 
-              onClick={() => navigate("/profile")}
-            >
-              <i className="bi bi-person-circle me-1"></i>
-              Profile
-            </button>
-          </div>
+    <div className="dashboard-wrapper">
+      {/* Sidebar Overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar}></div>}
+
+      {/* Sidebar */}
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h4>Menu</h4>
+          <button className="close-sidebar" onClick={closeSidebar}>
+            <i className="bi bi-x-lg"></i>
+          </button>
         </div>
-      </nav>
+        <nav className="sidebar-nav">
+          {getSidebarMenuItems().map((item, index) => (
+            <button
+              key={index}
+              className="sidebar-item"
+              onClick={() => navigateTo(item.path)}
+            >
+              <i className={`bi ${item.icon}`}></i>
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <button className="sidebar-item sidebar-logout" onClick={handleLogout}>
+            <i className="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </button>
+        </nav>
+      </aside>
 
-      <div className="container py-5">
-        {error && (
-          <div className="alert alert-danger alert-dismissible fade show" role="alert">
-            <i className="bi bi-exclamation-triangle me-2"></i>
-            {error}
-            <button type="button" className="btn-close" onClick={() => setError("")}></button>
+      {/* Main Content Area */}
+      <div className="dashboard-main">
+        {/* Header */}
+        <header className="dashboard-header">
+          <div className="header-left">
+            <button className="hamburger-btn" onClick={toggleSidebar}>
+              <i className="bi bi-list"></i>
+            </button>
+            <h1 className="header-title">My Attendance</h1>
           </div>
-        )}
-
-        {/* Student Info */}
-        {attendanceData?.student && (
-          <div className="card shadow-sm mb-4">
-            <div className="card-body">
-              <div className="row align-items-center">
-                <div className="col-md-8">
-                  <h5 className="mb-1">
-                    <i className="bi bi-person-badge me-2 text-primary"></i>
-                    {attendanceData.student.name}
-                  </h5>
-                  <p className="text-muted mb-0">
-                    Roll Number: <strong>{attendanceData.student.rollNumber}</strong> | 
-                    Class: <strong>{attendanceData.student.class}-{attendanceData.student.section}</strong>
-                  </p>
-                </div>
-                <div className="col-md-4 text-end">
-                  <div className="d-flex justify-content-end align-items-center">
-                    <span className="me-2">Overall Attendance:</span>
-                    <span className={`badge fs-6 ${
-                      (attendanceData.summary?.percentage || 0) >= 90 ? 'bg-success' :
-                      (attendanceData.summary?.percentage || 0) >= 75 ? 'bg-primary' :
-                      (attendanceData.summary?.percentage || 0) >= 60 ? 'bg-warning' :
-                      'bg-danger'
-                    }`}>
-                      {attendanceData.summary?.percentage || 0}%
-                    </span>
-                  </div>
-                </div>
+          <div className="header-right">
+            <div className="user-info">
+              <div className="user-avatar">
+                {user.username.charAt(0).toUpperCase()}
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Attendance Summary */}
-        {attendanceData?.summary && (
-          <div className="row g-3 mb-4">
-            <div className="col-md-3">
-              <div className="card bg-success bg-opacity-10 border-success">
-                <div className="card-body text-center">
-                  <i className="bi bi-check-circle text-success" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-success">{attendanceData.summary.present || 0}</h4>
-                  <small className="text-muted">Present</small>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-danger bg-opacity-10 border-danger">
-                <div className="card-body text-center">
-                  <i className="bi bi-x-circle text-danger" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-danger">{attendanceData.summary.absent || 0}</h4>
-                  <small className="text-muted">Absent</small>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-warning bg-opacity-10 border-warning">
-                <div className="card-body text-center">
-                  <i className="bi bi-clock text-warning" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-warning">{attendanceData.summary.late || 0}</h4>
-                  <small className="text-muted">Late</small>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-info bg-opacity-10 border-info">
-                <div className="card-body text-center">
-                  <i className="bi bi-info-circle text-info" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-info">{attendanceData.summary.excused || 0}</h4>
-                  <small className="text-muted">Excused</small>
-                </div>
+              <div className="user-details">
+                <span className="user-name">{user.username}</span>
+                <span className="user-role badge badge-student">
+                  STUDENT
+                </span>
               </div>
             </div>
           </div>
-        )}
+        </header>
 
-        {/* Subject-wise Summary */}
-        {attendanceData?.subjectSummary && attendanceData.subjectSummary.length > 0 && (
-          <div className="card shadow-sm mb-4">
-            <div className="card-header bg-white">
-              <h5 className="mb-0">
-                <i className="bi bi-book me-2"></i>
-                Subject-wise Attendance
-              </h5>
+        {/* Body */}
+        <main className="dashboard-body">
+          {error && (
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {error}
+              <button type="button" className="btn-close" onClick={() => setError("")}></button>
             </div>
-            <div className="card-body">
+          )}
+
+          {/* Student Info - Welcome Section */}
+          {attendanceData?.student && (
+            <div className="welcome-section">
+              <div className="welcome-text">
+                <h2>
+                  <i className="bi bi-person-badge me-2"></i>
+                  {attendanceData.student.name}
+                </h2>
+                <p>
+                  Roll Number: <strong>{attendanceData.student.rollNumber}</strong> | 
+                  Class: <strong>{attendanceData.student.class}-{attendanceData.student.section}</strong>
+                </p>
+              </div>
+              <div>
+                <span className={`badge ${
+                  (attendanceData.summary?.percentage || 0) >= 90 ? 'bg-success' :
+                  (attendanceData.summary?.percentage || 0) >= 75 ? 'bg-primary' :
+                  (attendanceData.summary?.percentage || 0) >= 60 ? 'bg-warning' :
+                  'bg-danger'
+                }`} style={{ fontSize: '1.2rem', padding: '10px 20px', borderRadius: '12px' }}>
+                  {attendanceData.summary?.percentage || 0}% Overall
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Attendance Summary - Dashboard Style */}
+          {attendanceData?.summary && (
+            <div className="stats-grid mb-4">
+              <div className="stat-card stat-card-success">
+                <div className="stat-icon">
+                  <i className="bi bi-check-circle"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{attendanceData.summary.present || 0}</h3>
+                  <p>Present</p>
+                </div>
+              </div>
+              <div className="stat-card stat-card-warning">
+                <div className="stat-icon">
+                  <i className="bi bi-x-circle"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{attendanceData.summary.absent || 0}</h3>
+                  <p>Absent</p>
+                </div>
+              </div>
+              <div className="stat-card stat-card-info">
+                <div className="stat-icon">
+                  <i className="bi bi-clock"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{attendanceData.summary.late || 0}</h3>
+                  <p>Late</p>
+                </div>
+              </div>
+              <div className="stat-card stat-card-primary">
+                <div className="stat-icon">
+                  <i className="bi bi-info-circle"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{attendanceData.summary.excused || 0}</h3>
+                  <p>Excused</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Subject-wise Summary - Dashboard Style */}
+          {attendanceData?.subjectSummary && attendanceData.subjectSummary.length > 0 && (
+            <div className="card shadow-sm mb-4" style={{ borderRadius: '20px', border: 'none' }}>
+              <div className="card-header" style={{ background: 'white', borderRadius: '20px 20px 0 0', borderBottom: '1px solid #e5e7eb' }}>
+                <h5 className="mb-0" style={{ color: '#1E3A8A', fontWeight: '600' }}>
+                  <i className="bi bi-book me-2"></i>
+                  Subject-wise Attendance
+                </h5>
+              </div>
+              <div className="card-body" style={{ padding: '25px' }}>
               <div className="row g-3">
                 {attendanceData.subjectSummary.map((subject, index) => (
                   <div key={index} className="col-md-6 col-lg-4">
@@ -267,9 +320,9 @@ const StudentAttendance = () => {
           </div>
         )}
 
-        {/* Date Range Filter */}
-        <div className="card shadow-sm mb-4">
-          <div className="card-body">
+          {/* Date Range Filter - Dashboard Style */}
+          <div className="card shadow-sm mb-4" style={{ borderRadius: '20px', border: 'none' }}>
+            <div className="card-body" style={{ padding: '25px' }}>
             <div className="row g-3 align-items-end">
               <div className="col-md-4">
                 <label className="form-label">Start Date</label>
@@ -295,6 +348,13 @@ const StudentAttendance = () => {
                 <button 
                   className="btn btn-primary me-2"
                   onClick={applyDateFilter}
+                  style={{ 
+                    background: 'linear-gradient(135deg, #1E3A8A 0%, #60A5FA 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '10px 20px',
+                    fontWeight: '600'
+                  }}
                 >
                   <i className="bi bi-funnel me-1"></i>
                   Apply Filter
@@ -306,6 +366,7 @@ const StudentAttendance = () => {
                     const token = localStorage.getItem("token");
                     fetchAttendance(token);
                   }}
+                  style={{ borderRadius: '12px', padding: '10px 20px', fontWeight: '600' }}
                 >
                   <i className="bi bi-arrow-clockwise me-1"></i>
                   Reset
@@ -315,18 +376,20 @@ const StudentAttendance = () => {
           </div>
         </div>
 
-        {/* Attendance Records */}
-        <div className="card shadow-sm">
-          <div className="card-header bg-white">
-            <h5 className="mb-0">
-              <i className="bi bi-calendar-check me-2"></i>
-              Detailed Attendance Records
-              {attendanceData?.records && (
-                <span className="badge bg-primary ms-2">{attendanceData.records.length}</span>
-              )}
-            </h5>
-          </div>
-          <div className="card-body">
+          {/* Attendance Records - Dashboard Style */}
+          <div className="card shadow-sm" style={{ borderRadius: '20px', border: 'none' }}>
+            <div className="card-header" style={{ background: 'white', borderRadius: '20px 20px 0 0', borderBottom: '1px solid #e5e7eb' }}>
+              <h5 className="mb-0" style={{ color: '#1E3A8A', fontWeight: '600' }}>
+                <i className="bi bi-calendar-check me-2"></i>
+                Detailed Attendance Records
+                {attendanceData?.records && (
+                  <span className="badge bg-primary ms-2" style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                    {attendanceData.records.length}
+                  </span>
+                )}
+              </h5>
+            </div>
+            <div className="card-body" style={{ padding: '25px' }}>
             {loading ? (
               <div className="text-center py-4">
                 <div className="spinner-border" role="status">
@@ -390,16 +453,16 @@ const StudentAttendance = () => {
           </div>
         </div>
 
-        {/* Attendance Insights */}
-        {attendanceData?.summary && attendanceData.summary.total > 0 && (
-          <div className="card shadow-sm mt-4">
-            <div className="card-header bg-white">
-              <h5 className="mb-0">
-                <i className="bi bi-graph-up me-2"></i>
-                Attendance Insights
-              </h5>
-            </div>
-            <div className="card-body">
+          {/* Attendance Insights - Dashboard Style */}
+          {attendanceData?.summary && attendanceData.summary.total > 0 && (
+            <div className="card shadow-sm mt-4" style={{ borderRadius: '20px', border: 'none' }}>
+              <div className="card-header" style={{ background: 'white', borderRadius: '20px 20px 0 0', borderBottom: '1px solid #e5e7eb' }}>
+                <h5 className="mb-0" style={{ color: '#1E3A8A', fontWeight: '600' }}>
+                  <i className="bi bi-graph-up me-2"></i>
+                  Attendance Insights
+                </h5>
+              </div>
+              <div className="card-body" style={{ padding: '25px' }}>
               <div className="row">
                 <div className="col-md-6">
                   <div className="mb-3">
@@ -443,9 +506,22 @@ const StudentAttendance = () => {
                   Please ensure regular attendance to meet academic requirements.
                 </div>
               )}
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* Footer */}
+        <footer className="dashboard-footer">
+          <div className="footer-content">
+            <p>&copy; 2024 Student Management System. All rights reserved.</p>
+            <div className="footer-links">
+              <a href="#privacy">Privacy Policy</a>
+              <a href="#terms">Terms of Service</a>
+              <a href="#support">Support</a>
             </div>
           </div>
-        )}
+        </footer>
       </div>
     </div>
   );

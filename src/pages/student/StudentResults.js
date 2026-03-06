@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../styles/Dashboard.css";
 
 const StudentResults = () => {
   const [user, setUser] = useState(null);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filters, setFilters] = useState({
     academicYear: "",
     examType: ""
@@ -98,200 +100,302 @@ const StudentResults = () => {
     return 'bg-danger';
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const navigateTo = (path) => {
+    navigate(path);
+    closeSidebar();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const getSidebarMenuItems = () => {
+    return [
+      { icon: 'bi-speedometer2', label: 'Dashboard', path: '/dashboard' },
+      { icon: 'bi-person-badge', label: 'My Profile', path: '/student/profile' },
+      { icon: 'bi-calendar-check', label: 'Attendance', path: '/student/attendance' },
+      { icon: 'bi-graph-up', label: 'Results', path: '/student/results' },
+      { icon: 'bi-cash-stack', label: 'Fees', path: '/student/fees' }
+    ];
+  };
+
   if (!user) return null;
 
   return (
-    <div className="min-vh-100 bg-light">
-      {/* Top Navigation */}
-      <nav className="navbar navbar-dark shadow-sm">
-        <div className="container-fluid px-4">
-          <span className="navbar-brand mb-0 h1">My Results</span>
-          <div className="d-flex align-items-center">
-            <button 
-              className="btn btn-outline-light btn-sm me-2"
-              onClick={() => navigate("/dashboard")}
-            >
-              <i className="bi bi-arrow-left me-2"></i>
-              Back to Dashboard
-            </button>
-            <button 
-              className="btn btn-outline-info btn-sm" 
-              onClick={() => navigate("/profile")}
-            >
-              <i className="bi bi-person-circle me-1"></i>
-              Profile
-            </button>
-          </div>
+    <div className="dashboard-wrapper">
+      {/* Sidebar Overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar}></div>}
+
+      {/* Sidebar */}
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h4>Menu</h4>
+          <button className="close-sidebar" onClick={closeSidebar}>
+            <i className="bi bi-x-lg"></i>
+          </button>
         </div>
-      </nav>
+        <nav className="sidebar-nav">
+          {getSidebarMenuItems().map((item, index) => (
+            <button
+              key={index}
+              className="sidebar-item"
+              onClick={() => navigateTo(item.path)}
+            >
+              <i className={`bi ${item.icon}`}></i>
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <button className="sidebar-item sidebar-logout" onClick={handleLogout}>
+            <i className="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </button>
+        </nav>
+      </aside>
 
-      <div className="container py-5">
-        {error && <div className="alert alert-danger">{error}</div>}
+      {/* Main Content Area */}
+      <div className="dashboard-main">
+        {/* Header */}
+        <header className="dashboard-header">
+          <div className="header-left">
+            <button className="hamburger-btn" onClick={toggleSidebar}>
+              <i className="bi bi-list"></i>
+            </button>
+            <h1 className="header-title">My Results</h1>
+          </div>
+          <div className="header-right">
+            <div className="user-info">
+              <div className="user-avatar">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="user-details">
+                <span className="user-name">{user.username}</span>
+                <span className="user-role badge badge-student">
+                  STUDENT
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
 
-        {/* Results Summary */}
-        {results.length > 0 && (
-          <div className="row g-3 mb-4">
-            <div className="col-md-3">
-              <div className="card bg-primary bg-opacity-10 border-primary">
-                <div className="card-body text-center">
-                  <i className="bi bi-journal-text text-primary" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-primary">{results.length}</h4>
-                  <small className="text-muted">Total Exams</small>
+        {/* Body */}
+        <main className="dashboard-body">
+          {error && (
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {error}
+              <button type="button" className="btn-close" onClick={() => setError('')}></button>
+            </div>
+          )}
+
+          {/* Welcome Section */}
+          <div className="welcome-section">
+            <div className="welcome-text">
+              <h2>Academic Performance</h2>
+              <p>Track your exam results and academic progress</p>
+            </div>
+            <button 
+              className="refresh-btn"
+              onClick={() => {
+                const token = localStorage.getItem("token");
+                fetchResults(token);
+              }}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="spinner-border spinner-border-sm me-2"></span>
+              ) : (
+                <i className="bi bi-arrow-clockwise me-2"></i>
+              )}
+              Refresh
+            </button>
+          </div>
+
+          {/* Results Summary - Dashboard Style */}
+          {results.length > 0 && (
+            <div className="stats-grid mb-4">
+              <div className="stat-card stat-card-primary">
+                <div className="stat-icon">
+                  <i className="bi bi-journal-text"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{results.length}</h3>
+                  <p>Total Exams</p>
+                </div>
+              </div>
+              <div className="stat-card stat-card-success">
+                <div className="stat-icon">
+                  <i className="bi bi-graph-up"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{Math.round(results.reduce((sum, result) => sum + result.percentage, 0) / results.length)}%</h3>
+                  <p>Average Score</p>
+                </div>
+              </div>
+              <div className="stat-card stat-card-info">
+                <div className="stat-icon">
+                  <i className="bi bi-trophy"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{Math.max(...results.map(r => r.percentage))}%</h3>
+                  <p>Best Score</p>
+                </div>
+              </div>
+              <div className="stat-card stat-card-warning">
+                <div className="stat-icon">
+                  <i className="bi bi-award"></i>
+                </div>
+                <div className="stat-info">
+                  <h3>{results.filter(r => r.grade === 'A+' || r.grade === 'A').length}</h3>
+                  <p>A Grades</p>
                 </div>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="card bg-success bg-opacity-10 border-success">
-                <div className="card-body text-center">
-                  <i className="bi bi-graph-up text-success" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-success">
-                    {Math.round(results.reduce((sum, result) => sum + result.percentage, 0) / results.length)}%
-                  </h4>
-                  <small className="text-muted">Average Score</small>
+          )}
+
+          {/* Filters - Dashboard Style */}
+          <div className="card shadow-sm mb-4" style={{ borderRadius: '20px', border: 'none' }}>
+            <div className="card-body" style={{ padding: '25px' }}>
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label" style={{ fontWeight: '600', color: '#374151' }}>Academic Year</label>
+                  <select 
+                    className="form-select"
+                    name="academicYear"
+                    value={filters.academicYear}
+                    onChange={handleFilterChange}
+                    style={{ borderRadius: '12px', padding: '10px 15px' }}
+                  >
+                    <option value="">All Years</option>
+                    <option value="2024-25">2024-25</option>
+                    <option value="2023-24">2023-24</option>
+                    <option value="2022-23">2022-23</option>
+                  </select>
                 </div>
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-info bg-opacity-10 border-info">
-                <div className="card-body text-center">
-                  <i className="bi bi-trophy text-info" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-info">
-                    {Math.max(...results.map(r => r.percentage))}%
-                  </h4>
-                  <small className="text-muted">Best Score</small>
+                <div className="col-md-4">
+                  <label className="form-label" style={{ fontWeight: '600', color: '#374151' }}>Exam Type</label>
+                  <select 
+                    className="form-select"
+                    name="examType"
+                    value={filters.examType}
+                    onChange={handleFilterChange}
+                    style={{ borderRadius: '12px', padding: '10px 15px' }}
+                  >
+                    <option value="">All Exams</option>
+                    <option value="Unit Test">Unit Test</option>
+                    <option value="Mid Term">Mid Term</option>
+                    <option value="Final Exam">Final Exam</option>
+                    <option value="Assignment">Assignment</option>
+                  </select>
                 </div>
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-warning bg-opacity-10 border-warning">
-                <div className="card-body text-center">
-                  <i className="bi bi-award text-warning" style={{ fontSize: '2rem' }}></i>
-                  <h4 className="mt-2 mb-0 text-warning">
-                    {results.filter(r => r.grade === 'A+' || r.grade === 'A').length}
-                  </h4>
-                  <small className="text-muted">A Grades</small>
+                <div className="col-md-4 d-flex align-items-end">
+                  <button 
+                    className="btn btn-outline-secondary"
+                    onClick={() => {
+                      setFilters({ academicYear: "", examType: "" });
+                      const token = localStorage.getItem("token");
+                      fetchResults(token);
+                    }}
+                    style={{ borderRadius: '12px', padding: '10px 20px', fontWeight: '600' }}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Reset Filters
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Filters */}
-        <div className="card shadow-sm mb-4">
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-4">
-                <label className="form-label">Academic Year</label>
-                <select 
-                  className="form-select"
-                  name="academicYear"
-                  value={filters.academicYear}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">All Years</option>
-                  <option value="2024-25">2024-25</option>
-                  <option value="2023-24">2023-24</option>
-                  <option value="2022-23">2022-23</option>
-                </select>
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Exam Type</label>
-                <select 
-                  className="form-select"
-                  name="examType"
-                  value={filters.examType}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">All Exams</option>
-                  <option value="Unit Test">Unit Test</option>
-                  <option value="Mid Term">Mid Term</option>
-                  <option value="Final Exam">Final Exam</option>
-                  <option value="Assignment">Assignment</option>
-                </select>
-              </div>
-              <div className="col-md-4 d-flex align-items-end">
-                <button 
-                  className="btn btn-outline-secondary"
-                  onClick={() => {
-                    setFilters({ academicYear: "", examType: "" });
-                    const token = localStorage.getItem("token");
-                    fetchResults(token);
-                  }}
-                >
-                  <i className="bi bi-arrow-clockwise me-1"></i>
-                  Reset Filters
-                </button>
-              </div>
+          {/* Results Table - Dashboard Style */}
+          <div className="card shadow-sm" style={{ borderRadius: '20px', border: 'none' }}>
+            <div className="card-header" style={{ background: 'white', borderRadius: '20px 20px 0 0', borderBottom: '1px solid #e5e7eb' }}>
+              <h5 className="mb-0" style={{ color: '#1E3A8A', fontWeight: '600' }}>
+                <i className="bi bi-graph-up me-2"></i>
+                Exam Results
+              </h5>
             </div>
-          </div>
-        </div>
-
-        {/* Results Table */}
-        <div className="card shadow-sm">
-          <div className="card-header bg-white">
-            <h5 className="mb-0">
-              <i className="bi bi-graph-up me-2"></i>
-              Exam Results
-            </h5>
-          </div>
-          <div className="card-body">
-            {loading ? (
-              <div className="text-center py-4">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Loading...</span>
+            <div className="card-body" style={{ padding: '25px' }}>
+              {loading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <p className="mt-3 text-muted">Loading results...</p>
                 </div>
-                <p className="mt-2">Loading results...</p>
-              </div>
-            ) : results.length > 0 ? (
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Date</th>
-                      <th>Exam Type</th>
-                      <th>Subject</th>
-                      <th>Marks Obtained</th>
-                      <th>Total Marks</th>
-                      <th>Percentage</th>
-                      <th>Grade</th>
-                      <th>Academic Year</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.map((result, index) => (
-                      <tr key={index}>
-                        <td>{new Date(result.examDate).toLocaleDateString()}</td>
-                        <td>
-                          <span className="badge bg-secondary">{result.examType}</span>
-                        </td>
-                        <td className="fw-bold">{result.subject}</td>
-                        <td className="text-center">{result.marksObtained}</td>
-                        <td className="text-center">{result.totalMarks}</td>
-                        <td>
-                          <span className={`badge ${getPercentageColor(result.percentage)}`}>
-                            {result.percentage}%
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`badge ${getGradeColor(result.grade)}`}>
-                            {result.grade}
-                          </span>
-                        </td>
-                        <td>{result.academicYear}</td>
+              ) : results.length > 0 ? (
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Date</th>
+                        <th>Exam Type</th>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Total Marks</th>
+                        <th>Percentage</th>
+                        <th>Grade</th>
+                        <th>Academic Year</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center text-muted py-5">
-                <i className="bi bi-graph-up" style={{ fontSize: '4rem' }}></i>
-                <h4 className="mt-3">No Results Found</h4>
-                <p>No exam results are available yet. Check back later!</p>
-              </div>
-            )}
+                    </thead>
+                    <tbody>
+                      {results.map((result, index) => (
+                        <tr key={index}>
+                          <td>{new Date(result.examDate).toLocaleDateString()}</td>
+                          <td>
+                            <span className="badge bg-secondary" style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                              {result.examType}
+                            </span>
+                          </td>
+                          <td className="fw-bold">{result.subject}</td>
+                          <td className="text-center">{result.marksObtained}</td>
+                          <td className="text-center">{result.totalMarks}</td>
+                          <td>
+                            <span className={`badge ${getPercentageColor(result.percentage)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                              {result.percentage}%
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge ${getGradeColor(result.grade)}`} style={{ fontSize: '0.85rem', padding: '6px 12px', borderRadius: '8px' }}>
+                              {result.grade}
+                            </span>
+                          </td>
+                          <td>{result.academicYear}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center text-muted py-5">
+                  <i className="bi bi-graph-up" style={{ fontSize: '4rem', color: '#9CA3AF' }}></i>
+                  <h4 className="mt-3" style={{ color: '#6B7280' }}>No Results Found</h4>
+                  <p style={{ color: '#9CA3AF' }}>No exam results are available yet. Check back later!</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="dashboard-footer">
+          <div className="footer-content">
+            <p>&copy; 2024 Student Management System. All rights reserved.</p>
+            <div className="footer-links">
+              <a href="#privacy">Privacy Policy</a>
+              <a href="#terms">Terms of Service</a>
+              <a href="#support">Support</a>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
