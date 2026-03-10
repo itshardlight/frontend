@@ -4,3 +4,4 @@ export { default as StudentAttendance } from './StudentAttendance';
 export { default as StudentFees } from './StudentFees';
 export { default as StudentAchievements } from './StudentAchievements';
 export { default as StudentProfile } from './StudentProfile';
+export { default as StudentTimetable } from './StudentTimetable';

@@ -10,17 +10,20 @@ import {
 import { 
   AdminPanel, 
   AdminStudentProfile, 
-  StudentRegistration 
+  StudentRegistration,
+  AdminTimetable
 } from "./pages/admin";
 import { 
   StudentResults, 
   StudentAttendance, 
   StudentFees, 
-  StudentProfile 
+  StudentProfile,
+  StudentTimetable
 } from "./pages/student";
 import { 
   Attendance, 
-  ResultsPage 
+  ResultsPage,
+  TimetablePage
 } from "./pages/teacher";
 import { 
   FeePage 
@@ -51,16 +54,19 @@ function App() {
         <Route path="/student/results" element={<StudentResults />} />
         <Route path="/student/attendance" element={<StudentAttendance />} />
         <Route path="/student/fees" element={<StudentFees />} />
+        <Route path="/student/timetable" element={<StudentTimetable />} />
         
         {/* Admin Routes */}
         <Route path="/admin/panel" element={<AdminPanel />} />
         <Route path="/admin/student-profile/:id" element={<AdminStudentProfile />} />
         <Route path="/admin/student-registration" element={<StudentRegistration />} />
         <Route path="/admin/results" element={<ResultsPage />} />
+        <Route path="/admin/timetable" element={<AdminTimetable />} />
         
         {/* Teacher Routes */}
         <Route path="/teacher/attendance" element={<Attendance />} />
         <Route path="/teacher/results" element={<ResultsPage />} />
+        <Route path="/teacher/timetable" element={<TimetablePage />} />
         
         {/* Fee Department Routes */}
         <Route path="/fee-department/fees" element={<FeePage />} />
