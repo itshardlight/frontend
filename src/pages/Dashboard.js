@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ResultsManagement } from "../components/teacher";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Dashboard.css";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
-  const [activeComponent, setActiveComponent] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState({
     totalStudents: 0,
