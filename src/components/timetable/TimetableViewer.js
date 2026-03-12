@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { timetableService } from '../../services/timetableService';
 import '../../styles/Timetable.css';
 
-const TimetableViewer = ({ className, section, readOnly = false, onEditEntry }) => {
+const TimetableViewer = ({ className, section, readOnly = false, onEditEntry, refreshKey }) => {
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -24,7 +24,7 @@ const TimetableViewer = ({ className, section, readOnly = false, onEditEntry }) 
     if (className && section) {
       fetchTimetable();
     }
-  }, [className, section]);
+  }, [className, section, refreshKey]);
 
   const fetchTimetable = async () => {
     try {
@@ -121,20 +121,35 @@ const TimetableViewer = ({ className, section, readOnly = false, onEditEntry }) 
                     return (
                       <td
                         key={`${day}-${period}`}
-                        className={`subject-cell ${!entry ? 'empty-cell' : ''}`}
+                        className={`subject-cell ${!entry ? 'empty-cell' : ''} ${!readOnly ? 'editable-cell' : ''}`}
                         onClick={() => handleCellClick(day, period)}
                         style={{ cursor: readOnly ? 'default' : 'pointer' }}
+                        title={readOnly ? '' : 'Click to edit'}
                       >
                         {entry ? (
                           <div className="subject-info">
                             <div className="subject-name">{entry.subject}</div>
-                            <div className="teacher-name">{entry.teacherName}</div>
+                            {entry.teacherName && (
+                              <div className="teacher-name">{entry.teacherName}</div>
+                            )}
                             {entry.room && (
                               <div className="room-info">Room: {entry.room}</div>
                             )}
+                            {!readOnly && (
+                              <div className="edit-indicator">
+                                <i className="fas fa-edit"></i>
+                              </div>
+                            )}
                           </div>
                         ) : (
-                          <span>{readOnly ? '-' : 'Click to add'}</span>
+                          <span className="empty-cell-content">
+                            {readOnly ? '-' : (
+                              <>
+                                <i className="fas fa-plus-circle me-1"></i>
+                                Add Class
+                              </>
+                            )}
+                          </span>
                         )}
                       </td>
                     );

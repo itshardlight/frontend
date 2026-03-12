@@ -92,7 +92,54 @@ const StudentTimetable = () => {
     );
   }
 
-  if (!studentProfile || !studentProfile.class || !studentProfile.section) {
+  if (!studentProfile) {
+    return (
+      <div className="container-fluid py-4">
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            <div className="alert alert-warning">
+              <i className="fas fa-info-circle me-2"></i>
+              Your profile information is not available. Please contact administration to set up your profile.
+            </div>
+            <div className="text-center">
+              <button 
+                className="btn btn-primary"
+                onClick={handleBackToDashboard}
+              >
+                <i className="fas fa-arrow-left me-2"></i>
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Extract class and section from different possible data structures
+  const getClassInfo = () => {
+    // Check if data is from Profile model (academic.currentGrade)
+    if (studentProfile.academic?.currentGrade && studentProfile.academic?.section) {
+      return {
+        class: studentProfile.academic.currentGrade,
+        section: studentProfile.academic.section,
+        rollNumber: studentProfile.academic.rollNumber
+      };
+    }
+    // Check if data is from Student model (direct class/section)
+    if (studentProfile.class && studentProfile.section) {
+      return {
+        class: studentProfile.class,
+        section: studentProfile.section,
+        rollNumber: studentProfile.rollNumber
+      };
+    }
+    return null;
+  };
+
+  const classInfo = getClassInfo();
+
+  if (!classInfo) {
     return (
       <div className="container-fluid py-4">
         <div className="row justify-content-center">
@@ -152,17 +199,21 @@ const StudentTimetable = () => {
                   <strong>Student Name:</strong>
                   <p className="mb-0">{studentProfile.firstName} {studentProfile.lastName}</p>
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-2">
                   <strong>Class:</strong>
-                  <p className="mb-0">Class {studentProfile.class}</p>
+                  <p className="mb-0">Class {classInfo.class}</p>
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-2">
                   <strong>Section:</strong>
-                  <p className="mb-0">Section {studentProfile.section}</p>
+                  <p className="mb-0">Section {classInfo.section}</p>
+                </div>
+                <div className="col-md-2">
+                  <strong>Roll Number:</strong>
+                  <p className="mb-0">{classInfo.rollNumber}</p>
                 </div>
                 <div className="col-md-3">
-                  <strong>Roll Number:</strong>
-                  <p className="mb-0">{studentProfile.rollNumber}</p>
+                  <strong>Academic Year:</strong>
+                  <p className="mb-0">{new Date().getFullYear()}-{new Date().getFullYear() + 1}</p>
                 </div>
               </div>
             </div>
@@ -174,8 +225,8 @@ const StudentTimetable = () => {
       <div className="row">
         <div className="col-12">
           <TimetableViewer
-            className={studentProfile.class}
-            section={studentProfile.section}
+            className={classInfo.class}
+            section={classInfo.section}
             readOnly={true}
           />
         </div>
@@ -186,7 +237,7 @@ const StudentTimetable = () => {
         <div className="col-12">
           <div className="alert alert-info">
             <i className="fas fa-info-circle me-2"></i>
-            <strong>Note:</strong> This is your class timetable. If you notice any discrepancies, 
+            <strong>Note:</strong> This is your class timetable. If you notice any discrepancies or if the timetable appears empty, 
             please contact your class teacher or the administration office.
           </div>
         </div>

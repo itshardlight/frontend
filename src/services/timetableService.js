@@ -13,6 +13,19 @@ const getAuthHeaders = () => {
 };
 
 export const timetableService = {
+  // Debug endpoint to test connection
+  debug: async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/timetable/debug`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Debug test failed' };
+    }
+  },
+
   // Get timetable for a specific class and section
   getClassTimetable: async (className, section) => {
     try {
@@ -23,6 +36,58 @@ export const timetableService = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch timetable' };
+    }
+  },
+
+  // Test endpoint
+  testCreate: async (entryData) => {
+    try {
+      console.log('Testing create with:', entryData);
+      const response = await axios.post(
+        `${API_BASE_URL}/timetable/test-create`,
+        entryData,
+        getAuthHeaders()
+      );
+      console.log('Test response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Test error:', error);
+      if (error.response) {
+        console.error('Test error response:', error.response.data);
+        throw error.response.data;
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        throw { message: 'No response from server. Please check your connection.' };
+      } else {
+        console.error('Request setup error:', error.message);
+        throw { message: 'Failed to test timetable entry' };
+      }
+    }
+  },
+
+  // Create or update timetable entry
+  saveTimetableEntry: async (entryData) => {
+    try {
+      console.log('Sending timetable entry:', entryData);
+      const response = await axios.post(
+        `${API_BASE_URL}/timetable`,
+        entryData,
+        getAuthHeaders()
+      );
+      console.log('Received response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Service error:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        throw error.response.data;
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        throw { message: 'No response from server. Please check your connection.' };
+      } else {
+        console.error('Request setup error:', error.message);
+        throw { message: 'Failed to save timetable entry' };
+      }
     }
   },
 
@@ -39,30 +104,17 @@ export const timetableService = {
     }
   },
 
-  // Get all available teachers
-  getTeachers: async () => {
+  // Update timetable entry
+  updateTimetableEntry: async (entryId, entryData) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/timetable/teachers`,
-        getAuthHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to fetch teachers' };
-    }
-  },
-
-  // Create or update timetable entry
-  saveTimetableEntry: async (entryData) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/timetable`,
+      const response = await axios.put(
+        `${API_BASE_URL}/timetable/${entryId}`,
         entryData,
         getAuthHeaders()
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Failed to save timetable entry' };
+      throw error.response?.data || { message: 'Failed to update timetable entry' };
     }
   },
 

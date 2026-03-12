@@ -1,12 +1,184 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TimetableViewer from './TimetableViewer';
+import { timetableService } from '../../services/timetableService';
 
 const TimetableManager = ({ userRole }) => {
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [refreshTimetable, setRefreshTimetable] = useState(0);
+
+  // Form data for timetable entry
+  const [formData, setFormData] = useState({
+    subject: '',
+    startTime: '',
+    endTime: '',
+    room: ''
+  });
 
   const classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const sections = ['A', 'B', 'C', 'D'];
+
+  useEffect(() => {
+    // Remove teacher fetching since we're not using it anymore
+  }, []);
+
+  const testCreate = async () => {
+    try {
+      const testData = {
+        class: '1',
+        section: 'A',
+        dayOfWeek: 'monday',
+        period: '1',
+        subject: 'Test Subject',
+        startTime: '09:00',
+        endTime: '09:45',
+        room: 'Test Room'
+      };
+      
+      console.log('Testing create with:', testData);
+      const response = await timetableService.testCreate(testData);
+      console.log('Test response:', response);
+      setSuccess('Test successful: ' + response.message);
+    } catch (err) {
+      console.error('Test failed:', err);
+      setError('Test failed: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const testConnection = async () => {
+    try {
+      const response = await timetableService.debug();
+      console.log('Debug response:', response);
+      setSuccess('Connection test successful!');
+    } catch (err) {
+      console.error('Debug test failed:', err);
+      setError('Connection test failed: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const handleEditEntry = (entryData) => {
+    const { day, period, entry, defaultStartTime, defaultEndTime } = entryData;
+    
+    setEditingEntry({
+      day,
+      period,
+      entryId: entry?._id || null
+    });
+
+    setFormData({
+      subject: entry?.subject || '',
+      startTime: entry?.startTime || defaultStartTime,
+      endTime: entry?.endTime || defaultEndTime,
+      room: entry?.room || ''
+    });
+
+    setShowModal(true);
+  };
+
+  const handleSaveEntry = async () => {
+    if (!selectedClass || !selectedSection || !editingEntry) {
+      setError('Please select a class and section first');
+      return;
+    }
+
+    if (!formData.subject || !formData.startTime || !formData.endTime) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      const entryData = {
+        class: selectedClass,
+        section: selectedSection,
+        dayOfWeek: editingEntry.day,
+        period: editingEntry.period,
+        subject: formData.subject,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        room: formData.room
+      };
+
+      if (editingEntry.entryId) {
+        entryData._id = editingEntry.entryId;
+      }
+
+      console.log('Saving timetable entry:', entryData);
+      const response = await timetableService.saveTimetableEntry(entryData);
+      console.log('Save response:', response);
+      
+      setSuccess('Timetable entry saved successfully');
+      setShowModal(false);
+      
+      // Reset form
+      setFormData({
+        subject: '',
+        startTime: '',
+        endTime: '',
+        room: ''
+      });
+      setEditingEntry(null);
+
+      // Refresh timetable
+      setRefreshTimetable(prev => prev + 1);
+    } catch (err) {
+      console.error('Error saving timetable entry:', err);
+      setError(err.message || 'Failed to save timetable entry');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteEntry = async () => {
+    if (!editingEntry?.entryId) {
+      setError('No entry to delete');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      await timetableService.deleteTimetableEntry(editingEntry.entryId);
+      setSuccess('Timetable entry deleted successfully');
+      setShowModal(false);
+      
+      // Reset form
+      setFormData({
+        subject: '',
+        startTime: '',
+        endTime: '',
+        room: ''
+      });
+      setEditingEntry(null);
+
+      // Refresh timetable
+      setRefreshTimetable(prev => prev + 1);
+    } catch (err) {
+      setError(err.message || 'Failed to delete timetable entry');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingEntry(null);
+    setFormData({
+      subject: '',
+      startTime: '',
+      endTime: '',
+      room: ''
+    });
+    setError('');
+  };
 
   return (
     <div className="timetable-manager">
@@ -39,19 +211,165 @@ const TimetableManager = ({ userRole }) => {
         </div>
       </div>
 
+      {/* Success/Error Messages */}
+      {success && (
+        <div className="alert alert-success alert-dismissible fade show">
+          <i className="fas fa-check-circle me-2"></i>
+          {success}
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setSuccess('')}
+          ></button>
+        </div>
+      )}
+
+      {error && (
+        <div className="alert alert-danger alert-dismissible fade show">
+          <i className="fas fa-exclamation-triangle me-2"></i>
+          {error}
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setError('')}
+          ></button>
+        </div>
+      )}
+
       {selectedClass && selectedSection && (
         <TimetableViewer 
           className={selectedClass}
           section={selectedSection}
-          readOnly={true}
+          readOnly={false}
+          onEditEntry={handleEditEntry}
+          refreshKey={refreshTimetable}
         />
       )}
 
       {(!selectedClass || !selectedSection) && (
         <div className="alert alert-info">
           <i className="fas fa-info-circle me-2"></i>
-          Please select a class and section to view the timetable.
+          Please select a class and section to manage the timetable.
+          <div className="mt-2">
+            <button 
+              className="btn btn-sm btn-outline-primary me-2"
+              onClick={testConnection}
+            >
+              Test Connection
+            </button>
+            <button 
+              className="btn btn-sm btn-outline-success"
+              onClick={testCreate}
+            >
+              Test Create
+            </button>
+          </div>
         </div>
+      )}
+
+      {/* Edit Modal */}
+      {showModal && (
+        <>
+          <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    {editingEntry?.entryId ? 'Edit' : 'Add'} Timetable Entry
+                  </h5>
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    onClick={closeModal}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <strong>
+                      Class {selectedClass} - Section {selectedSection}
+                    </strong>
+                    <br />
+                    <span className="text-muted">
+                      {editingEntry?.day?.charAt(0).toUpperCase() + editingEntry?.day?.slice(1)} - 
+                      Period {editingEntry?.period}
+                    </span>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Subject *</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.subject}
+                      onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                      placeholder="Enter subject name"
+                    />
+                  </div>
+
+                  <div className="row mb-3">
+                    <div className="col-6">
+                      <label className="form-label">Start Time *</label>
+                      <input
+                        type="time"
+                        className="form-control"
+                        value={formData.startTime}
+                        onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                      />
+                    </div>
+                    <div className="col-6">
+                      <label className="form-label">End Time *</label>
+                      <input
+                        type="time"
+                        className="form-control"
+                        value={formData.endTime}
+                        onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Room</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.room}
+                      onChange={(e) => setFormData(prev => ({ ...prev, room: e.target.value }))}
+                      placeholder="Enter room number (optional)"
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={closeModal}
+                  >
+                    Cancel
+                  </button>
+                  {editingEntry?.entryId && (
+                    <button 
+                      type="button" 
+                      className="btn btn-danger" 
+                      onClick={handleDeleteEntry}
+                      disabled={loading}
+                    >
+                      {loading ? 'Deleting...' : 'Delete'}
+                    </button>
+                  )}
+                  <button 
+                    type="button" 
+                    className="btn btn-primary" 
+                    onClick={handleSaveEntry}
+                    disabled={loading}
+                  >
+                    {loading ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop fade show"></div>
+        </>
       )}
     </div>
   );

@@ -286,3 +286,206 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
 }
+
+/* Editable Timetable Styles */
+.editable-cell {
+  position: relative;
+}
+
+.editable-cell:hover {
+  background-color: #e0f2fe !important;
+  border-color: var(--primary-color) !important;
+}
+
+.editable-cell .subject-info {
+  position: relative;
+}
+
+.edit-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.editable-cell:hover .edit-indicator {
+  opacity: 1;
+}
+
+.edit-indicator i {
+  font-size: 0.7rem;
+  color: var(--primary-color);
+}
+
+.empty-cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 1rem;
+  color: var(--text-light);
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.empty-cell:hover .empty-cell-content {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.empty-cell:hover .empty-cell-content i {
+  transform: scale(1.1);
+}
+
+/* Timetable Manager Styles */
+.timetable-manager {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timetable-manager .form-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.timetable-manager .form-select {
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  padding: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.timetable-manager .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.25);
+}
+
+/* Modal Enhancements */
+.modal-content {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 15px 15px 0 0;
+  border-bottom: none;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 2rem;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Form Controls in Modal */
+.modal .form-control,
+.modal .form-select {
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  padding: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.25);
+}
+
+.modal .form-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
+.btn-secondary {
+  background: #6b7280;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+/* Alert Styles */
+.alert {
+  border-radius: 10px;
+  border: none;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+}
+
+.alert i {
+  margin-right: 0.5rem;
+}
