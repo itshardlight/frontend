@@ -24,42 +24,8 @@ const TimetableManager = ({ userRole }) => {
   const sections = ['A', 'B', 'C', 'D'];
 
   useEffect(() => {
-    // Remove teacher fetching since we're not using it anymore
+    // Component initialization
   }, []);
-
-  const testCreate = async () => {
-    try {
-      const testData = {
-        class: '1',
-        section: 'A',
-        dayOfWeek: 'monday',
-        period: '1',
-        subject: 'Test Subject',
-        startTime: '09:00',
-        endTime: '09:45',
-        room: 'Test Room'
-      };
-      
-      console.log('Testing create with:', testData);
-      const response = await timetableService.testCreate(testData);
-      console.log('Test response:', response);
-      setSuccess('Test successful: ' + response.message);
-    } catch (err) {
-      console.error('Test failed:', err);
-      setError('Test failed: ' + (err.message || 'Unknown error'));
-    }
-  };
-
-  const testConnection = async () => {
-    try {
-      const response = await timetableService.debug();
-      console.log('Debug response:', response);
-      setSuccess('Connection test successful!');
-    } catch (err) {
-      console.error('Debug test failed:', err);
-      setError('Connection test failed: ' + (err.message || 'Unknown error'));
-    }
-  };
 
   const handleEditEntry = (entryData) => {
     const { day, period, entry, defaultStartTime, defaultEndTime } = entryData;
@@ -249,21 +215,7 @@ const TimetableManager = ({ userRole }) => {
       {(!selectedClass || !selectedSection) && (
         <div className="alert alert-info">
           <i className="fas fa-info-circle me-2"></i>
-          Please select a class and section to manage the timetable.
-          <div className="mt-2">
-            <button 
-              className="btn btn-sm btn-outline-primary me-2"
-              onClick={testConnection}
-            >
-              Test Connection
-            </button>
-            <button 
-              className="btn btn-sm btn-outline-success"
-              onClick={testCreate}
-            >
-              Test Create
-            </button>
-          </div>
+          Select a class and section above to start managing the timetable.
         </div>
       )}
 

@@ -372,16 +372,7 @@ const Dashboard = () => {
             <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</span>
           </div>
         )}
-        {user.role === "admin" && (
-          <div className="action-card" onClick={() => navigateTo("/admin/timetable")}>
-            <div className="action-icon action-icon-secondary">
-              <i className="bi bi-calendar-week"></i>
-            </div>
-            <h5>Timetable Administration</h5>
-            <p>Complete timetable management for all classes</p>
-            <span className="badge bg-primary">All Classes</span>
-          </div>
-        )}
+
       </div>
     </div>
   );
@@ -497,7 +488,7 @@ const Dashboard = () => {
         { icon: 'bi-clipboard-check', label: 'Attendance', path: '/teacher/attendance' },
         { icon: 'bi-journal-text', label: 'Results', path: '/teacher/results' },
         { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },
-        { icon: 'bi-calendar-week', label: 'Timetable Admin', path: '/admin/timetable' }
+        { icon: 'bi-calendar-week', label: 'Timetable', path: '/teacher/timetable' }
       ],
       fee_department: [
         { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },
