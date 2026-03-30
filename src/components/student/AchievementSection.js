@@ -205,7 +205,7 @@ const AchievementSection = ({ profile, currentUser, onUpdate }) => {
                   )}
                   <div className="text-end">
                     <small className="text-muted">
-                      Added by: {achievement.addedBy?.fullName || achievement.addedBy?.username || 'You'}
+                      Added by: {achievement.addedBy?.fullName || achievement.addedBy?.username || `${profile.firstName} ${profile.lastName}`}
                     </small>
                   </div>
                 </div>
