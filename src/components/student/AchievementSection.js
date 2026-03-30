@@ -14,8 +14,8 @@ const AchievementSection = ({ profile, currentUser, onUpdate }) => {
   const canView = true; // Everyone can view achievements
   const canAdd = currentUser.role === 'student' && (
     profile.userId?._id === currentUser.id || 
-    profile._id === currentUser.id ||
-    profile.userId === currentUser.id
+    profile.userId === currentUser.id ||
+    profile._id === currentUser.id
   );
 
   if (!canView) return null;

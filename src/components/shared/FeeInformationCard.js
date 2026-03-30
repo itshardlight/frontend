@@ -18,9 +18,8 @@ const FeeInformationCard = ({ studentId }) => {
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
-      // Admin users should be able to access fee information
-      if (user.role === 'admin') {
-        // For admin, we can directly call the fee API
+      if (user.role === 'admin' || user.role === 'fee_department') {
+        // For admin/fee_department, use the students endpoint
         const response = await axios.get(`http://localhost:5000/api/fees/students`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -40,15 +39,34 @@ const FeeInformationCard = ({ studentId }) => {
             });
           }
         }
+      } else if (user.role === 'student') {
+        // For students, use the specific student endpoint
+        const response = await axios.get(`http://localhost:5000/api/fees/student/${studentId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          setFeeInfo(response.data.data);
+        } else {
+          setFeeInfo({
+            totalFee: 0,
+            paidAmount: 0,
+            pendingAmount: 0,
+            paymentStatus: 'pending',
+            feeHistory: []
+          });
+        }
       } else {
-        // For non-admin users, show limited access message
-        setError('Fee information access restricted to administrators');
+        // For other roles, show limited access message
+        setError('Fee information access restricted');
       }
     } catch (err) {
       console.error('Error fetching fee info:', err);
       
       if (err.response?.status === 403) {
-        setError('Access denied. Fee information requires admin privileges.');
+        setError('Access denied. You can only view your own fee information.');
+      } else if (err.response?.status === 404) {
+        setError('Fee information not found for this student.');
       } else {
         setError('Failed to load fee information');
       }
