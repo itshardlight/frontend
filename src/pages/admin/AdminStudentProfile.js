@@ -46,18 +46,71 @@ const AdminStudentProfile = () => {
         return;
       }
       
-      const response = await axios.get(`http://localhost:5000/api/students/${id}`, {
+      // First, get the student data
+      const studentResponse = await axios.get(`http://localhost:5000/api/students/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      if (response.data.success) {
-        setStudent(response.data.data);
-        setEditData(response.data.data);
-      } else {
-        setError(response.data.message || 'Failed to load student details');
+      if (!studentResponse.data.success) {
+        setError(studentResponse.data.message || 'Failed to load student details');
+        return;
       }
+
+      const studentData = studentResponse.data.data;
+      
+      // Then, try to get the corresponding profile data
+      let profileData = null;
+      
+      try {
+        // Get all profiles and find the matching one
+        const profilesResponse = await axios.get(`http://localhost:5000/api/profiles?limit=1000`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (profilesResponse.data.success) {
+          // First try to match by userId
+          if (studentData.userId) {
+            profileData = profilesResponse.data.profiles.find(profile => 
+              profile.userId?._id === studentData.userId || profile.userId === studentData.userId
+            );
+          }
+          
+          // If not found by userId, try to match by student details
+          if (!profileData) {
+            profileData = profilesResponse.data.profiles.find(profile => 
+              profile.firstName === studentData.firstName &&
+              profile.lastName === studentData.lastName &&
+              profile.academic?.currentGrade === studentData.class &&
+              profile.academic?.section === studentData.section &&
+              profile.academic?.rollNumber === studentData.rollNumber
+            );
+          }
+        }
+      } catch (profileError) {
+        console.log('Could not fetch profile data:', profileError);
+      }
+      
+      // Merge student and profile data, prioritizing profile data for achievements
+      const mergedData = {
+        ...studentData,
+        // Add profile-specific fields if profile exists
+        ...(profileData && {
+          _id: profileData._id, // Use profile ID for achievement operations
+          achievements: profileData.achievements || [],
+          feeInfo: profileData.feeInfo,
+          medicalInfo: profileData.medicalInfo,
+          profileId: profileData._id
+        }),
+        // Ensure we have an empty achievements array if no profile
+        achievements: profileData?.achievements || []
+      };
+
+      setStudent(mergedData);
+      setEditData(mergedData);
     } catch (err) {
       console.error('Error fetching student:', err);
       setError(err.response?.data?.message || 'Failed to load student details');
@@ -99,7 +152,18 @@ const AdminStudentProfile = () => {
   };
 
   const handleInputChange = (field, value) => {
-    setEditData({ ...editData, [field]: value });
+    if (field === 'medicalInfo' && typeof editData.medicalInfo === 'object' && editData.medicalInfo !== null) {
+      // If medicalInfo is currently an object, update the conditions property
+      setEditData({ 
+        ...editData, 
+        medicalInfo: {
+          ...editData.medicalInfo,
+          conditions: value
+        }
+      });
+    } else {
+      setEditData({ ...editData, [field]: value });
+    }
   };
 
   const getInitials = (firstName, lastName) => {
@@ -936,14 +1000,14 @@ const AdminStudentProfile = () => {
                             <textarea
                               className="form-control"
                               rows="2"
-                              value={editData.medicalInfo || ''}
+                              value={typeof editData.medicalInfo === 'string' ? editData.medicalInfo : editData.medicalInfo?.conditions || ''}
                               onChange={(e) => handleInputChange('medicalInfo', e.target.value)}
                             />
                           </>
                         ) : (
                           <div className="d-flex align-items-start">
                             <span className="fw-bold me-2">Medical Information:</span>
-                            <span>{student.medicalInfo}</span>
+                            <span>{typeof student.medicalInfo === 'string' ? student.medicalInfo : student.medicalInfo?.conditions || 'None reported'}</span>
                           </div>
                         )}
                       </div>
