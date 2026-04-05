@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Dashboard.css";
+import StudentDashboardCharts from "../components/shared/StudentDashboardCharts";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -235,25 +236,9 @@ const Dashboard = () => {
   // Student Dashboard Content
   const StudentDashboard = () => (
     <div className="dashboard-content">
-      <div className="stats-grid">
-        <div className="stat-card stat-card-primary">
-          <div className="stat-icon">
-            <i className="bi bi-cash-stack"></i>
-          </div>
-          <div className="stat-info">
-            <h3>Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</h3>
-            <p>Fees Paid</p>
-          </div>
-        </div>
-        <div className="stat-card stat-card-warning">
-          <div className="stat-icon">
-            <i className="bi bi-exclamation-circle"></i>
-          </div>
-          <div className="stat-info">
-            <h3>Rs.{dashboardStats.pendingFees.toLocaleString()}</h3>
-            <p>Pending Fees</p>
-          </div>
-        </div>
+      {/* Dashboard Charts Section */}
+      <div className="mb-4">
+        <StudentDashboardCharts userId={user.id || user._id} />
       </div>
 
       <div className="action-cards-grid">
@@ -585,7 +570,7 @@ const Dashboard = () => {
         {/* Footer */}
         <footer className="dashboard-footer">
           <div className="footer-content">
-            <p>&copy; 2024 Student Management System. All rights reserved.</p>
+            <p>&copy; Student Management System. All rights reserved.</p>
             <div className="footer-links">
               <a href="#privacy">Privacy Policy</a>
               <a href="#terms">Terms of Service</a>

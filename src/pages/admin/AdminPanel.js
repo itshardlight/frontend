@@ -13,6 +13,20 @@ const AdminPanel = () => {
   const [studentsError, setStudentsError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState("users");
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [createUserLoading, setCreateUserLoading] = useState(false);
+  const [createUserError, setCreateUserError] = useState("");
+  const [createUserSuccess, setCreateUserSuccess] = useState("");
+  const [createdCredentials, setCreatedCredentials] = useState(null);
+  const [createUserForm, setCreateUserForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "teacher",
+    phone: "",
+    department: "",
+    subject: ""
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -121,6 +135,73 @@ const AdminPanel = () => {
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setCreateUserLoading(true);
+    setCreateUserError("");
+    setCreateUserSuccess("");
+
+    try {
+      // Debug: Check what we're sending
+      console.log("Current user object:", currentUser);
+      console.log("User ID being sent:", currentUser?.id);
+      
+      const requestData = {
+        userId: currentUser.id,
+        ...createUserForm
+      };
+      
+      console.log("Full request data:", requestData);
+      
+      const response = await axios.post("http://localhost:5000/api/admin/create-user", requestData);
+
+      if (response.data.success) {
+        setCreateUserSuccess("User account created successfully!");
+        setCreatedCredentials(response.data.credentials);
+        setCreateUserForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          role: "teacher",
+          phone: "",
+          department: "",
+          subject: ""
+        });
+        fetchUsers(currentUser.id);
+      }
+    } catch (err) {
+      console.error("Full error object:", err);
+      console.error("Error response data:", err.response?.data);
+      setCreateUserError(err.response?.data?.message || "Failed to create user account");
+    } finally {
+      setCreateUserLoading(false);
+    }
+  };
+
+  const handleCreateUserFormChange = (e) => {
+    const { name, value } = e.target;
+    setCreateUserForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const resetCreateUserModal = () => {
+    setShowCreateUserModal(false);
+    setCreateUserError("");
+    setCreateUserSuccess("");
+    setCreatedCredentials(null);
+    setCreateUserForm({
+      firstName: "",
+      lastName: "",
+      email: "",
+      role: "teacher",
+      phone: "",
+      department: "",
+      subject: ""
+    });
+  };
+
   const getRoleBadgeClass = (role) => {
     switch (role) {
       case "admin": return "bg-danger";
@@ -194,23 +275,32 @@ const AdminPanel = () => {
                 <h4>User Management</h4>
                 <p className="text-muted mb-0">Manage user roles and permissions</p>
               </div>
-              <button 
-                className="btn btn-outline-primary"
-                onClick={() => fetchUsers(currentUser.id)}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-sync-alt me-2"></i>
-                    Refresh
-                  </>
-                )}
-              </button>
+              <div className="d-flex gap-2">
+                <button 
+                  className="btn btn-success"
+                  onClick={() => setShowCreateUserModal(true)}
+                >
+                  <i className="fas fa-plus me-2"></i>
+                  Create User Account
+                </button>
+                <button 
+                  className="btn btn-outline-primary"
+                  onClick={() => fetchUsers(currentUser.id)}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sync-alt me-2"></i>
+                      Refresh
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -267,7 +357,6 @@ const AdminPanel = () => {
                                 >
                                   <option value="student">Student</option>
                                   <option value="teacher">Teacher</option>
-                                  <option value="parent">Parent</option>
                                   <option value="fee_department">Fee Department</option>
                                   <option value="admin">Admin</option>
                                 </select>
@@ -295,31 +384,25 @@ const AdminPanel = () => {
                 <div className="card-body">
                   <h5>User Statistics</h5>
                   <div className="row mt-3">
-                    <div className="col-md-2">
+                    <div className="col-md-3">
                       <div className="text-center">
                         <h3 className="text-danger">{users.filter(u => u.role === "admin").length}</h3>
                         <p className="text-muted small">Admins</p>
                       </div>
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-md-3">
                       <div className="text-center">
                         <h3 className="text-primary">{users.filter(u => u.role === "teacher").length}</h3>
                         <p className="text-muted small">Teachers</p>
                       </div>
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-md-3">
                       <div className="text-center">
                         <h3 className="text-success">{users.filter(u => u.role === "student").length}</h3>
                         <p className="text-muted small">Students</p>
                       </div>
                     </div>
-                    <div className="col-md-2">
-                      <div className="text-center">
-                        <h3 className="text-info">{users.filter(u => u.role === "parent").length}</h3>
-                        <p className="text-muted small">Parents</p>
-                      </div>
-                    </div>
-                    <div className="col-md-2">
+                    <div className="col-md-3">
                       <div className="text-center">
                         <h3 className="text-warning">{users.filter(u => u.role === "fee_department").length}</h3>
                         <p className="text-muted small">Fee Dept</p>
@@ -462,6 +545,205 @@ const AdminPanel = () => {
           </>
         )}
       </div>
+
+      {/* Create User Modal */}
+      {showCreateUserModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Create User Account</h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={resetCreateUserModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {createUserError && (
+                  <div className="alert alert-danger">{createUserError}</div>
+                )}
+                {createUserSuccess && (
+                  <div className="alert alert-success">{createUserSuccess}</div>
+                )}
+                
+                {createdCredentials ? (
+                  <div className="card bg-light">
+                    <div className="card-body">
+                      <h6 className="card-title text-success">
+                        <i className="fas fa-check-circle me-2"></i>
+                        Account Created Successfully!
+                      </h6>
+                      <p className="card-text">Please share these login credentials with the user:</p>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Email:</strong> {createdCredentials.email}
+                        </div>
+                        <div className="col-md-6">
+                          <strong>Password:</strong> {createdCredentials.password}
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <strong>Username:</strong> {createdCredentials.username}
+                      </div>
+                      <div className="alert alert-info mt-3 mb-0">
+                        <small>
+                          <i className="fas fa-info-circle me-1"></i>
+                          The user will be required to change their password on first login.
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleCreateUser}>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          First Name <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="firstName"
+                          value={createUserForm.firstName}
+                          onChange={handleCreateUserFormChange}
+                          required
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Last Name <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="lastName"
+                          value={createUserForm.lastName}
+                          onChange={handleCreateUserFormChange}
+                          required
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Email <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          name="email"
+                          value={createUserForm.email}
+                          onChange={handleCreateUserFormChange}
+                          required
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Role <span className="text-danger">*</span>
+                        </label>
+                        <select
+                          className="form-select"
+                          name="role"
+                          value={createUserForm.role}
+                          onChange={handleCreateUserFormChange}
+                          required
+                        >
+                          <option value="teacher">Teacher</option>
+                          <option value="fee_department">Fee Department</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label">Phone</label>
+                        <input
+                          type="tel"
+                          className="form-control"
+                          name="phone"
+                          value={createUserForm.phone}
+                          onChange={handleCreateUserFormChange}
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label">Department</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="department"
+                          value={createUserForm.department}
+                          onChange={handleCreateUserFormChange}
+                          placeholder="e.g., Mathematics, Science, Administration"
+                        />
+                      </div>
+                      {createUserForm.role === "teacher" && (
+                        <div className="col-md-12">
+                          <label className="form-label">Subject</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="subject"
+                            value={createUserForm.subject}
+                            onChange={handleCreateUserFormChange}
+                            placeholder="e.g., Mathematics, Physics, English"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="mt-4">
+                      <div className="alert alert-info">
+                        <small>
+                          <i className="fas fa-info-circle me-1"></i>
+                          <strong>Auto-generated credentials:</strong><br/>
+                          Username: firstname_lastname<br/>
+                          Password: firstname@123<br/>
+                          User will be required to change password on first login.
+                        </small>
+                      </div>
+                    </div>
+
+                    <div className="modal-footer">
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary" 
+                        onClick={resetCreateUserModal}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="btn btn-success"
+                        disabled={createUserLoading}
+                      >
+                        {createUserLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-plus me-2"></i>
+                            Create Account
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+              {createdCredentials && (
+                <div className="modal-footer">
+                  <button 
+                    type="button" 
+                    className="btn btn-primary" 
+                    onClick={resetCreateUserModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

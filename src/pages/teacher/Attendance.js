@@ -128,7 +128,7 @@ const Attendance = () => {
         {/* Footer */}
         <footer className="dashboard-footer">
           <div className="footer-content">
-            <p>&copy; 2024 Student Management System. All rights reserved.</p>
+            <p>&copy; Student Management System. All rights reserved.</p>
             <div className="footer-links">
               <a href="#privacy">Privacy Policy</a>
               <a href="#terms">Terms of Service</a>

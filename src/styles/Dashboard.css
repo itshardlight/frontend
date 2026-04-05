@@ -563,3 +563,40 @@
     display: none;
   }
 }
+/* Dashboard Charts Styling */
+.dashboard-charts-container {
+  margin-bottom: 2rem;
+}
+
+.dashboard-charts-container .card {
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-charts-container .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-charts-container .card-header {
+  border-radius: 12px 12px 0 0 !important;
+  border-bottom: none;
+  padding: 1rem 1.25rem;
+}
+
+.dashboard-charts-container .card-body {
+  padding: 1.5rem;
+}
+
+/* Responsive adjustments for dashboard charts */
+@media (max-width: 768px) {
+  .dashboard-charts-container .col-lg-4 {
+    margin-bottom: 1rem;
+  }
+  
+  .dashboard-charts-container .card-body {
+    padding: 1rem;
+  }
+}
