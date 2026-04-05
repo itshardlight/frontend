@@ -31,7 +31,7 @@ const AchievementSection = ({ profile, currentUser, onUpdate }) => {
       });
       
       setAddingAchievement(false);
-      setNewAchievement({cd 
+      setNewAchievement({
         title: '',
         description: '',
         date: '',
