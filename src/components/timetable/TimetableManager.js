@@ -1,153 +1,137 @@
 import React, { useState, useEffect } from 'react';
-import TimetableViewer from './TimetableViewer';
 import { timetableService } from '../../services/timetableService';
 
 const TimetableManager = ({ userRole }) => {
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [editingEntry, setEditingEntry] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [refreshTimetable, setRefreshTimetable] = useState(0);
-
-  // Form data for timetable entry
-  const [formData, setFormData] = useState({
-    subject: '',
-    startTime: '',
-    endTime: '',
-    room: ''
-  });
+  const [timetableData, setTimetableData] = useState({});
+  const [originalData, setOriginalData] = useState({});
 
   const classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
   const sections = ['A', 'B', 'C', 'D'];
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+  const periods = ['1', '2', '3', '4', '5', '6', '7', '8'];
+  const timeSlots = [
+    { period: '1', start: '09:00', end: '09:45' },
+    { period: '2', start: '09:45', end: '10:30' },
+    { period: '3', start: '10:30', end: '11:15' },
+    { period: '4', start: '11:30', end: '12:15' },
+    { period: '5', start: '12:15', end: '13:00' },
+    { period: '6', start: '14:00', end: '14:45' },
+    { period: '7', start: '14:45', end: '15:30' },
+    { period: '8', start: '15:30', end: '16:15' }
+  ];
 
   useEffect(() => {
-    // Component initialization
-  }, []);
+    if (selectedClass && selectedSection) {
+      fetchTimetable();
+    }
+  }, [selectedClass, selectedSection]);
 
-  const handleEditEntry = (entryData) => {
-    const { day, period, entry, defaultStartTime, defaultEndTime } = entryData;
-    
-    setEditingEntry({
-      day,
-      period,
-      entryId: entry?._id || null
-    });
-
-    setFormData({
-      subject: entry?.subject || '',
-      startTime: entry?.startTime || defaultStartTime,
-      endTime: entry?.endTime || defaultEndTime,
-      room: entry?.room || ''
-    });
-
-    setShowModal(true);
+  const fetchTimetable = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await timetableService.getClassTimetable(selectedClass, selectedSection);
+      const data = response.data || [];
+      
+      // Convert array to object for easier editing
+      const timetableObj = {};
+      data.forEach(entry => {
+        const key = `${entry.dayOfWeek}-${entry.period}`;
+        timetableObj[key] = {
+          _id: entry._id,
+          subject: entry.subject || '',
+          startTime: entry.startTime || '',
+          endTime: entry.endTime || ''
+        };
+      });
+      
+      setTimetableData(timetableObj);
+      setOriginalData(JSON.parse(JSON.stringify(timetableObj)));
+    } catch (err) {
+      setError(err.message || 'Failed to fetch timetable');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSaveEntry = async () => {
-    if (!selectedClass || !selectedSection || !editingEntry) {
+  const getTimeSlot = (period) => {
+    return timeSlots.find(slot => slot.period === period);
+  };
+
+  const handleInputChange = (day, period, field, value) => {
+    const key = `${day}-${period}`;
+    setTimetableData(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveAll = async () => {
+    if (!selectedClass || !selectedSection) {
       setError('Please select a class and section first');
       return;
     }
 
-    if (!formData.subject || !formData.startTime || !formData.endTime) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
     try {
       setLoading(true);
       setError('');
+      setSuccess('');
 
-      const entryData = {
-        class: selectedClass,
-        section: selectedSection,
-        dayOfWeek: editingEntry.day,
-        period: editingEntry.period,
-        subject: formData.subject,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        room: formData.room
-      };
+      // Prepare all entries for bulk save
+      const entries = [];
+      days.forEach(day => {
+        periods.forEach(period => {
+          const key = `${day}-${period}`;
+          const entry = timetableData[key];
+          
+          // Only include entries with a subject
+          if (entry && entry.subject && entry.subject.trim()) {
+            const timeSlot = getTimeSlot(period);
+            entries.push({
+              _id: entry._id || null,
+              class: selectedClass,
+              section: selectedSection,
+              dayOfWeek: day,
+              period: period,
+              subject: entry.subject.trim(),
+              startTime: entry.startTime || timeSlot?.start || '',
+              endTime: entry.endTime || timeSlot?.end || ''
+            });
+          }
+        });
+      });
 
-      if (editingEntry.entryId) {
-        entryData._id = editingEntry.entryId;
+      if (entries.length === 0) {
+        setError('Please add at least one subject to save');
+        return;
       }
 
-      console.log('Saving timetable entry:', entryData);
-      const response = await timetableService.saveTimetableEntry(entryData);
+      console.log('Saving all entries:', entries);
+      const response = await timetableService.saveBulkTimetable(entries);
       console.log('Save response:', response);
       
-      setSuccess('Timetable entry saved successfully');
-      setShowModal(false);
+      setSuccess(`Successfully saved ${entries.length} timetable entries!`);
       
-      // Reset form
-      setFormData({
-        subject: '',
-        startTime: '',
-        endTime: '',
-        room: ''
-      });
-      setEditingEntry(null);
-
       // Refresh timetable
-      setRefreshTimetable(prev => prev + 1);
+      await fetchTimetable();
     } catch (err) {
-      console.error('Error saving timetable entry:', err);
-      setError(err.message || 'Failed to save timetable entry');
+      console.error('Error saving timetable:', err);
+      setError(err.message || 'Failed to save timetable');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDeleteEntry = async () => {
-    if (!editingEntry?.entryId) {
-      setError('No entry to delete');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-
-      await timetableService.deleteTimetableEntry(editingEntry.entryId);
-      setSuccess('Timetable entry deleted successfully');
-      setShowModal(false);
-      
-      // Reset form
-      setFormData({
-        subject: '',
-        startTime: '',
-        endTime: '',
-        room: ''
-      });
-      setEditingEntry(null);
-
-      // Refresh timetable
-      setRefreshTimetable(prev => prev + 1);
-    } catch (err) {
-      setError(err.message || 'Failed to delete timetable entry');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingEntry(null);
-    setFormData({
-      subject: '',
-      startTime: '',
-      endTime: '',
-      room: ''
-    });
-    setError('');
   };
 
   return (
-    <div className="timetable-manager">
+    <div className="timetable-manager-simple">
       <div className="row mb-4">
         <div className="col-md-6">
           <label className="form-label">Select Class</label>
@@ -180,7 +164,7 @@ const TimetableManager = ({ userRole }) => {
       {/* Success/Error Messages */}
       {success && (
         <div className="alert alert-success alert-dismissible fade show">
-          <i className="fas fa-check-circle me-2"></i>
+          <i className="bi bi-check-circle me-2"></i>
           {success}
           <button 
             type="button" 
@@ -192,7 +176,7 @@ const TimetableManager = ({ userRole }) => {
 
       {error && (
         <div className="alert alert-danger alert-dismissible fade show">
-          <i className="fas fa-exclamation-triangle me-2"></i>
+          <i className="bi bi-exclamation-triangle me-2"></i>
           {error}
           <button 
             type="button" 
@@ -203,125 +187,89 @@ const TimetableManager = ({ userRole }) => {
       )}
 
       {selectedClass && selectedSection && (
-        <TimetableViewer 
-          className={selectedClass}
-          section={selectedSection}
-          readOnly={false}
-          onEditEntry={handleEditEntry}
-          refreshKey={refreshTimetable}
-        />
+        <>
+          {loading && !timetableData ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-2">Loading timetable...</p>
+            </div>
+          ) : (
+            <>
+              <div className="timetable-edit-grid">
+                <table className="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '100px' }}>Period</th>
+                      <th style={{ width: '100px' }}>Time</th>
+                      {days.map(day => (
+                        <th key={day}>
+                          {day.charAt(0).toUpperCase() + day.slice(1)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {periods.map(period => {
+                      const timeSlot = getTimeSlot(period);
+                      return (
+                        <tr key={period}>
+                          <td className="text-center fw-bold">Period {period}</td>
+                          <td className="text-center text-muted small">
+                            {timeSlot ? `${timeSlot.start} - ${timeSlot.end}` : ''}
+                          </td>
+                          {days.map(day => {
+                            const key = `${day}-${period}`;
+                            const entry = timetableData[key] || {};
+                            return (
+                              <td key={key} className="p-2">
+                                <input
+                                  type="text"
+                                  className="form-control form-control-sm"
+                                  placeholder="Subject"
+                                  value={entry.subject || ''}
+                                  onChange={(e) => handleInputChange(day, period, 'subject', e.target.value)}
+                                />
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="d-flex justify-content-end mt-3">
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleSaveAll}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-save me-2"></i>
+                      Save All Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+        </>
       )}
 
       {(!selectedClass || !selectedSection) && (
         <div className="alert alert-info">
-          <i className="fas fa-info-circle me-2"></i>
+          <i className="bi bi-info-circle me-2"></i>
           Select a class and section above to start managing the timetable.
         </div>
-      )}
-
-      {/* Edit Modal */}
-      {showModal && (
-        <>
-          <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">
-                    {editingEntry?.entryId ? 'Edit' : 'Add'} Timetable Entry
-                  </h5>
-                  <button 
-                    type="button" 
-                    className="btn-close" 
-                    onClick={closeModal}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <strong>
-                      Class {selectedClass} - Section {selectedSection}
-                    </strong>
-                    <br />
-                    <span className="text-muted">
-                      {editingEntry?.day?.charAt(0).toUpperCase() + editingEntry?.day?.slice(1)} - 
-                      Period {editingEntry?.period}
-                    </span>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Subject *</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.subject}
-                      onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-                      placeholder="Enter subject name"
-                    />
-                  </div>
-
-                  <div className="row mb-3">
-                    <div className="col-6">
-                      <label className="form-label">Start Time *</label>
-                      <input
-                        type="time"
-                        className="form-control"
-                        value={formData.startTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                      />
-                    </div>
-                    <div className="col-6">
-                      <label className="form-label">End Time *</label>
-                      <input
-                        type="time"
-                        className="form-control"
-                        value={formData.endTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Room</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.room}
-                      onChange={(e) => setFormData(prev => ({ ...prev, room: e.target.value }))}
-                      placeholder="Enter room number (optional)"
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-                  {editingEntry?.entryId && (
-                    <button 
-                      type="button" 
-                      className="btn btn-danger" 
-                      onClick={handleDeleteEntry}
-                      disabled={loading}
-                    >
-                      {loading ? 'Deleting...' : 'Delete'}
-                    </button>
-                  )}
-                  <button 
-                    type="button" 
-                    className="btn btn-primary" 
-                    onClick={handleSaveEntry}
-                    disabled={loading}
-                  >
-                    {loading ? 'Saving...' : 'Save'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="modal-backdrop fade show"></div>
-        </>
       )}
     </div>
   );

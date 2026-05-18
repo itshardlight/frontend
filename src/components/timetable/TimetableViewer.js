@@ -132,9 +132,6 @@ const TimetableViewer = ({ className, section, readOnly = false, onEditEntry, re
                             {entry.teacherName && (
                               <div className="teacher-name">{entry.teacherName}</div>
                             )}
-                            {entry.room && (
-                              <div className="room-info">Room: {entry.room}</div>
-                            )}
                             {!readOnly && (
                               <div className="edit-indicator">
                                 <i className="fas fa-edit"></i>

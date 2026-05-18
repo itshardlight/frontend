@@ -129,6 +129,32 @@ export const timetableService = {
     } catch (error) {
       throw error.response?.data || { message: 'Failed to delete timetable entry' };
     }
+  },
+
+  // Bulk save timetable entries
+  saveBulkTimetable: async (entries) => {
+    try {
+      console.log('Sending bulk timetable entries:', entries);
+      const response = await axios.post(
+        `${API_BASE_URL}/timetable/bulk`,
+        { entries },
+        getAuthHeaders()
+      );
+      console.log('Bulk save response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Bulk save error:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        throw error.response.data;
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        throw { message: 'No response from server. Please check your connection.' };
+      } else {
+        console.error('Request setup error:', error.message);
+        throw { message: 'Failed to save timetable entries' };
+      }
+    }
   }
 };
 
