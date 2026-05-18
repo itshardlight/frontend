@@ -196,37 +196,10 @@ const AdminTimetable = () => {
             <div className="card-header">
               <h5 className="mb-0">
                 <i className="fas fa-chart-bar me-2"></i>
-                Timetable Overview
+        
               </h5>
             </div>
-            <div className="card-body">
-              <div className="row text-center">
-                <div className="col-md-3">
-                  <div className="border rounded p-3">
-                    <h4 className="text-primary mb-1">12</h4>
-                    <small className="text-muted">Total Classes</small>
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="border rounded p-3">
-                    <h4 className="text-success mb-1">36</h4>
-                    <small className="text-muted">Class Sections</small>
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="border rounded p-3">
-                    <h4 className="text-info mb-1">8</h4>
-                    <small className="text-muted">Periods per Day</small>
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="border rounded p-3">
-                    <h4 className="text-warning mb-1">6</h4>
-                    <small className="text-muted">Working Days</small>
-                  </div>
-                </div>
-              </div>
-            </div>
+          
           </div>
         </div>
       </div>

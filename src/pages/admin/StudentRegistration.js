@@ -1080,7 +1080,7 @@ const StudentRegistration = () => {
                             <div className="d-flex gap-2">
                               <button
                                 className="btn btn-outline-primary btn-sm"
-                                onClick={() => navigate(`/student-profile/${student._id}`)}
+                                onClick={() => navigate(`/admin/student-profile/${student._id}`)}
                               >
                                 <i className="bi bi-eye me-1"></i>
                                 View
