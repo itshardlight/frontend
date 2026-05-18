@@ -14,7 +14,7 @@ const TimetableManagement = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+  const classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
   const sections = ['A', 'B', 'C'];
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
 

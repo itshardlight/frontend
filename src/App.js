@@ -12,7 +12,7 @@ import {
   AdminStudentProfile, 
   StudentRegistration,
   AdminTimetable,
-  AdminAIPredictions
+  AIPredictions
 } from "./pages/admin";
 import { 
   StudentResults, 
@@ -63,7 +63,7 @@ function App() {
         <Route path="/admin/student-registration" element={<StudentRegistration />} />
         <Route path="/admin/results" element={<ResultsPage />} />
         <Route path="/admin/timetable" element={<AdminTimetable />} />
-        <Route path="/admin-ai-predictions" element={<AdminAIPredictions />} />
+        <Route path="/admin/ai-predictions" element={<AIPredictions />} />
         
 
         {/* Teacher Routes */}

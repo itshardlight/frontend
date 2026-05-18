@@ -249,6 +249,12 @@
   align-items: center;
 }
 
+.welcome-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .welcome-text h2 {
   color: #1E3A8A;
   font-size: 2rem;
@@ -282,6 +288,15 @@
 .refresh-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.download-btn {
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4) !important;
 }
 
 /* Dashboard Content */
@@ -526,6 +541,12 @@
     align-items: flex-start;
     gap: 15px;
     padding: 20px;
+  }
+
+  .welcome-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .welcome-text h2 {

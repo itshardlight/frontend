@@ -3,42 +3,46 @@ import { studentService } from "../../services/studentService";
 
 const AttendanceManager = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedClass, setSelectedClass] = useState("9");
+  const [selectedClass, setSelectedClass] = useState("1");
   const [selectedSection, setSelectedSection] = useState("A");
-  const [selectedSubject, setSelectedSubject] = useState("Mathematics");
-  const [selectedPeriod, setSelectedPeriod] = useState("1");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [attendance, setAttendance] = useState({});
 
-  // Load students when class/section changes
+  // Reload students + existing attendance whenever class/section/date changes
   useEffect(() => {
     loadStudents();
-    loadExistingAttendance();
-  }, [selectedClass, selectedSection, selectedDate, selectedSubject, selectedPeriod]);
+  }, [selectedClass, selectedSection]);
+
+  useEffect(() => {
+    if (students.length > 0) {
+      loadExistingAttendance();
+    }
+  }, [selectedDate, students]);
 
   const loadStudents = async () => {
     try {
       setLoading(true);
       setError("");
-      
+
       const response = await studentService.getStudents({
         class: selectedClass,
         section: selectedSection
       });
-      
+
       const studentList = response.data || [];
       setStudents(studentList);
-      
-      // Initialize attendance state
+
+      // Reset attendance marks
       const initialAttendance = {};
       studentList.forEach(student => {
         initialAttendance[student._id] = "not_marked";
       });
       setAttendance(initialAttendance);
-      
+
     } catch (err) {
       setError("Failed to load students: " + err.message);
     } finally {
@@ -52,26 +56,18 @@ const AttendanceManager = () => {
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection}?date=${selectedDate}&subject=${selectedSubject}&period=${selectedPeriod}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/class/${selectedClass}/${selectedSection}?date=${selectedDate}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
           const existingAttendance = {};
-          
           result.data.students.forEach(studentData => {
-            if (studentData.attendance) {
-              existingAttendance[studentData.student._id] = studentData.attendance.status;
-            } else {
-              existingAttendance[studentData.student._id] = "not_marked";
-            }
+            existingAttendance[studentData.student._id] = studentData.status;
           });
-          
-          setAttendance(existingAttendance);
+          setAttendance(prev => ({ ...prev, ...existingAttendance }));
         }
       }
     } catch (err) {
@@ -80,51 +76,44 @@ const AttendanceManager = () => {
   };
 
   const handleStatusChange = (studentId, status) => {
-    setAttendance({ ...attendance, [studentId]: status });
+    setAttendance(prev => ({ ...prev, [studentId]: status }));
   };
 
   const handleSaveAttendance = async () => {
     try {
-      setLoading(true);
+      setSaving(true);
       setError("");
-      
-      // Prepare attendance data
+
       const attendanceData = Object.entries(attendance)
         .filter(([_, status]) => status !== "not_marked")
-        .map(([studentId, status]) => ({
-          studentId,
-          status,
-          timeIn: status === "present" || status === "late" ? new Date().toISOString() : null
-        }));
+        .map(([studentId, status]) => ({ studentId, status }));
 
       if (attendanceData.length === 0) {
         setError("Please mark attendance for at least one student");
-        setLoading(false);
+        setSaving(false);
         return;
       }
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/mark-attendance`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          class: selectedClass,
-          section: selectedSection,
-          date: selectedDate,
-          subject: selectedSubject,
-          period: selectedPeriod,
-          attendanceData
-        })
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/attendance/mark-attendance`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            class: selectedClass,
+            section: selectedSection,
+            date: selectedDate,
+            attendanceData
+          })
+        }
+      );
 
       const result = await response.json();
 
       if (result.success) {
-        setSuccess(`Attendance saved successfully for ${attendanceData.length} students!`);
-        setTimeout(() => setSuccess(""), 3000);
+        setSuccess(`Attendance saved for ${attendanceData.length} student(s) on ${new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`);
+        setTimeout(() => setSuccess(""), 4000);
       } else {
         setError(result.message || "Failed to save attendance");
       }
@@ -132,27 +121,33 @@ const AttendanceManager = () => {
     } catch (err) {
       setError("Failed to save attendance: " + err.message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
+  };
+
+  const markAll = (status) => {
+    const newAttendance = {};
+    students.forEach(student => { newAttendance[student._id] = status; });
+    setAttendance(prev => ({ ...prev, ...newAttendance }));
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case "present": return "badge bg-success";
-      case "absent": return "badge bg-danger";
-      case "late": return "badge bg-warning text-dark";
-      case "excused": return "badge bg-info";
+      case "present":    return "badge bg-success";
+      case "absent":     return "badge bg-danger";
+      case "late":       return "badge bg-warning text-dark";
+      case "excused":    return "badge bg-info";
       case "not_marked": return "badge bg-secondary";
-      default: return "badge bg-secondary";
+      default:           return "badge bg-secondary";
     }
   };
 
   const stats = {
-    total: students.length,
-    present: students.filter(s => attendance[s._id] === "present").length,
-    absent: students.filter(s => attendance[s._id] === "absent").length,
-    late: students.filter(s => attendance[s._id] === "late").length,
-    excused: students.filter(s => attendance[s._id] === "excused").length,
+    total:      students.length,
+    present:    students.filter(s => attendance[s._id] === "present").length,
+    absent:     students.filter(s => attendance[s._id] === "absent").length,
+    late:       students.filter(s => attendance[s._id] === "late").length,
+    excused:    students.filter(s => attendance[s._id] === "excused").length,
     not_marked: students.filter(s => attendance[s._id] === "not_marked").length,
   };
 
@@ -164,111 +159,73 @@ const AttendanceManager = () => {
           <i className="bi bi-calendar-check me-2 text-primary"></i>
           Attendance Management
         </h2>
-        <p className="text-muted mb-0">Mark and track student attendance</p>
+        <p className="text-muted mb-0">Mark daily attendance for a class</p>
       </div>
 
-      {/* Messages */}
+      {/* Alerts */}
       {success && (
         <div className="alert alert-success alert-dismissible fade show" role="alert">
-          <i className="bi bi-check-circle me-2"></i>
-          {success}
+          <i className="bi bi-check-circle me-2"></i>{success}
           <button type="button" className="btn-close" onClick={() => setSuccess("")}></button>
         </div>
       )}
       {error && (
         <div className="alert alert-danger alert-dismissible fade show" role="alert">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          {error}
+          <i className="bi bi-exclamation-triangle me-2"></i>{error}
           <button type="button" className="btn-close" onClick={() => setError("")}></button>
         </div>
       )}
 
       {/* Stats Cards */}
       <div className="row g-3 mb-4">
-        <div className="col-md-2">
-          <div className="card text-center border-primary">
-            <div className="card-body">
-              <i className="bi bi-people-fill text-primary" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.total}</h3>
-              <small className="text-muted">Total</small>
+        {[
+          { label: "Total",      value: stats.total,      color: "primary",   icon: "bi-people-fill" },
+          { label: "Present",    value: stats.present,    color: "success",   icon: "bi-check-circle-fill" },
+          { label: "Absent",     value: stats.absent,     color: "danger",    icon: "bi-x-circle-fill" },
+          { label: "Late",       value: stats.late,       color: "warning",   icon: "bi-clock-fill" },
+          { label: "Excused",    value: stats.excused,    color: "info",      icon: "bi-info-circle-fill" },
+          { label: "Not Marked", value: stats.not_marked, color: "secondary", icon: "bi-question-circle-fill" },
+        ].map(({ label, value, color, icon }) => (
+          <div className="col-md-2" key={label}>
+            <div className={`card text-center border-${color}`}>
+              <div className="card-body">
+                <i className={`bi ${icon} text-${color}`} style={{ fontSize: "2rem" }}></i>
+                <h3 className="mt-2 mb-0">{value}</h3>
+                <small className="text-muted">{label}</small>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="col-md-2">
-          <div className="card text-center border-success">
-            <div className="card-body">
-              <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.present}</h3>
-              <small className="text-muted">Present</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-2">
-          <div className="card text-center border-danger">
-            <div className="card-body">
-              <i className="bi bi-x-circle-fill text-danger" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.absent}</h3>
-              <small className="text-muted">Absent</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-2">
-          <div className="card text-center border-warning">
-            <div className="card-body">
-              <i className="bi bi-clock-fill text-warning" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.late}</h3>
-              <small className="text-muted">Late</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-2">
-          <div className="card text-center border-info">
-            <div className="card-body">
-              <i className="bi bi-info-circle-fill text-info" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.excused}</h3>
-              <small className="text-muted">Excused</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-2">
-          <div className="card text-center border-secondary">
-            <div className="card-body">
-              <i className="bi bi-question-circle-fill text-secondary" style={{ fontSize: "2rem" }}></i>
-              <h3 className="mt-2 mb-0">{stats.not_marked}</h3>
-              <small className="text-muted">Not Marked</small>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Filters */}
+      {/* Controls */}
       <div className="card mb-4">
         <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-2">
-              <label className="form-label">Date</label>
+          <div className="row g-3 align-items-end">
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Date</label>
               <input
                 type="date"
                 className="form-control"
                 value={selectedDate}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
             </div>
-            <div className="col-md-2">
-              <label className="form-label">Class</label>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Class</label>
               <select
                 className="form-select"
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
               >
-                <option value="9">Class 9</option>
-                <option value="10">Class 10</option>
-                <option value="11">Class 11</option>
-                <option value="12">Class 12</option>
+                {['1','2','3','4','5','6','7','8','9','10'].map(cls => (
+                  <option key={cls} value={cls}>Class {cls}</option>
+                ))}
               </select>
             </div>
-            <div className="col-md-2">
-              <label className="form-label">Section</label>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">Section</label>
               <select
                 className="form-select"
                 value={selectedSection}
@@ -279,55 +236,16 @@ const AttendanceManager = () => {
                 <option value="C">Section C</option>
               </select>
             </div>
-            <div className="col-md-2">
-              <label className="form-label">Subject</label>
-              <select
-                className="form-select"
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
-              >
-                <option value="Mathematics">Mathematics</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
-                <option value="English">English</option>
-                <option value="Hindi">Hindi</option>
-                <option value="History">History</option>
-                <option value="Geography">Geography</option>
-              </select>
-            </div>
-            <div className="col-md-2">
-              <label className="form-label">Period</label>
-              <select
-                className="form-select"
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-              >
-                <option value="1">Period 1</option>
-                <option value="2">Period 2</option>
-                <option value="3">Period 3</option>
-                <option value="4">Period 4</option>
-                <option value="5">Period 5</option>
-                <option value="6">Period 6</option>
-                <option value="7">Period 7</option>
-                <option value="8">Period 8</option>
-              </select>
-            </div>
-            <div className="col-md-2 d-flex align-items-end">
-              <button 
-                className="btn btn-primary w-100"
+            <div className="col-md-3 d-flex gap-2">
+              <button
+                className="btn btn-success flex-fill"
                 onClick={handleSaveAttendance}
-                disabled={loading}
+                disabled={saving || loading}
               >
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2"></span>
-                    Saving...
-                  </>
+                {saving ? (
+                  <><span className="spinner-border spinner-border-sm me-2"></span>Saving...</>
                 ) : (
-                  <>
-                    <i className="bi bi-save me-2"></i>Save
-                  </>
+                  <><i className="bi bi-save me-2"></i>Save</>
                 )}
               </button>
             </div>
@@ -337,35 +255,20 @@ const AttendanceManager = () => {
 
       {/* Students Table */}
       <div className="card">
-        <div className="card-header">
-          <div className="d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">Students - Class {selectedClass}-{selectedSection}</h5>
-            <div className="d-flex gap-2">
-              <button 
-                className="btn btn-outline-success btn-sm"
-                onClick={() => {
-                  const newAttendance = {};
-                  students.forEach(student => {
-                    newAttendance[student._id] = "present";
-                  });
-                  setAttendance({ ...attendance, ...newAttendance });
-                }}
-              >
-                <i className="bi bi-check-all me-1"></i>All Present
-              </button>
-              <button 
-                className="btn btn-outline-danger btn-sm"
-                onClick={() => {
-                  const newAttendance = {};
-                  students.forEach(student => {
-                    newAttendance[student._id] = "absent";
-                  });
-                  setAttendance({ ...attendance, ...newAttendance });
-                }}
-              >
-                <i className="bi bi-x-circle me-1"></i>All Absent
-              </button>
-            </div>
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">
+            Class {selectedClass}-{selectedSection} &nbsp;
+            <span className="text-muted fw-normal" style={{ fontSize: '0.9rem' }}>
+              {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </span>
+          </h5>
+          <div className="d-flex gap-2">
+            <button className="btn btn-outline-success btn-sm" onClick={() => markAll("present")}>
+              <i className="bi bi-check-all me-1"></i>All Present
+            </button>
+            <button className="btn btn-outline-danger btn-sm" onClick={() => markAll("absent")}>
+              <i className="bi bi-x-circle me-1"></i>All Absent
+            </button>
           </div>
         </div>
         <div className="card-body p-0">
@@ -376,7 +279,7 @@ const AttendanceManager = () => {
                   <th>Roll No</th>
                   <th>Student Name</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th>Mark Attendance</th>
                 </tr>
               </thead>
               <tbody>
@@ -389,13 +292,13 @@ const AttendanceManager = () => {
                 ) : students.length > 0 ? (
                   students.map((student) => (
                     <tr key={student._id}>
-                      <td className="align-middle">
-                        <strong>{student.rollNumber}</strong>
-                      </td>
+                      <td className="align-middle"><strong>{student.rollNumber}</strong></td>
                       <td className="align-middle">
                         <div className="d-flex align-items-center">
-                          <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                               style={{ width: "35px", height: "35px", fontSize: "14px" }}>
+                          <div
+                            className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                            style={{ width: "35px", height: "35px", fontSize: "14px", flexShrink: 0 }}
+                          >
                             {student.firstName?.[0]}{student.lastName?.[0]}
                           </div>
                           {student.fullName}
@@ -403,7 +306,7 @@ const AttendanceManager = () => {
                       </td>
                       <td className="align-middle">
                         <span className={getStatusBadge(attendance[student._id])}>
-                          {attendance[student._id]?.toUpperCase().replace('_', ' ')}
+                          {(attendance[student._id] || 'not_marked').toUpperCase().replace('_', ' ')}
                         </span>
                       </td>
                       <td className="align-middle">
@@ -413,28 +316,28 @@ const AttendanceManager = () => {
                             onClick={() => handleStatusChange(student._id, "present")}
                             title="Present"
                           >
-                            <i className="bi bi-check-circle"></i>
+                            <i className="bi bi-check-circle"></i> Present
                           </button>
                           <button
                             className={`btn ${attendance[student._id] === "absent" ? "btn-danger" : "btn-outline-danger"}`}
                             onClick={() => handleStatusChange(student._id, "absent")}
                             title="Absent"
                           >
-                            <i className="bi bi-x-circle"></i>
+                            <i className="bi bi-x-circle"></i> Absent
                           </button>
                           <button
                             className={`btn ${attendance[student._id] === "late" ? "btn-warning" : "btn-outline-warning"}`}
                             onClick={() => handleStatusChange(student._id, "late")}
                             title="Late"
                           >
-                            <i className="bi bi-clock"></i>
+                            <i className="bi bi-clock"></i> Late
                           </button>
                           <button
                             className={`btn ${attendance[student._id] === "excused" ? "btn-info" : "btn-outline-info"}`}
                             onClick={() => handleStatusChange(student._id, "excused")}
                             title="Excused"
                           >
-                            <i className="bi bi-info-circle"></i>
+                            <i className="bi bi-info-circle"></i> Excused
                           </button>
                         </div>
                       </td>
@@ -444,7 +347,7 @@ const AttendanceManager = () => {
                   <tr>
                     <td colSpan="4" className="text-center py-4 text-muted">
                       <i className="bi bi-inbox" style={{ fontSize: "2rem" }}></i>
-                      <p className="mb-0 mt-2">No students found in this class</p>
+                      <p className="mb-0 mt-2">No students found in Class {selectedClass}-{selectedSection}</p>
                     </td>
                   </tr>
                 )}

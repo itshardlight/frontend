@@ -245,10 +245,9 @@ const AcademicSection = ({ profile, currentUser, editing, editData, setEditData 
               onChange={(e) => handleAcademicChange('currentGrade', e.target.value)}
             >
               <option value="">Select Grade</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
+              {['1','2','3','4','5','6','7','8','9','10'].map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
             </select>
           ) : (
             <span>{profile.academic.currentGrade || 'Not assigned'}</span>

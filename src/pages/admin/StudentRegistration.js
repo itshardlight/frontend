@@ -600,10 +600,9 @@ const StudentRegistration = () => {
                     required
                   >
                     <option value="">Select Class</option>
-                    <option value="9">Class 9</option>
-                    <option value="10">Class 10</option>
-                    <option value="11">Class 11</option>
-                    <option value="12">Class 12</option>
+                    {['1','2','3','4','5','6','7','8','9','10'].map(cls => (
+                      <option key={cls} value={cls}>Class {cls}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="col-md-4">

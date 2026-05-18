@@ -327,13 +327,21 @@ const Dashboard = () => {
               <p>Manage student fees and payments</p>
               <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</span>
             </div>
-            <div className="action-card" onClick={() => navigateTo("/admin-ai-predictions")}>
+            <div className="action-card" onClick={() => navigateTo("/admin/timetable")}>
+              <div className="action-icon action-icon-secondary">
+                <i className="bi bi-calendar-week"></i>
+              </div>
+              <h5>Timetable Management</h5>
+              <p>Manage class schedules and timetables</p>
+              <span className="badge bg-secondary">Schedule</span>
+            </div>
+            <div className="action-card" onClick={() => navigateTo("/admin/ai-predictions")}>
               <div className="action-icon action-icon-info">
                 <i className="bi bi-robot"></i>
               </div>
-              <h5> AI Predictions</h5>
-              <p>Analyze student performance with AI</p>
-              <span className="badge bg-info">Smart Analytics</span>
+              <h5>AI Predictions</h5>
+              <p>Random Forest student performance predictions</p>
+              <span className="badge bg-info">ML Analytics</span>
             </div>
           </>
         )}
@@ -455,12 +463,12 @@ const Dashboard = () => {
       ],
       admin: [
         { icon: 'bi-gear', label: 'Admin Panel', path: '/admin/panel' },
-        { icon: 'bi-people', label: 'Students', path: '/admin/student-registration' },
+        { icon: 'bi-person-plus', label: 'Add Student', path: '/admin/student-registration' },
         { icon: 'bi-clipboard-check', label: 'Attendance', path: '/teacher/attendance' },
         { icon: 'bi-journal-text', label: 'Results', path: '/teacher/results' },
         { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },
         { icon: 'bi-calendar-week', label: 'Timetable', path: '/teacher/timetable' },
-        { icon: 'bi-robot', label: '🤖 AI Predictions', path: '/admin-ai-predictions' }
+        { icon: 'bi-robot', label: 'AI Predictions', path: '/admin/ai-predictions' }
       ],
       fee_department: [
         { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },

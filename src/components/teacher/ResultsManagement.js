@@ -54,7 +54,7 @@ const ResultsManagement = () => {
     { value: 'half_yearly', label: 'Half Yearly' }
   ];
 
-  const classes = ['', '9', '10', '11', '12'];
+  const classes = ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
   const sections = ['', 'A', 'B', 'C'];
   const grades = ['', 'A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F'];
   const resultOptions = [

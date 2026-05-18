@@ -338,6 +338,412 @@ const StudentResults = () => {
     window.print();
   };
 
+  const handleDownloadAllResults = () => {
+    if (results.length === 0) {
+      alert('No results available to download');
+      return;
+    }
+
+    // Group results by academic year
+    const resultsByYear = results.reduce((acc, result) => {
+      const year = result.academicYear || 'Unknown Year';
+      if (!acc[year]) {
+        acc[year] = [];
+      }
+      acc[year].push(result);
+      return acc;
+    }, {});
+
+    // Show year selection modal
+    showYearSelectionModal(resultsByYear);
+  };
+
+  const showYearSelectionModal = (resultsByYear) => {
+    const years = Object.keys(resultsByYear).sort().reverse();
+    
+    // Create modal HTML
+    const modalHTML = `
+      <div class="modal fade show d-block" tabindex="-1" style="z-index: 1060; background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content" style="border-radius: 15px; border: none;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1E3A8A 0%, #60A5FA 100%); border-radius: 15px 15px 0 0;">
+              <h5 class="modal-title text-white">
+                <i class="bi bi-file-earmark-pdf me-2"></i>
+                Download Academic Year Report
+              </h5>
+              <button type="button" class="btn-close btn-close-white" onclick="closeYearModal()"></button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+              <p class="text-muted mb-3">Select an academic year to download the PDF report:</p>
+              <div class="year-selection-grid">
+                ${years.map(year => `
+                  <button class="year-option-btn" onclick="downloadYearReport('${year}', ${JSON.stringify(resultsByYear[year]).replace(/"/g, '&quot;')})">
+                    <div class="year-info">
+                      <div class="year-title">${year}</div>
+                      <div class="year-count">${resultsByYear[year].length} exam${resultsByYear[year].length !== 1 ? 's' : ''}</div>
+                    </div>
+                    <i class="bi bi-download"></i>
+                  </button>
+                `).join('')}
+              </div>
+              <div class="mt-3 text-center">
+                <button class="btn btn-outline-primary" onclick="downloadAllYears(${JSON.stringify(resultsByYear).replace(/"/g, '&quot;')})">
+                  <i class="bi bi-collection me-2"></i>
+                  Download All Years
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Add styles for the modal
+    const styles = `
+      <style>
+        .year-selection-grid {
+          display: grid;
+          gap: 12px;
+          margin-bottom: 15px;
+        }
+        .year-option-btn {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 15px 20px;
+          border: 2px solid #e5e7eb;
+          border-radius: 12px;
+          background: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: left;
+          width: 100%;
+        }
+        .year-option-btn:hover {
+          border-color: #60A5FA;
+          background: #f8fafc;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
+        }
+        .year-title {
+          font-weight: 600;
+          color: #1E3A8A;
+          font-size: 1.1rem;
+        }
+        .year-count {
+          color: #6B7280;
+          font-size: 0.9rem;
+        }
+        .year-option-btn i {
+          color: #60A5FA;
+          font-size: 1.2rem;
+        }
+      </style>
+    `;
+
+    // Insert modal into DOM
+    document.head.insertAdjacentHTML('beforeend', styles);
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Add global functions for modal actions
+    window.closeYearModal = () => {
+      const modal = document.querySelector('.modal.show');
+      if (modal) modal.remove();
+      const style = document.querySelector('style:last-child');
+      if (style) style.remove();
+    };
+
+    window.downloadYearReport = (year, yearResults) => {
+      generateYearPDF(year, yearResults);
+      window.closeYearModal();
+    };
+
+    window.downloadAllYears = (allResults) => {
+      Object.keys(allResults).forEach(year => {
+        setTimeout(() => generateYearPDF(year, allResults[year]), 500);
+      });
+      window.closeYearModal();
+    };
+  };
+
+  const generateYearPDF = (academicYear, yearResults) => {
+    // Create a new window for PDF generation
+    const printWindow = window.open('', '_blank');
+    
+    const studentName = yearResults[0]?.studentName || user?.fullName || user?.username || 'Student';
+    const studentClass = yearResults[0]?.studentClass || yearResults[0]?.class || 'N/A';
+    const studentSection = yearResults[0]?.studentSection || yearResults[0]?.section || 'N/A';
+    const studentRoll = yearResults[0]?.studentRollNumber || yearResults[0]?.rollNumber || 'N/A';
+
+    // Calculate year statistics
+    const totalExams = yearResults.length;
+    const averagePercentage = Math.round(yearResults.reduce((sum, result) => sum + result.percentage, 0) / totalExams);
+    const bestScore = Math.max(...yearResults.map(r => r.percentage));
+    const aGrades = yearResults.filter(r => r.grade === 'A+' || r.grade === 'A' || r.overallGrade === 'A+' || r.overallGrade === 'A').length;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Academic Report - ${academicYear}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: #333;
+            background: white;
+          }
+          .report-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+          }
+          .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-bottom: 3px solid #1E3A8A;
+            padding-bottom: 20px;
+          }
+          .school-name { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #1E3A8A; 
+            margin-bottom: 5px;
+          }
+          .report-title { 
+            font-size: 20px; 
+            color: #374151; 
+            margin-bottom: 10px;
+          }
+          .academic-year { 
+            font-size: 16px; 
+            color: #6B7280; 
+          }
+          .student-info { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-bottom: 30px;
+          }
+          .info-card { 
+            background: #f8fafc; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border-left: 4px solid #1E3A8A;
+          }
+          .info-label { 
+            font-weight: 600; 
+            color: #374151; 
+            margin-bottom: 5px;
+          }
+          .info-value { 
+            color: #6B7280;
+          }
+          .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 30px;
+          }
+          .stat-card { 
+            text-align: center; 
+            padding: 15px; 
+            background: #f3f4f6; 
+            border-radius: 8px;
+          }
+          .stat-number { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #1E3A8A;
+          }
+          .stat-label { 
+            font-size: 12px; 
+            color: #6B7280; 
+            margin-top: 5px;
+          }
+          .results-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 30px;
+          }
+          .results-table th, .results-table td { 
+            border: 1px solid #e5e7eb; 
+            padding: 10px; 
+            text-align: left;
+          }
+          .results-table th { 
+            background: #1E3A8A; 
+            color: white; 
+            font-weight: 600;
+          }
+          .results-table tr:nth-child(even) { 
+            background: #f9fafb;
+          }
+          .grade-badge { 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            font-weight: 600;
+          }
+          .grade-a { background: #dcfce7; color: #166534; }
+          .grade-b { background: #dbeafe; color: #1e40af; }
+          .grade-c { background: #fef3c7; color: #92400e; }
+          .grade-d { background: #fee2e2; color: #991b1b; }
+          .footer { 
+            text-align: center; 
+            margin-top: 30px; 
+            padding-top: 20px; 
+            border-top: 1px solid #e5e7eb; 
+            color: #6B7280; 
+            font-size: 12px;
+          }
+          @media print {
+            body { margin: 0; }
+            .report-container { padding: 15px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-container">
+          <div class="header">
+            <div class="school-name">Student Management System</div>
+            <div class="report-title">Academic Performance Report</div>
+            <div class="academic-year">Academic Year: ${academicYear}</div>
+          </div>
+
+          <div class="student-info">
+            <div class="info-card">
+              <div class="info-label">Student Name</div>
+              <div class="info-value">${studentName}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Class & Section</div>
+              <div class="info-value">${studentClass}-${studentSection}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Roll Number</div>
+              <div class="info-value">${studentRoll}</div>
+            </div>
+            <div class="info-card">
+              <div class="info-label">Report Generated</div>
+              <div class="info-value">${new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number">${totalExams}</div>
+              <div class="stat-label">Total Exams</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">${averagePercentage}%</div>
+              <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">${bestScore}%</div>
+              <div class="stat-label">Best Score</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">${aGrades}</div>
+              <div class="stat-label">A Grades</div>
+            </div>
+          </div>
+
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Exam Name</th>
+                <th>Exam Type</th>
+                <th>Date</th>
+                <th>Total Marks</th>
+                <th>Obtained</th>
+                <th>Percentage</th>
+                <th>Grade</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${yearResults.map(result => `
+                <tr>
+                  <td>${result.examName || result.examType}</td>
+                  <td>${result.examType}</td>
+                  <td>${new Date(result.examDate).toLocaleDateString()}</td>
+                  <td>${result.totalMaxMarks}</td>
+                  <td>${result.totalObtainedMarks}</td>
+                  <td>${result.percentage}%</td>
+                  <td>
+                    <span class="grade-badge grade-${(result.overallGrade || result.grade || '').toLowerCase().charAt(0)}">
+                      ${result.overallGrade || result.grade}
+                    </span>
+                  </td>
+                  <td>${result.result || 'N/A'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          ${yearResults.some(r => r.subjects && r.subjects.length > 0) ? `
+            <h3 style="color: #1E3A8A; margin-bottom: 15px;">Subject-wise Performance</h3>
+            ${yearResults.filter(r => r.subjects && r.subjects.length > 0).map(result => `
+              <div style="margin-bottom: 25px;">
+                <h4 style="color: #374151; margin-bottom: 10px;">${result.examName || result.examType}</h4>
+                <table class="results-table">
+                  <thead>
+                    <tr>
+                      <th>Subject</th>
+                      <th>Code</th>
+                      <th>Max Marks</th>
+                      <th>Obtained</th>
+                      <th>Percentage</th>
+                      <th>Grade</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${result.subjects.map(subject => {
+                      const subjectPercentage = Math.round((subject.obtainedMarks / subject.maxMarks) * 100);
+                      const subjectGrade = getSubjectGrade(subjectPercentage);
+                      return `
+                        <tr>
+                          <td>${subject.subjectName}</td>
+                          <td>${subject.subjectCode}</td>
+                          <td>${subject.maxMarks}</td>
+                          <td>${subject.obtainedMarks}</td>
+                          <td>${subjectPercentage}%</td>
+                          <td>
+                            <span class="grade-badge grade-${subjectGrade.toLowerCase().charAt(0)}">
+                              ${subjectGrade}
+                            </span>
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `).join('')}
+          ` : ''}
+
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    };
+  };
+
   const getSubjectGrade = (percentage) => {
     if (percentage >= 90) return 'A+';
     if (percentage >= 80) return 'A';
@@ -452,21 +858,44 @@ const StudentResults = () => {
               <h2>Academic Performance</h2>
               <p>Track your exam results and academic progress</p>
             </div>
-            <button 
-              className="refresh-btn"
-              onClick={() => {
-                const token = localStorage.getItem("token");
-                fetchResults(token);
-              }}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="spinner-border spinner-border-sm me-2"></span>
-              ) : (
-                <i className="bi bi-arrow-clockwise me-2"></i>
+            <div className="welcome-actions">
+              <button 
+                className="refresh-btn"
+                onClick={() => {
+                  const token = localStorage.getItem("token");
+                  fetchResults(token);
+                }}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                ) : (
+                  <i className="bi bi-arrow-clockwise me-2"></i>
+                )}
+                Refresh
+              </button>
+              {results.length > 0 && (
+                <button 
+                  className="download-btn"
+                  onClick={handleDownloadAllResults}
+                  disabled={loading}
+                  style={{
+                    background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '12px 24px',
+                    color: 'white',
+                    fontWeight: '600',
+                    marginLeft: '12px',
+                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <i className="bi bi-file-earmark-pdf me-2"></i>
+                  Download PDF Reports
+                </button>
               )}
-              Refresh
-            </button>
+            </div>
           </div>
 
           {/* Results Summary - Dashboard Style */}
