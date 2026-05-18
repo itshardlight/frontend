@@ -11,7 +11,8 @@ import {
   AdminPanel, 
   AdminStudentProfile, 
   StudentRegistration,
-  AdminTimetable
+  AdminTimetable,
+  AdminAIPredictions
 } from "./pages/admin";
 import { 
   StudentResults, 
@@ -62,7 +63,9 @@ function App() {
         <Route path="/admin/student-registration" element={<StudentRegistration />} />
         <Route path="/admin/results" element={<ResultsPage />} />
         <Route path="/admin/timetable" element={<AdminTimetable />} />
+        <Route path="/admin-ai-predictions" element={<AdminAIPredictions />} />
         
+
         {/* Teacher Routes */}
         <Route path="/teacher/attendance" element={<Attendance />} />
         <Route path="/teacher/results" element={<ResultsPage />} />
@@ -75,17 +78,7 @@ function App() {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failure" element={<PaymentFailure />} />
         
-        {/* Legacy Routes for Backward Compatibility */}
-        <Route path="/student-profile" element={<StudentProfile />} />
-        <Route path="/student-profile/:id" element={<AdminStudentProfile />} />
-        <Route path="/student-results" element={<StudentResults />} />
-        <Route path="/student-attendance" element={<StudentAttendance />} />
-        <Route path="/student-fees" element={<StudentFees />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/attendance" element={<Attendance />} />
-        <Route path="/student-registration" element={<StudentRegistration />} />
-        <Route path="/results" element={<ResultsPage />} />
-        <Route path="/fees" element={<FeePage />} />
+
         
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FeeManagement } from '../../components/shared';
 
 const FeePage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -11,12 +12,6 @@ const FeePage = () => {
     
     if (!token) {
       navigate('/login');
-      return;
-    }
-
-    // Redirect fee department users to their dedicated dashboard
-    if (user.role === 'fee_department') {
-      navigate('/fee-department');
       return;
     }
 
@@ -47,6 +42,7 @@ const FeePage = () => {
               className="btn btn-outline-light btn-sm"
               onClick={() => {
                 localStorage.removeItem('token');
+                localStorage.removeItem('user');
                 localStorage.removeItem('userRole');
                 navigate('/login');
               }}
@@ -59,7 +55,7 @@ const FeePage = () => {
       </nav>
       
       <div className="container-fluid py-4">
-        <FeeManagement />
+        <FeeManagement initialTab={searchParams.get('tab')} />
       </div>
     </div>
   );

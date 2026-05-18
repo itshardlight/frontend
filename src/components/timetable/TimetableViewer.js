@@ -7,7 +7,7 @@ const TimetableViewer = ({ className, section, readOnly = false, onEditEntry, re
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
   const periods = ['1', '2', '3', '4', '5', '6', '7', '8'];
   const timeSlots = [
     { period: '1', start: '09:00', end: '09:45' },

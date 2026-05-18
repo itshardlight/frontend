@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
-const FeeManagement = () => {
+const FeeManagement = ({ initialTab = 'overview' }) => {
   // Tab management
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab);
   
   // Enhanced filters
   const [filters, setFilters] = useState({
@@ -147,6 +147,12 @@ const FeeManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found. Please login again.');
+        setLoading(false);
+        return;
+      }
+
       const params = new URLSearchParams();
       if (filters.class) params.append('class', filters.class);
       if (filters.section) params.append('section', filters.section);
@@ -155,13 +161,34 @@ const FeeManagement = () => {
 
       const response = await axios.get(
         `http://localhost:5000/api/fees/students?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // 10 second timeout
+        }
       );
 
-      setStudents(response.data.data || []);
+      if (response.data.success) {
+        setStudents(response.data.data || []);
+      } else {
+        setError(response.data.message || 'Failed to fetch students');
+      }
     } catch (error) {
       console.error('Error fetching students:', error);
-      setError(error.response?.data?.message || 'Error fetching students');
+      if (error.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        // Optionally redirect to login
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }, 2000);
+      } else if (error.response?.status === 403) {
+        setError('Access denied. You do not have permission to view this data.');
+      } else if (error.code === 'ECONNABORTED') {
+        setError('Request timeout. Please check your internet connection and try again.');
+      } else {
+        setError(error.response?.data?.message || 'Error fetching students. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -222,12 +249,25 @@ const FeeManagement = () => {
       return;
     }
 
+    // Validate payment date
+    const paymentDate = new Date(paymentForm.paymentDate);
+    const today = new Date();
+    if (paymentDate > today) {
+      setError('Payment date cannot be in the future');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found. Please login again.');
+        return;
+      }
+
       const paymentData = {
         studentId: selectedStudent._id,
         amount: parseFloat(paymentForm.amount),
@@ -237,25 +277,43 @@ const FeeManagement = () => {
         paymentDate: paymentForm.paymentDate
       };
 
-      await axios.post(
+      const response = await axios.post(
         'http://localhost:5000/api/fees/payment',
         paymentData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000
+        }
       );
 
-      setSuccess('Payment added successfully!');
-      setPaymentForm({
-        amount: '',
-        paymentMethod: 'cash',
-        receiptNumber: '',
-        description: '',
-        paymentDate: new Date().toISOString().split('T')[0]
-      });
-      setSelectedStudent(null);
-      fetchStudents();
+      if (response.data.success) {
+        setSuccess('Payment added successfully!');
+        setPaymentForm({
+          amount: '',
+          paymentMethod: 'cash',
+          receiptNumber: '',
+          description: '',
+          paymentDate: new Date().toISOString().split('T')[0]
+        });
+        setSelectedStudent(null);
+        fetchStudents();
+        
+        // Auto-clear success message after 5 seconds
+        setTimeout(() => setSuccess(''), 5000);
+      } else {
+        setError(response.data.message || 'Failed to add payment');
+      }
     } catch (error) {
       console.error('Error adding payment:', error);
-      setError(error.response?.data?.message || 'Error adding payment');
+      if (error.response?.status === 401) {
+        setError('Session expired. Please login again.');
+      } else if (error.response?.status === 403) {
+        setError('Access denied. You do not have permission to add payments.');
+      } else if (error.code === 'ECONNABORTED') {
+        setError('Request timeout. Please check your internet connection and try again.');
+      } else {
+        setError(error.response?.data?.message || 'Error adding payment. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -270,33 +328,75 @@ const FeeManagement = () => {
       return;
     }
 
+    const totalFee = parseFloat(feeStructureData.totalFee);
+    if (totalFee <= 0) {
+      setError('Total fee must be greater than 0');
+      return;
+    }
+
+    // Validate individual fees don't exceed total
+    const individualFeesSum = 
+      (parseFloat(feeStructureData.tuitionFee) || 0) +
+      (parseFloat(feeStructureData.admissionFee) || 0) +
+      (parseFloat(feeStructureData.examFee) || 0) +
+      (parseFloat(feeStructureData.libraryFee) || 0) +
+      (parseFloat(feeStructureData.sportsFee) || 0) +
+      (parseFloat(feeStructureData.otherFees) || 0);
+
+    if (individualFeesSum > totalFee) {
+      setError(`Sum of individual fees (Rs.${individualFeesSum}) cannot exceed total fee (Rs.${totalFee})`);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found. Please login again.');
+        return;
+      }
       
-      await axios.put(
+      const response = await axios.put(
         `http://localhost:5000/api/fees/structure/${studentId}`,
         feeStructureData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000
+        }
       );
 
-      setSuccess('Fee structure updated successfully!');
-      setFeeStructureForm({
-        totalFee: '',
-        tuitionFee: '',
-        admissionFee: '',
-        examFee: '',
-        libraryFee: '',
-        sportsFee: '',
-        otherFees: '',
-        dueDate: ''
-      });
-      fetchStudents();
+      if (response.data.success) {
+        setSuccess('Fee structure updated successfully!');
+        setFeeStructureForm({
+          totalFee: '',
+          tuitionFee: '',
+          admissionFee: '',
+          examFee: '',
+          libraryFee: '',
+          sportsFee: '',
+          otherFees: '',
+          dueDate: ''
+        });
+        fetchStudents();
+        
+        // Auto-clear success message after 5 seconds
+        setTimeout(() => setSuccess(''), 5000);
+      } else {
+        setError(response.data.message || 'Failed to update fee structure');
+      }
     } catch (error) {
       console.error('Error updating fee structure:', error);
-      setError(error.response?.data?.message || 'Error updating fee structure');
+      if (error.response?.status === 401) {
+        setError('Session expired. Please login again.');
+      } else if (error.response?.status === 403) {
+        setError('Access denied. You do not have permission to update fee structures.');
+      } else if (error.code === 'ECONNABORTED') {
+        setError('Request timeout. Please check your internet connection and try again.');
+      } else {
+        setError(error.response?.data?.message || 'Error updating fee structure. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -335,6 +435,13 @@ const FeeManagement = () => {
     fetchStudents();
   }, [filters.class, filters.section, filters.academicYear]);
 
+  // Effect to handle initial tab from URL parameter
+  useEffect(() => {
+    if (initialTab && ['overview', 'students', 'payments', 'structure', 'reports'].includes(initialTab)) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
   const stats = calculateStats();
 
   return (
@@ -347,9 +454,23 @@ const FeeManagement = () => {
                 <i className="bi bi-cash-stack me-2"></i>
                 Fee Management
               </h4>
-              <span className="badge bg-light text-success">
-                Collection Rate: {stats.collectionRate}%
-              </span>
+              <div className="d-flex align-items-center gap-2">
+                <span className="badge bg-light text-success">
+                  Collection Rate: {stats.collectionRate}%
+                </span>
+                <button
+                  className="btn btn-light btn-sm"
+                  onClick={() => fetchStudents()}
+                  disabled={loading}
+                  title="Refresh Data"
+                >
+                  {loading ? (
+                    <span className="spinner-border spinner-border-sm"></span>
+                  ) : (
+                    <i className="bi bi-arrow-clockwise"></i>
+                  )}
+                </button>
+              </div>
             </div>
             
             <div className="card-body">
@@ -476,7 +597,7 @@ const FeeManagement = () => {
                     </div>
                   </div>
                   
-                  <div className="row mt-3">
+                  <div className="row g-3">
                     <div className="col-md-4">
                       <label className="form-label">Search</label>
                       <div className="input-group">
@@ -489,7 +610,22 @@ const FeeManagement = () => {
                           placeholder="Search by name, roll number, email..."
                           value={filters.search}
                           onChange={(e) => handleFilterChange('search', e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              fetchStudents();
+                            }
+                          }}
                         />
+                        {filters.search && (
+                          <button
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={() => handleFilterChange('search', '')}
+                            title="Clear search"
+                          >
+                            <i className="bi bi-x"></i>
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="col-md-2">
@@ -512,10 +648,25 @@ const FeeManagement = () => {
                         onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
                       />
                     </div>
-                    <div className="col-md-4 d-flex align-items-end">
+                    <div className="col-md-2 d-flex align-items-end">
                       <div className="text-muted small">
                         Showing <strong>{filteredStudents.length}</strong> of <strong>{students.length}</strong> students
                       </div>
+                    </div>
+                    <div className="col-md-2 d-flex align-items-end justify-content-end">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={fetchStudents}
+                        disabled={loading}
+                        title="Refresh student data (Ctrl+R)"
+                      >
+                        {loading ? (
+                          <span className="spinner-border spinner-border-sm me-1"></span>
+                        ) : (
+                          <i className="bi bi-arrow-clockwise me-1"></i>
+                        )}
+                        Refresh
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -699,37 +850,64 @@ const FeeManagement = () => {
                                 </td>
                                 <td>
                                   <div className="btn-group btn-group-sm">
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={() => {
-                                        setSelectedStudent(student);
-                                        setActiveTab('payments');
-                                      }}
-                                      title="Add Payment"
-                                    >
-                                      <i className="bi bi-credit-card"></i>
-                                    </button>
-                                    <button
-                                      className="btn btn-secondary"
-                                      onClick={() => {
-                                        setSelectedStudent(student);
-                                        const fees = {
-                                          totalFee: feeInfo.totalFee || '',
-                                          tuitionFee: feeInfo.tuitionFee || '',
-                                          admissionFee: feeInfo.admissionFee || '',
-                                          examFee: feeInfo.examFee || '',
-                                          libraryFee: feeInfo.libraryFee || '',
-                                          sportsFee: feeInfo.sportsFee || '',
-                                          otherFees: feeInfo.otherFees || '',
-                                          dueDate: feeInfo.dueDate ? new Date(feeInfo.dueDate).toISOString().split('T')[0] : ''
-                                        };
-                                        setFeeStructureForm(fees);
-                                        setActiveTab('structure');
-                                      }}
-                                      title="Edit Fee Structure"
-                                    >
-                                      <i className="bi bi-gear"></i>
-                                    </button>
+                                    {totalFee > 0 ? (
+                                      <>
+                                        <button
+                                          className="btn btn-primary"
+                                          onClick={() => {
+                                            setSelectedStudent(student);
+                                            setActiveTab('payments');
+                                          }}
+                                          title="Add Payment for this student"
+                                          disabled={pendingAmount <= 0}
+                                        >
+                                          <i className="bi bi-credit-card"></i>
+                                        </button>
+                                        <button
+                                          className="btn btn-secondary"
+                                          onClick={() => {
+                                            setSelectedStudent(student);
+                                            const fees = {
+                                              totalFee: feeInfo.totalFee || '',
+                                              tuitionFee: feeInfo.tuitionFee || '',
+                                              admissionFee: feeInfo.admissionFee || '',
+                                              examFee: feeInfo.examFee || '',
+                                              libraryFee: feeInfo.libraryFee || '',
+                                              sportsFee: feeInfo.sportsFee || '',
+                                              otherFees: feeInfo.otherFees || '',
+                                              dueDate: feeInfo.dueDate ? new Date(feeInfo.dueDate).toISOString().split('T')[0] : ''
+                                            };
+                                            setFeeStructureForm(fees);
+                                            setActiveTab('structure');
+                                          }}
+                                          title="Edit Fee Structure for this student"
+                                        >
+                                          <i className="bi bi-gear"></i>
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <button
+                                        className="btn btn-warning btn-sm"
+                                        onClick={() => {
+                                          setSelectedStudent(student);
+                                          setFeeStructureForm({
+                                            totalFee: '',
+                                            tuitionFee: '',
+                                            admissionFee: '',
+                                            examFee: '',
+                                            libraryFee: '',
+                                            sportsFee: '',
+                                            otherFees: '',
+                                            dueDate: ''
+                                          });
+                                          setActiveTab('structure');
+                                        }}
+                                        title="Set Fee Structure"
+                                      >
+                                        <i className="bi bi-plus-circle me-1"></i>
+                                        Set Fees
+                                      </button>
+                                    )}
                                   </div>
                                 </td>
                               </tr>

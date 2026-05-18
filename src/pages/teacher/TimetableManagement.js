@@ -16,7 +16,7 @@ const TimetableManagement = () => {
 
   const classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const sections = ['A', 'B', 'C'];
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
 
   const [formData, setFormData] = useState({
     class: '',

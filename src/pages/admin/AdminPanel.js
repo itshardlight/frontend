@@ -265,6 +265,14 @@ const AdminPanel = () => {
               Student Management
             </button>
           </li>
+          <li className="nav-item">
+            <button 
+              className="nav-link"
+              onClick={() => navigate("/admin-ai-predictions")}
+            >
+              🤖 AI Predictions
+            </button>
+          </li>
         </ul>
 
         {/* Users Tab */}

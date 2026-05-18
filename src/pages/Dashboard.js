@@ -284,36 +284,6 @@ const Dashboard = () => {
   // Teacher/Admin Dashboard Content
   const TeacherDashboard = () => (
     <div className="dashboard-content">
-      <div className="stats-grid">
-        <div className="stat-card stat-card-primary">
-          <div className="stat-icon">
-            <i className="bi bi-people"></i>
-          </div>
-          <div className="stat-info">
-            <h3>{dashboardStats.totalStudents}</h3>
-            <p>Total Students</p>
-          </div>
-        </div>
-        <div className="stat-card stat-card-success">
-          <div className="stat-icon">
-            <i className="bi bi-cash-stack"></i>
-          </div>
-          <div className="stat-info">
-            <h3>Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</h3>
-            <p>Fees Collected</p>
-          </div>
-        </div>
-        <div className="stat-card stat-card-warning">
-          <div className="stat-icon">
-            <i className="bi bi-exclamation-triangle"></i>
-          </div>
-          <div className="stat-info">
-            <h3>Rs.{dashboardStats.pendingFees.toLocaleString()}</h3>
-            <p>Pending Fees</p>
-          </div>
-        </div>
-      </div>
-
       <div className="action-cards-grid">
         <div className="action-card" onClick={() => navigateTo("/admin/student-registration")}>
           <div className="action-icon action-icon-primary">
@@ -348,14 +318,24 @@ const Dashboard = () => {
           <span className="badge bg-info">Schedule</span>
         </div>
         {user.role === "admin" && (
-          <div className="action-card" onClick={() => navigateTo("/fee-department/fees")}>
-            <div className="action-icon action-icon-warning">
-              <i className="bi bi-cash-stack"></i>
+          <>
+            <div className="action-card" onClick={() => navigateTo("/fee-department/fees")}>
+              <div className="action-icon action-icon-warning">
+                <i className="bi bi-cash-stack"></i>
+              </div>
+              <h5>Fee Management</h5>
+              <p>Manage student fees and payments</p>
+              <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</span>
             </div>
-            <h5>Fee Management</h5>
-            <p>Manage student fees and payments</p>
-            <span className="badge bg-success">Rs.{dashboardStats.totalFeeCollected.toLocaleString()}</span>
-          </div>
+            <div className="action-card" onClick={() => navigateTo("/admin-ai-predictions")}>
+              <div className="action-icon action-icon-info">
+                <i className="bi bi-robot"></i>
+              </div>
+              <h5> AI Predictions</h5>
+              <p>Analyze student performance with AI</p>
+              <span className="badge bg-info">Smart Analytics</span>
+            </div>
+          </>
         )}
 
       </div>
@@ -404,41 +384,47 @@ const Dashboard = () => {
           </div>
           <h5>Fee Management System</h5>
           <p>Complete fee management & payment processing</p>
+          <span className="badge bg-success">Main Dashboard</span>
         </div>
-        <div className="action-card">
+        <div className="action-card" onClick={() => {
+          navigateTo("/fee-department/fees?tab=students");
+        }}>
           <div className="action-icon action-icon-primary">
             <i className="bi bi-search"></i>
           </div>
           <h5>Student Fee Overview</h5>
           <p>Search by name/class/roll & view fee status</p>
+          <span className="badge bg-primary">View Students</span>
         </div>
-        <div className="action-card">
+        <div className="action-card" onClick={() => {
+          navigateTo("/fee-department/fees?tab=structure");
+        }}>
           <div className="action-icon action-icon-warning">
             <i className="bi bi-gear"></i>
           </div>
           <h5>Fee Structure</h5>
           <p>Set fee categories & manage discounts</p>
+          <span className="badge bg-warning">Configure Fees</span>
         </div>
-        <div className="action-card">
+        <div className="action-card" onClick={() => {
+          navigateTo("/fee-department/fees?tab=payments");
+        }}>
           <div className="action-icon action-icon-info">
             <i className="bi bi-clipboard-data"></i>
           </div>
           <h5>Payment Tracking</h5>
           <p>Daily collection & pending fee reports</p>
+          <span className="badge bg-info">Add Payments</span>
         </div>
-        <div className="action-card">
+        <div className="action-card" onClick={() => {
+          navigateTo("/fee-department/fees?tab=reports");
+        }}>
           <div className="action-icon action-icon-danger">
             <i className="bi bi-graph-up-arrow"></i>
           </div>
           <h5>Reports & Analytics</h5>
           <p>Monthly revenue & collection graphs</p>
-        </div>
-        <div className="action-card">
-          <div className="action-icon action-icon-secondary">
-            <i className="bi bi-bell"></i>
-          </div>
-          <h5>Notifications</h5>
-          <p>Payment reminders & due alerts</p>
+          <span className="badge bg-danger">View Reports</span>
         </div>
       </div>
     </div>
@@ -473,7 +459,8 @@ const Dashboard = () => {
         { icon: 'bi-clipboard-check', label: 'Attendance', path: '/teacher/attendance' },
         { icon: 'bi-journal-text', label: 'Results', path: '/teacher/results' },
         { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },
-        { icon: 'bi-calendar-week', label: 'Timetable', path: '/teacher/timetable' }
+        { icon: 'bi-calendar-week', label: 'Timetable', path: '/teacher/timetable' },
+        { icon: 'bi-robot', label: '🤖 AI Predictions', path: '/admin-ai-predictions' }
       ],
       fee_department: [
         { icon: 'bi-cash-stack', label: 'Fee Management', path: '/fee-department/fees' },
