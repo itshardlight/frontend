@@ -398,7 +398,7 @@ const StudentRegistration = () => {
               <i className="bi bi-person-plus me-2"></i>
               New Student Registration Form
             </h5>
-            <small className="text-muted">Fill in all required fields marked with *</small>
+       
           </div>
           <div className="card-body p-4">
           <form onSubmit={handleSubmit} className="student-registration-form">
@@ -523,10 +523,7 @@ const StudentRegistration = () => {
                     required
                     title="Email will be auto-generated based on first name and roll number"
                   />
-                  <small className="text-muted">
-                    <i className="bi bi-info-circle me-1"></i>
-                    Auto-generated as: firstname + rollnumber + @gmail.com
-                  </small>
+              
                 </div>
               </div>
             </div>

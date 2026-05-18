@@ -93,10 +93,7 @@ const AdminTimetable = () => {
         {activeTab === 'manage' && (
           <div className="tab-pane fade show active">
             <div className="mt-4">
-              <div className="alert alert-info">
-                <i className="fas fa-info-circle me-2"></i>
-                <strong>Admin Access:</strong> You have full access to create, edit, and delete timetable entries for all classes and sections.
-              </div>
+             
               <TimetableManager userRole={user.role} />
             </div>
           </div>
@@ -133,10 +130,7 @@ const AdminTimetable = () => {
                     </select>
                   </div>
                   <div className="col-md-4 d-flex align-items-end">
-                    <div className="alert alert-success mb-0 flex-grow-1">
-                      <i className="fas fa-eye me-2"></i>
-                      <strong>View Mode:</strong> Read-only display
-                    </div>
+                 
                   </div>
                 </div>
               </div>
@@ -148,42 +142,6 @@ const AdminTimetable = () => {
                 section={selectedSection}
                 readOnly={true}
               />
-
-              {/* Quick Actions */}
-              <div className="row mt-4">
-                <div className="col-12">
-                  <div className="card">
-                    <div className="card-header">
-                      <h5 className="mb-0">
-                        <i className="fas fa-tools me-2"></i>
-                        Quick Actions
-                      </h5>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="col-md-6">
-                          <button
-                            className="btn btn-primary w-100 mb-2"
-                            onClick={() => setActiveTab('manage')}
-                          >
-                            <i className="fas fa-edit me-2"></i>
-                            Edit This Timetable
-                          </button>
-                        </div>
-                        <div className="col-md-6">
-                          <button
-                            className="btn btn-outline-primary w-100 mb-2"
-                            onClick={() => window.print()}
-                          >
-                            <i className="fas fa-print me-2"></i>
-                            Print Timetable
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
