@@ -31,15 +31,12 @@ const ResultsManagement = () => {
   // Form state for creating/editing results
   const [resultForm, setResultForm] = useState({
     examName: '',
-    studentClass: '',
-    studentSection: '',
     subjects: [
       { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
       { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
       { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
     ],
-    remarks: '',
-    attendance: 100
+    remarks: ''
   });
 
   // Constants for dropdowns
@@ -244,8 +241,6 @@ const ResultsManagement = () => {
       const result = response.data.data;
       setResultForm({
         examName: result.examName,
-        studentClass: result.studentClass,
-        studentSection: result.studentSection,
         subjects: result.subjects.map(sub => ({
           subjectName: sub.subjectName,
           subjectCode: sub.subjectCode,
@@ -253,8 +248,7 @@ const ResultsManagement = () => {
           obtainedMarks: sub.obtainedMarks,
           remarks: sub.remarks || ''
         })),
-        remarks: result.remarks || '',
-        attendance: result.attendance || 100
+        remarks: result.remarks || ''
       });
 
       setIsEditing(true);
@@ -305,18 +299,18 @@ const ResultsManagement = () => {
       return;
     }
 
+    if (!filters.class || !filters.section) {
+      setError('Please select class and section from filters');
+      return;
+    }
+
     if (!filters.examType) {
-      setError('Please select exam type');
+      setError('Please select exam type from filters');
       return;
     }
 
     if (!resultForm.examName.trim()) {
       setError('Please enter exam name');
-      return;
-    }
-
-    if (!resultForm.studentClass || !resultForm.studentSection) {
-      setError('Please select the class and section the student is studying in');
       return;
     }
 
@@ -346,15 +340,14 @@ const ResultsManagement = () => {
         examType: filters.examType,
         examName: resultForm.examName,
         academicYear: filters.academicYear || '2024-25',
-        studentClass: resultForm.studentClass,
-        studentSection: resultForm.studentSection,
+        studentClass: filters.class,
+        studentSection: filters.section,
         subjects: resultForm.subjects.map(subject => ({
           ...subject,
           maxMarks: parseInt(subject.maxMarks),
           obtainedMarks: parseInt(subject.obtainedMarks)
         })),
         remarks: resultForm.remarks,
-        attendance: parseInt(resultForm.attendance),
         totalMaxMarks: totals.totalMaxMarks,
         totalObtainedMarks: totals.totalObtainedMarks,
         percentage: totals.percentage,
@@ -387,15 +380,12 @@ const ResultsManagement = () => {
       setEditingResultId(null);
       setResultForm({
         examName: '',
-        studentClass: '',
-        studentSection: '',
         subjects: [
           { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
           { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
           { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
         ],
-        remarks: '',
-        attendance: 100
+        remarks: ''
       });
 
       // Refresh data
@@ -446,30 +436,18 @@ const ResultsManagement = () => {
     setSelectedStudent(null);
     setResultForm({
       examName: '',
-      studentClass: '',
-      studentSection: '',
       subjects: [
         { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
         { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
         { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
       ],
-      remarks: '',
-      attendance: 100
+      remarks: ''
     });
   };
 
   // Preload student data when selected
   const preloadStudentData = (student) => {
     setSelectedStudent(student);
-    
-    // Preload class and section from student data
-    if (student.class && student.section) {
-      setResultForm(prev => ({
-        ...prev,
-        studentClass: student.class,
-        studentSection: student.section
-      }));
-    }
   };
 
   // Effect to fetch data when filters change
@@ -535,13 +513,15 @@ const ResultsManagement = () => {
                 <div className="card-header bg-light">
                   <h6 className="mb-0">
                     <i className="bi bi-funnel me-2"></i>
-                    Filters
+                    Filters {activeTab === 'create' && <span className="badge bg-warning ms-2">Required for Creating Results</span>}
                   </h6>
                 </div>
                 <div className="card-body">
                   <div className="row g-3">
                     <div className="col-md-2">
-                      <label className="form-label">Class</label>
+                      <label className="form-label">
+                        Class {activeTab === 'create' && <span className="text-danger">*</span>}
+                      </label>
                       <select
                         className="form-select"
                         value={filters.class}
@@ -554,7 +534,9 @@ const ResultsManagement = () => {
                       </select>
                     </div>
                     <div className="col-md-2">
-                      <label className="form-label">Section</label>
+                      <label className="form-label">
+                        Section {activeTab === 'create' && <span className="text-danger">*</span>}
+                      </label>
                       <select
                         className="form-select"
                         value={filters.section}
@@ -567,7 +549,9 @@ const ResultsManagement = () => {
                       </select>
                     </div>
                     <div className="col-md-2">
-                      <label className="form-label">Exam Type</label>
+                      <label className="form-label">
+                        Exam Type {activeTab === 'create' && <span className="text-danger">*</span>}
+                      </label>
                       <select
                         className="form-select"
                         value={filters.examType}
@@ -911,89 +895,48 @@ const ResultsManagement = () => {
                             </h6>
                           </div>
                           <div className="card-body">
+                            <div className="alert alert-info mb-3">
+                              <i className="bi bi-info-circle me-2"></i>
+                              <strong>Note:</strong> Exam Type, Class, Section, and Academic Year are taken from the filters above. 
+                              Make sure you have selected the correct values before creating the result.
+                            </div>
                             <div className="row g-3">
-                              <div className="col-md-6">
-                                <label className="form-label">Exam Type *</label>
-                                <select
-                                  className="form-select"
-                                  value={filters.examType}
-                                  onChange={(e) => handleExamTypeChange(e.target.value)}
-                                  required
-                                >
-                                  <option value="">Select Exam Type</option>
-                                  {examTypes
-                                    .filter(exam => exam.value !== '')
-                                    .map(exam => (
-                                      <option key={exam.value} value={exam.value}>
-                                        {exam.label}
-                                      </option>
-                                    ))}
-                                </select>
-                                <small className="text-muted">Select the type of exam</small>
+                              <div className="col-md-3">
+                                <label className="form-label">Exam Type (From Filter)</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={examTypes.find(e => e.value === filters.examType)?.label || 'Not Selected'}
+                                  disabled
+                                />
                               </div>
-                              <div className="col-md-6">
+                              <div className="col-md-3">
+                                <label className="form-label">Class-Section (From Filter)</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={filters.class && filters.section ? `${filters.class}-${filters.section}` : 'Not Selected'}
+                                  disabled
+                                />
+                              </div>
+                              <div className="col-md-3">
+                                <label className="form-label">Academic Year (From Filter)</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={filters.academicYear || '2024-25'}
+                                  disabled
+                                />
+                              </div>
+                              <div className="col-md-3">
                                 <label className="form-label">Exam Name *</label>
                                 <input
                                   type="text"
                                   className="form-control"
                                   value={resultForm.examName}
                                   onChange={(e) => setResultForm(prev => ({ ...prev, examName: e.target.value }))}
-                                  placeholder="Enter exam name (e.g., 'First Term Exam')"
+                                  placeholder="Enter exam name"
                                   required
-                                />
-                                <small className="text-muted">Custom name for this exam</small>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Student Details */}
-                        <div className="card mb-4">
-                          <div className="card-header bg-light">
-                            <h6 className="mb-0">
-                              <i className="bi bi-person-circle me-2"></i>
-                              Student Details
-                            </h6>
-                          </div>
-                          <div className="card-body">
-                            <div className="row g-3">
-                              <div className="col-md-4">
-                                <label className="form-label">Class (Studying) *</label>
-                                <select
-                                  className="form-select"
-                                  value={resultForm.studentClass}
-                                  onChange={(e) => setResultForm(prev => ({ ...prev, studentClass: e.target.value }))}
-                                  required
-                                >
-                                  <option value="">Select Class</option>
-                                  {classes.filter(c => c !== '').map(cls => (
-                                    <option key={cls} value={cls}>{cls}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div className="col-md-4">
-                                <label className="form-label">Section (Studying) *</label>
-                                <select
-                                  className="form-select"
-                                  value={resultForm.studentSection}
-                                  onChange={(e) => setResultForm(prev => ({ ...prev, studentSection: e.target.value }))}
-                                  required
-                                >
-                                  <option value="">Select Section</option>
-                                  {sections.filter(s => s !== '').map(sec => (
-                                    <option key={sec} value={sec}>{sec}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div className="col-md-4">
-                                <label className="form-label">Attendance (%)</label>
-                                <input
-                                  type="number"
-                                  className="form-control"
-                                  value={resultForm.attendance}
-                                  onChange={(e) => setResultForm(prev => ({ ...prev, attendance: e.target.value }))}
-                                  min="0"
-                                  max="100"
                                 />
                               </div>
                             </div>
@@ -1222,16 +1165,15 @@ const ResultsManagement = () => {
                       <table className="table table-striped table-hover">
                         <thead className="table-dark">
                           <tr>
-                            <th width="10%">Student Details</th>
-                            <th width="7%">Class-Sec</th>
-                            <th width="10%">Exam Details</th>
-                            <th width="20%">Subject Breakdown</th>
-                            <th width="8%">Total Marks</th>
-                            <th width="8%">Percentage</th>
-                            <th width="6%">Grade</th>
-                            <th width="6%">Result</th>
-                            <th width="7%">Attendance</th>
-                            <th width="10%">Actions</th>
+                            <th width="12%">Student Details</th>
+                            <th width="8%">Class-Sec</th>
+                            <th width="12%">Exam Details</th>
+                            <th width="25%">Subject Breakdown</th>
+                            <th width="10%">Total Marks</th>
+                            <th width="10%">Percentage</th>
+                            <th width="8%">Grade</th>
+                            <th width="8%">Result</th>
+                            <th width="12%">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1313,17 +1255,6 @@ const ResultsManagement = () => {
                                   <i className={`bi ${result.result === 'pass' ? 'bi-check-circle' : 'bi-x-circle'} me-1`}></i>
                                   {result.result.toUpperCase()}
                                 </span>
-                              </td>
-                              <td>
-                                <div className="small">
-                                  <span className={`badge ${
-                                    result.attendance >= 90 ? 'bg-success' :
-                                    result.attendance >= 75 ? 'bg-warning' :
-                                    'bg-danger'
-                                  }`}>
-                                    {result.attendance}%
-                                  </span>
-                                </div>
                               </td>
                               <td>
                                 <div className="btn-group btn-group-sm">
