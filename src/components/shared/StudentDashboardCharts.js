@@ -183,7 +183,16 @@ const StudentDashboardCharts = ({ userId }) => {
 
     // Get last 5 results for the chart
     const recentResults = data.results.slice(-5);
-    const labels = recentResults.map(result => result.examName || result.examType);
+    const examTypeLabels = {
+      'unit_test_1': 'Unit Test 1',
+      'unit_test_2': 'Unit Test 2',
+      'mid_term': 'Mid Term',
+      'final_term': 'Final Term',
+      'annual': 'Annual',
+      'quarterly': 'Quarterly',
+      'half_yearly': 'Half Yearly'
+    };
+    const labels = recentResults.map(result => examTypeLabels[result.examType] || result.examType);
     const percentages = recentResults.map(result => result.percentage || 0);
 
     // Define color logic based on marks

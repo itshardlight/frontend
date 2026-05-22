@@ -30,7 +30,6 @@ const ResultsManagement = () => {
   
   // Form state for creating/editing results
   const [resultForm, setResultForm] = useState({
-    examName: '',
     subjects: [
       { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
       { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
@@ -99,7 +98,6 @@ const ResultsManagement = () => {
         (result.studentId?.firstName?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.studentId?.lastName?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.rollNumber?.toString().includes(filters.search) ||
-         result.examName?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.examType?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.overallGrade?.toLowerCase().includes(filters.search.toLowerCase()) ||
          result.result?.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -240,7 +238,6 @@ const ResultsManagement = () => {
 
       const result = response.data.data;
       setResultForm({
-        examName: result.examName,
         subjects: result.subjects.map(sub => ({
           subjectName: sub.subjectName,
           subjectCode: sub.subjectCode,
@@ -274,20 +271,9 @@ const ResultsManagement = () => {
     }
   };
 
-  // Handle exam type change with auto-population
+  // Handle exam type change
   const handleExamTypeChange = (value) => {
     setFilters(prev => ({ ...prev, examType: value }));
-    
-    // Auto-populate exam name if not already set
-    if (value && !resultForm.examName.trim()) {
-      const selectedExam = examTypes.find(exam => exam.value === value);
-      if (selectedExam && selectedExam.label !== 'All Exam Types') {
-        setResultForm(prev => ({ 
-          ...prev, 
-          examName: selectedExam.label 
-        }));
-      }
-    }
   };
 
   // Submit result (create or update)
@@ -306,11 +292,6 @@ const ResultsManagement = () => {
 
     if (!filters.examType) {
       setError('Please select exam type from filters');
-      return;
-    }
-
-    if (!resultForm.examName.trim()) {
-      setError('Please enter exam name');
       return;
     }
 
@@ -338,7 +319,6 @@ const ResultsManagement = () => {
       const resultData = {
         studentId: selectedStudent._id,
         examType: filters.examType,
-        examName: resultForm.examName,
         academicYear: filters.academicYear || '2024-25',
         studentClass: filters.class,
         studentSection: filters.section,
@@ -379,7 +359,6 @@ const ResultsManagement = () => {
       setIsEditing(false);
       setEditingResultId(null);
       setResultForm({
-        examName: '',
         subjects: [
           { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
           { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
@@ -435,7 +414,6 @@ const ResultsManagement = () => {
     setEditingResultId(null);
     setSelectedStudent(null);
     setResultForm({
-      examName: '',
       subjects: [
         { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
         { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
@@ -919,24 +897,13 @@ const ResultsManagement = () => {
                                   disabled
                                 />
                               </div>
-                              <div className="col-md-3">
+                              <div className="col-md-4">
                                 <label className="form-label">Academic Year (From Filter)</label>
                                 <input
                                   type="text"
                                   className="form-control"
                                   value={filters.academicYear || '2024-25'}
                                   disabled
-                                />
-                              </div>
-                              <div className="col-md-3">
-                                <label className="form-label">Exam Name *</label>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  value={resultForm.examName}
-                                  onChange={(e) => setResultForm(prev => ({ ...prev, examName: e.target.value }))}
-                                  placeholder="Enter exam name"
-                                  required
                                 />
                               </div>
                             </div>
@@ -1197,8 +1164,7 @@ const ResultsManagement = () => {
                               </td>
                               <td>
                                 <div>
-                                  <div className="fw-semibold small">{result.examName}</div>
-                                  <div className="text-muted x-small">
+                                  <div className="text-muted small">
                                     {examTypes.find(e => e.value === result.examType)?.label || result.examType}
                                   </div>
                                   <div className="text-muted x-small">{result.academicYear}</div>

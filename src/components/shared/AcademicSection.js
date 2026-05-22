@@ -124,7 +124,7 @@ const AcademicSection = ({ profile, currentUser, editing, editData, setEditData 
             {results.map((result, index) => (
               <div key={index} className="result-card">
                 <div className="result-header">
-                  <h5>{result.examName}</h5>
+                  <h5>{result.examType.replace('_', ' ').toUpperCase()}</h5>
                   <div className="result-meta">
                     <span className="exam-type">{result.examType.replace('_', ' ').toUpperCase()}</span>
                     <span className={`result-status ${result.result}`}>{result.result.toUpperCase()}</span>

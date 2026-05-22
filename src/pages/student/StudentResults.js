@@ -18,6 +18,17 @@ const StudentResults = () => {
   });
   const navigate = useNavigate();
 
+  // Exam types mapping
+  const examTypes = [
+    { value: 'unit_test_1', label: 'Unit Test 1' },
+    { value: 'unit_test_2', label: 'Unit Test 2' },
+    { value: 'mid_term', label: 'Mid Term' },
+    { value: 'final_term', label: 'Final Term' },
+    { value: 'annual', label: 'Annual' },
+    { value: 'quarterly', label: 'Quarterly' },
+    { value: 'half_yearly', label: 'Half Yearly' }
+  ];
+
   // Add print styles
   useEffect(() => {
     const style = document.createElement('style');
@@ -666,7 +677,7 @@ const StudentResults = () => {
             <tbody>
               ${yearResults.map(result => `
                 <tr>
-                  <td>${result.examName || result.examType}</td>
+                  <td>${examTypes.find(e => e.value === result.examType)?.label || result.examType}</td>
                   <td>${result.examType}</td>
                   <td>${new Date(result.examDate).toLocaleDateString()}</td>
                   <td>${result.totalMaxMarks}</td>
@@ -687,7 +698,7 @@ const StudentResults = () => {
             <h3 style="color: #1E3A8A; margin-bottom: 15px;">Subject-wise Performance</h3>
             ${yearResults.filter(r => r.subjects && r.subjects.length > 0).map(result => `
               <div style="margin-bottom: 25px;">
-                <h4 style="color: #374151; margin-bottom: 10px;">${result.examName || result.examType}</h4>
+                <h4 style="color: #374151; margin-bottom: 10px;">${examTypes.find(e => e.value === result.examType)?.label || result.examType}</h4>
                 <table class="results-table">
                   <thead>
                     <tr>
@@ -1040,7 +1051,7 @@ const StudentResults = () => {
                                 {isFirstRow && (
                                   <td rowSpan={result.subjects.length} style={{ verticalAlign: 'middle', borderRight: '2px solid #e5e7eb' }}>
                                     <div>
-                                      <div className="fw-bold mb-1">{result.examName}</div>
+                                      <div className="fw-bold mb-1">{examTypes.find(e => e.value === result.examType)?.label || result.examType}</div>
                                       <span className="badge bg-secondary mb-1" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '6px' }}>
                                         {result.examType}
                                       </span>
@@ -1116,7 +1127,7 @@ const StudentResults = () => {
                             <tr key={index}>
                               <td>
                                 <div>
-                                  <div className="fw-bold mb-1">{result.examName || result.examType}</div>
+                                  <div className="fw-bold mb-1">{examTypes.find(e => e.value === result.examType)?.label || result.examType}</div>
                                   <span className="badge bg-secondary mb-1" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '6px' }}>
                                     {result.examType}
                                   </span>
@@ -1184,7 +1195,7 @@ const StudentResults = () => {
                           <i className="bi bi-file-earmark-text me-2"></i>
                           Detailed Result Report
                         </h4>
-                        <p className="mb-0 small opacity-75">{selectedResult.examName || selectedResult.examType}</p>
+                        <p className="mb-0 small opacity-75">{examTypes.find(e => e.value === selectedResult.examType)?.label || selectedResult.examType}</p>
                       </div>
                       <button type="button" className="btn-close btn-close-white no-print" onClick={closeDetailModal}></button>
                     </div>
@@ -1230,12 +1241,9 @@ const StudentResults = () => {
                                 Exam Information
                               </h6>
                               <div className="mb-2">
-                                <strong>Exam Name:</strong> {selectedResult.examName}
-                              </div>
-                              <div className="mb-2">
                                 <strong>Exam Type:</strong> 
                                 <span className="badge bg-secondary ms-2" style={{ fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>
-                                  {selectedResult.examType}
+                                  {examTypes.find(e => e.value === selectedResult.examType)?.label || selectedResult.examType}
                                 </span>
                               </div>
                               <div className="mb-2">

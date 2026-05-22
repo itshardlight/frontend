@@ -199,7 +199,7 @@ const ResultsSection = ({ studentId }) => {
                   <div className={`card-header ${i % 2 === 0 ? 'bg-info text-white' : 'bg-warning text-dark'}`}>
                     <div className="d-flex justify-content-between align-items-center">
                       <h6 className="mb-0">
-                        {formatExamType(res.examType)} - {res.examName}
+                        {formatExamType(res.examType)}
                       </h6>
                       <span className="badge bg-light text-dark">
                         Class {res.class}
