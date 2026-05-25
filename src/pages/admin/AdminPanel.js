@@ -68,7 +68,7 @@ const AdminPanel = () => {
     try {
       setStudentsLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get("http://localhost:5000/api/students", {
+      const response = await axios.get("http://localhost:5000/api/students?limit=1000", {
         headers: {
           'Authorization': `Bearer ${token}`
         }

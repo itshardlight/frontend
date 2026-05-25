@@ -42,7 +42,7 @@ const Dashboard = () => {
       if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
         // Fetch comprehensive stats for admin/teacher
         const [studentsRes, feeRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/students', {
+          axios.get('http://localhost:5000/api/students?limit=1000', {
             headers: { Authorization: `Bearer ${token}` }
           }),
           currentUser.role === 'admin' ? axios.get('http://localhost:5000/api/fees/analytics', {

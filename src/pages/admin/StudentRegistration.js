@@ -71,7 +71,7 @@ const StudentRegistration = () => {
     try {
       setStudentsLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get("http://localhost:5000/api/students", {
+      const response = await axios.get("http://localhost:5000/api/students?limit=1000", {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -82,7 +82,7 @@ const StudentRegistration = () => {
         // Update stats with actual data
         setStats(prev => ({
           ...prev,
-          totalStudents: response.data.data.length,
+          totalStudents: response.data.pagination?.totalStudents || response.data.data.length,
           activeStudents: response.data.data.filter(s => s.status === 'active').length
         }));
       }
