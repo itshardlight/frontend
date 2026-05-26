@@ -493,7 +493,6 @@ const AIPredictions = () => {
                             <strong>Common reasons students can't be analyzed:</strong>
                             <ul className="mb-0 mt-2">
                               <li>Less than 3 published exam results</li>
-                              <li>Exam results in 'draft' status (need 'published', 'verified', or 'locked')</li>
                               <li>Missing attendance data</li>
                               <li>Incomplete subject scores</li>
                             </ul>

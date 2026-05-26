@@ -25,8 +25,6 @@ const ResultsManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingResultId, setEditingResultId] = useState(null);
   
   // Form state for creating/editing results
   const [resultForm, setResultForm] = useState({
@@ -169,8 +167,6 @@ const ResultsManagement = () => {
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
     setSelectedStudent(null);
-    setIsEditing(false);
-    setEditingResultId(null);
   };
 
   // Reset all filters
@@ -224,59 +220,12 @@ const ResultsManagement = () => {
     }
   };
 
-  // Load result for editing
-  const loadResultForEditing = async (resultId) => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:5000/api/results/${resultId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const result = response.data.data;
-      setResultForm({
-        subjects: result.subjects.map(sub => ({
-          subjectName: sub.subjectName,
-          subjectCode: sub.subjectCode,
-          maxMarks: sub.maxMarks,
-          obtainedMarks: sub.obtainedMarks,
-          remarks: sub.remarks || ''
-        })),
-        remarks: result.remarks || ''
-      });
-
-      setIsEditing(true);
-      setEditingResultId(resultId);
-      setActiveTab('create');
-      setSelectedStudent(result.studentId);
-      
-      // Set filters based on the result being edited
-      setFilters(prev => ({
-        ...prev,
-        class: result.studentClass,
-        section: result.studentSection,
-        examType: result.examType,
-        academicYear: result.academicYear
-      }));
-
-      setSuccess('Result loaded for editing');
-    } catch (error) {
-      console.error('Error loading result:', error);
-      setError(error.response?.data?.message || 'Error loading result for editing');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Handle exam type change
   const handleExamTypeChange = (value) => {
     setFilters(prev => ({ ...prev, examType: value }));
   };
 
-  // Submit result (create or update)
+  // Submit result (create only)
   const handleSubmitResult = async (e) => {
     e.preventDefault();
 
@@ -335,29 +284,16 @@ const ResultsManagement = () => {
         result: totals.result
       };
 
-      let response;
-      if (isEditing && editingResultId) {
-        // Update existing result
-        response = await axios.put(
-          `http://localhost:5000/api/results/${editingResultId}`,
-          resultData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setSuccess('Result updated successfully!');
-      } else {
-        // Create new result
-        response = await axios.post(
-          'http://localhost:5000/api/results',
-          resultData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setSuccess('Result created successfully!');
-      }
+      // Create new result
+      const response = await axios.post(
+        'http://localhost:5000/api/results',
+        resultData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSuccess('Result created successfully!');
 
       // Reset form
       setSelectedStudent(null);
-      setIsEditing(false);
-      setEditingResultId(null);
       setResultForm({
         subjects: [
           { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
@@ -376,7 +312,7 @@ const ResultsManagement = () => {
     } catch (error) {
       console.error('Error saving result:', error);
       console.error('Error response:', error.response?.data);
-      setError(error.response?.data?.message || `Error ${isEditing ? 'updating' : 'creating'} result`);
+      setError(error.response?.data?.message || 'Error creating result');
     } finally {
       setLoading(false);
     }
@@ -410,8 +346,6 @@ const ResultsManagement = () => {
 
   // Cancel editing
   const cancelEditing = () => {
-    setIsEditing(false);
-    setEditingResultId(null);
     setSelectedStudent(null);
     setResultForm({
       subjects: [
@@ -449,12 +383,7 @@ const ResultsManagement = () => {
                 <i className="bi bi-journal-text me-2"></i>
                 Results Management
               </h4>
-              {isEditing && (
-                <span className="badge bg-warning">
-                  <i className="bi bi-pencil me-1"></i>
-                  Editing Mode
-                </span>
-              )}
+             
             </div>
             
             <div className="card-body">
@@ -469,7 +398,7 @@ const ResultsManagement = () => {
                     }}
                   >
                     <i className="bi bi-plus-circle me-2"></i>
-                    {isEditing ? 'Edit Result' : 'Create Results'}
+                    Create Results
                   </button>
                 </li>
                 <li className="nav-item">
@@ -795,22 +724,10 @@ const ResultsManagement = () => {
                                     Class: {student.class}-{student.section}
                                   </p>
                                   {student.hasResult ? (
-                                    <div>
-                                      <span className="badge bg-warning">
-                                        <i className="bi bi-exclamation-triangle me-1"></i>
-                                        Result Exists
-                                      </span>
-                                      <button
-                                        className="btn btn-link btn-sm mt-2"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          loadResultForEditing(student.existingResultId);
-                                        }}
-                                      >
-                                        <i className="bi bi-pencil me-1"></i>
-                                        Edit Result
-                                      </button>
-                                    </div>
+                                    <span className="badge bg-warning">
+                                      <i className="bi bi-exclamation-triangle me-1"></i>
+                                      Result Exists
+                                    </span>
                                   ) : (
                                     <span className="badge bg-success">Ready for Entry</span>
                                   )}
@@ -833,7 +750,7 @@ const ResultsManagement = () => {
                       <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
                           <h5>
-                            {isEditing ? 'Edit Result' : 'Create Result'} for 
+                            Create Result for 
                             <span className="text-primary ms-2">
                               {selectedStudent.firstName} {selectedStudent.lastName}
                             </span>
@@ -843,24 +760,13 @@ const ResultsManagement = () => {
                             Class: {selectedStudent.class}-{selectedStudent.section}
                           </p>
                         </div>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={cancelEditing}
-                          >
-                            <i className="bi bi-arrow-left me-1"></i>
-                            {isEditing ? 'Cancel Edit' : 'Back to Students'}
-                          </button>
-                          {isEditing && (
-                            <button
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleDeleteResult(editingResultId)}
-                            >
-                              <i className="bi bi-trash me-1"></i>
-                              Delete
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={cancelEditing}
+                        >
+                          <i className="bi bi-arrow-left me-1"></i>
+                          Back to Students
+                        </button>
                       </div>
 
                       <form onSubmit={handleSubmitResult}>
@@ -1086,12 +992,12 @@ const ResultsManagement = () => {
                             {loading ? (
                               <>
                                 <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                                {isEditing ? 'Updating...' : 'Creating...'}
+                                Creating...
                               </>
                             ) : (
                               <>
-                                <i className={`bi ${isEditing ? 'bi-check2-circle' : 'bi-save'} me-2`}></i>
-                                {isEditing ? 'Update Result' : 'Save Result'}
+                                <i className="bi bi-save me-2"></i>
+                                Save Result
                               </>
                             )}
                           </button>
@@ -1233,13 +1139,6 @@ const ResultsManagement = () => {
                                     }}
                                   >
                                     <i className="bi bi-eye"></i>
-                                  </button>
-                                  <button
-                                    className="btn btn-outline-warning"
-                                    title="Edit Result"
-                                    onClick={() => loadResultForEditing(result._id)}
-                                  >
-                                    <i className="bi bi-pencil"></i>
                                   </button>
                                   <button
                                     className="btn btn-outline-danger"
