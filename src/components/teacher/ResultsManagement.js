@@ -29,9 +29,12 @@ const ResultsManagement = () => {
   // Form state for creating/editing results
   const [resultForm, setResultForm] = useState({
     subjects: [
+      { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' },
+      { subjectName: 'Hindi', subjectCode: 'HIN', maxMarks: 100, obtainedMarks: '', remarks: '' },
       { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
       { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
-      { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
+      { subjectName: 'Social Studies', subjectCode: 'SST', maxMarks: 100, obtainedMarks: '', remarks: '' },
+      { subjectName: 'Computer', subjectCode: 'COMP', maxMarks: 100, obtainedMarks: '', remarks: '' }
     ],
     remarks: ''
   });
@@ -296,9 +299,12 @@ const ResultsManagement = () => {
       setSelectedStudent(null);
       setResultForm({
         subjects: [
+          { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' },
+          { subjectName: 'Hindi', subjectCode: 'HIN', maxMarks: 100, obtainedMarks: '', remarks: '' },
           { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
           { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
-          { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
+          { subjectName: 'Social Studies', subjectCode: 'SST', maxMarks: 100, obtainedMarks: '', remarks: '' },
+          { subjectName: 'Computer', subjectCode: 'COMP', maxMarks: 100, obtainedMarks: '', remarks: '' }
         ],
         remarks: ''
       });
@@ -349,9 +355,12 @@ const ResultsManagement = () => {
     setSelectedStudent(null);
     setResultForm({
       subjects: [
+        { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' },
+        { subjectName: 'Hindi', subjectCode: 'HIN', maxMarks: 100, obtainedMarks: '', remarks: '' },
         { subjectName: 'Mathematics', subjectCode: 'MATH', maxMarks: 100, obtainedMarks: '', remarks: '' },
         { subjectName: 'Science', subjectCode: 'SCI', maxMarks: 100, obtainedMarks: '', remarks: '' },
-        { subjectName: 'English', subjectCode: 'ENG', maxMarks: 100, obtainedMarks: '', remarks: '' }
+        { subjectName: 'Social Studies', subjectCode: 'SST', maxMarks: 100, obtainedMarks: '', remarks: '' },
+        { subjectName: 'Computer', subjectCode: 'COMP', maxMarks: 100, obtainedMarks: '', remarks: '' }
       ],
       remarks: ''
     });
