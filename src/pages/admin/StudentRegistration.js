@@ -884,17 +884,20 @@ const StudentRegistration = () => {
                   />
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label small">Filter by Class</label>
-                  <select
-                    className="form-select"
-                    value={filterClass}
-                    onChange={(e) => setFilterClass(e.target.value)}
-                  >
-                    <option value="">All Classes</option>
-                    {uniqueClasses.map(cls => (
-                      <option key={cls} value={cls}>{cls}</option>
-                    ))}
-                  </select>
+                 <label className="form-label small">Filter by Class</label>
+<select
+  className="form-select"
+  value={filterClass}
+  onChange={(e) => setFilterClass(e.target.value)}
+>
+  <option value="">All Classes</option>
+  {uniqueClasses
+    .sort((a, b) => Number(a) - Number(b))   // numeric ascending sort
+    .map(cls => (
+      <option key={cls} value={cls}>{cls}</option>
+    ))}
+</select>
+
                 </div>
                 <div className="col-md-3">
                   <label className="form-label small">Filter by Section</label>
