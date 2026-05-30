@@ -330,12 +330,7 @@ const AIPredictions = () => {
                 Select a class to see Random Forest predictions for next exam performance
               </p>
               
-              {availableClasses.length > 0 && (
-                <div className="alert alert-info mb-4">
-                  <i className="bi bi-info-circle me-2"></i>
-                  <strong>Available Classes:</strong> {availableClasses.map(c => `${c.class}-${c.section} (${c.studentCount} students)`).join(', ')}
-                </div>
-              )}
+             
               
               <div className="row g-3">
                 <div className="col-md-4">
@@ -414,44 +409,6 @@ const AIPredictions = () => {
                 </h5>
               </div>
               <div className="card-body" style={{ padding: '25px' }}>
-                {/* Analysis Summary */}
-                {analysisDebug && (
-                  <div className="alert alert-info mb-4">
-                    <h6 className="alert-heading">
-                      <i className="bi bi-info-circle me-2"></i>
-                      Analysis Summary
-                    </h6>
-                    <div className="row">
-                      <div className="col-md-3">
-                        <strong>Total Students:</strong> {analysisDebug.totalStudents}
-                      </div>
-                      <div className="col-md-3">
-                        <strong>Analyzed:</strong> {analysisDebug.analyzedStudents}
-                      </div>
-                      <div className="col-md-3">
-                        <strong>No Data:</strong> {analysisDebug.summary?.noData || 0}
-                      </div>
-                      <div className="col-md-3">
-                        <strong>Success Rate:</strong> {analysisDebug.totalStudents > 0 ? Math.round((analysisDebug.analyzedStudents / analysisDebug.totalStudents) * 100) : 0}%
-                      </div>
-                    </div>
-                    {analysisDebug.summary?.noData > 0 && (
-                      <div className="mt-2">
-                        <small className="text-muted">
-                          <i className="bi bi-exclamation-triangle me-1"></i>
-                          {analysisDebug.summary.noData} students could not be analyzed due to insufficient exam data (need at least 3 published results)
-                        </small>
-                        <button 
-                          className="btn btn-link btn-sm p-0 ms-2"
-                          onClick={() => setShowDebugInfo(!showDebugInfo)}
-                        >
-                          {showDebugInfo ? 'Hide Details' : 'Show Details'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
                 {/* Debug Information */}
                 {showDebugInfo && analysisDebug && (
                   <div className="card bg-light mb-4">
@@ -554,8 +511,7 @@ const AIPredictions = () => {
                         <th style={{ fontWeight: '600' }}>Student</th>
                         <th style={{ fontWeight: '600' }}>Roll Number</th>
                         <th className="text-center" style={{ fontWeight: '600' }}>Next Exam Prediction</th>
-                        <th className="text-center" style={{ fontWeight: '600' }}>Confidence</th>
-                        <th className="text-center" style={{ fontWeight: '600' }}>Model Details</th>
+
                       </tr>
                     </thead>
                     <tbody>
@@ -576,60 +532,11 @@ const AIPredictions = () => {
                           <td className="text-center">
                             {getPerformanceBadge(studentAnalysis.prediction.nextExamPerformance)}
                           </td>
-                          <td className="text-center">
-                            {getConfidenceBadge(studentAnalysis.prediction.confidence)}
-                          </td>
-                          <td className="text-center">
-                            <small className="text-muted">
-                              Random Forest
-                              <br />
-                              {studentAnalysis.randomForestDetails?.goodVotes || 0}G / {studentAnalysis.randomForestDetails?.badVotes || 0}B
-                            </small>
-                          </td>
+                       
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                </div>
-                
-                {/* Summary */}
-                <div className="mt-4 p-3" style={{ background: '#f8fafc', borderRadius: '10px' }}>
-                  <div className="row text-center">
-                    <div className="col-md-3">
-                      <h4 className="text-primary">{predictions.length}</h4>
-                      <small className="text-muted">Analyzed Students</small>
-                    </div>
-                    <div className="col-md-3">
-                      <h4 className="text-success">
-                        {predictions.filter(p => p.prediction.nextExamPerformance === 'good').length}
-                      </h4>
-                      <small className="text-muted">Good Predictions</small>
-                    </div>
-                    <div className="col-md-3">
-                      <h4 className="text-danger">
-                        {predictions.filter(p => p.prediction.nextExamPerformance === 'bad').length}
-                      </h4>
-                      <small className="text-muted">Bad Predictions</small>
-                    </div>
-                    <div className="col-md-3">
-                      <h4 className="text-info">
-                        {Math.round(predictions.reduce((sum, p) => sum + p.prediction.confidence, 0) / predictions.length)}%
-                      </h4>
-                      <small className="text-muted">Avg Confidence</small>
-                    </div>
-                  </div>
-                  
-                  {analysisDebug && analysisDebug.totalStudents > predictions.length && (
-                    <div className="row mt-3">
-                      <div className="col-12">
-                        <div className="alert alert-warning mb-0">
-                          <i className="bi bi-exclamation-triangle me-2"></i>
-                          <strong>Analysis Incomplete:</strong> {analysisDebug.totalStudents - predictions.length} out of {analysisDebug.totalStudents} students could not be analyzed.
-                          {showDebugInfo ? '' : ' Click "Show Details" above for more information.'}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
